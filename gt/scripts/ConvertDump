@@ -1,0 +1,59 @@
+#!/bin/csh
+
+# Usage: ConvertDump <dump_directory> <data_directory>
+#
+# This script converts a set of dumped files back to data by converting
+# the PPMs to JPEG and creating a .info file	
+#
+
+if ($2x == x) then
+	echo "Usage: ConvertDump <dump_directory> <data_directory>"
+	exit
+endif
+
+set dumpd = $1
+set datad = $2
+
+if (!(-e $datad)) then
+	echo "Creating data directory: $datad"
+	mkdir $datad
+else
+	echo " "
+	echo "$datad already exists...."
+	echo "JPEG files will be overwritten..."
+	echo "Continue? (Y/N) ";
+	set $ans = (<$)
+	if ($ans != "y" ||  $ans != "Y") then
+	 echo "Exiting..."
+   	  exit
+	endif
+
+endif
+
+#
+# Convert Files
+#
+set count = 0;
+echo "Converting"
+foreach ppmfile ($dumpd/*.ppm)
+	@ count += 1;
+	set tailfile = $ppmfile:t
+	set jpgfile = $datad/$tailfile:r.jpg
+	echo -n ".";
+	convert $ppmfile $jpgfile
+end
+
+#
+# 
+#
+set infofile =  $datad/$datad:t.info
+
+echo "#VIPER_VERSION_3.0" >! $infofile
+echo "1" >> $infofile
+
+foreach jpgfile ($datad/*.jpg)
+  echo $jpgfile >> $infofile
+end
+
+echo " "
+echo "Conversion Complete"

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+test ${JAVA:?"not set; source a config file"};
+test ${CLASSPATH:?"not set; source a config file"};
+test ${GTFC_HOME:?"not set; source a config file"};
+
+JRE="${JAVA} -cp ${GTFC_HOME}/classes:${CLASSPATH} -Djava.compiler=NONE $*"
+for x in "geometry.GeometryTest" "descriptors.attributes.AttributeTest"
+do
+   echo Running viper.${x}...
+   ${JRE} junit.textui.TestRunner viper.${x}
+done

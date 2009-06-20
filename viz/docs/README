@@ -1,0 +1,80 @@
+ * ************************************************************************ *
+       Copyright (C) 2000 by the University of Maryland, College Park
+
+		Laboratory for Language and Media Processing
+		   Institute for Advanced Computer Studies
+	       University of Maryland, College Park, MD  20742
+
+   email: lamp@cfar.umd.edu               http: documents.cfar.umd.edu/LAMP
+ * ************************************************************************ *
+
+#
+# This code is used to make graphs from the .raw files produced by 
+# the gtfC program.  
+#
+
+
+To run this code, 
+   1) modify gtfc-graphics.config to set up local environements.
+   2) make sure that your version of perl includes
+	perl5.005_01
+	Chart-0.99
+	GD-1.19
+   3) possibly modify the perl program bin/makegraph to point to the
+	local version of perl
+
+The Examples directories contains several .raw files that can be used
+	to produce various graphs and several .config files which 
+	make different types of graphs.
+	
+
+Each of the following graphs can be run from the Examples directory.
+They rely on using the .raw file by the same name, and produce a
+series of graphs.  For the first 3 individual .config files, 5 graphs
+will be produce for each.  For the pixel run 3 graphs are produced.
+
+The combined graph shows how all of the runs (dice, maxdev and
+overlap, or news-desk-pixel and advertisement-pixel) can be shown on
+one graph, and the append graph shows how those runs can be appended.
+
+For Individual Graphs:
+
+	makeGraph news-desk-dice.config
+	makeGraph news-desk-maxdev.config 
+	makeGraph news-desk-overlap.config
+	makeGraph news-desk-pixel.config
+
+For Graphs comparing all Runs:
+
+	makeGraph news-desk-combined.config 
+	makeGraph pixel-combined.config 
+
+For Graphs appending all Runs:
+
+	makeGraph news-desk-combined.config 
+
+combineGraph can be used to make a single ps file from a set of .gif files.
+
+
+NOTES:
+
+1) In order for the pixel Frame Measure to work correctly, either the list
+of source files must be included as in:
+
+  SOURCEFILES = 1 nd-001_00001.jpg 	2  nd-002_00001.jpg 	...
+
+where the pairs represent the frame number and the name of the file
+respectivly, one pair for each frame, on a single line.
+
+or a single line 
+
+  NUMFRAMES = N 
+
+where N is the number of frames in the Sequence or Frame List
+
+Currently this information can be added manually during the ground
+truth creation and will carry through to the evaluation.  This will be
+changed in the next version of ViPER to be included automatically.
+
+
+

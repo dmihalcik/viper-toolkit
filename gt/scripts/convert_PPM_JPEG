@@ -1,0 +1,33 @@
+#!/bin/csh
+
+# Usage: convert_version <from_directory> <to_direcetory> 
+#
+# this script convert all PPM files in <from_directory> to JPEG  
+#
+
+set ind = $1
+set outd = $2
+
+#
+# Converting Files
+#
+set count = 0;
+echo "converting"
+foreach oldfile ($ind/*.ppm)
+	@ count += 1;
+	set tailfile1 = $oldfile:t
+	set basefile = $tailfile1:r
+	set newfile = $outd/$tailfile1
+	
+	echo $newfile;
+	echo -n ".";
+	convert  
+
+end
+
+#
+# 
+#
+
+echo " "
+echo "Converting Complete"

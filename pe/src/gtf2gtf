@@ -1,0 +1,25 @@
+#!/bin/sh
+
+test ${GTFC_HOME:?"not set; source a config file"};
+test ${JAVA:?"not set; source a config file"};
+test ${CLASSPATH:?"not set; source a config file"};
+
+OPTIONS="-cp ${GTFC_HOME}/classes:${CLASSPATH} "
+
+# Add this to turn the compiler off - will give line numbers in stack traces
+# OPTIONS="${OPTIONS} -Djava.compiler=NONE"
+
+# Add this to set maximum memory to 128 megabytes (default is 64 on most
+#    systems)
+OPTIONS="${OPTIONS} -Xmx128m"
+
+# Add one of these to turn on profiling (the first is the older method)
+# OPTIONS="${OPTIONS} -prof"
+# OPTIONS="${OPTIONS} -Xrunhprof"
+
+# To run in the debugger, in place of $JAVA, use:
+# JRE="jdb -sourcepath ${GTFC_HOME}/src ${OPTIONS}"
+
+JRE="${JAVA} ${OPTIONS}"
+
+${JRE} viper.descriptors.Converter -ig -og $*

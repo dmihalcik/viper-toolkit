@@ -1,0 +1,286 @@
+#! /usr/bin/perl
+
+##################################################################
+# usage : GTF_PPM <init file>
+##################################################################
+
+if (("x".$ARGV[0]) eq "x") {
+        die "USAGE: GTF_PPM <init file>";
+}
+
+
+
+# variables declaration
+########################################
+$status = 0;
+$Line = "";
+@field = ();
+$result = "";
+$srcdir = "";
+@srcfile = ();
+$gtfFile = "";
+$rdfFile = "";
+$gtfColor = "";
+$rdfColor = "";
+$ppmDir = "";
+$type = 1;
+$rdfAttribute = "";
+$gtfAttribute = "";
+
+$startFrame = 0;
+$endFrame = 0;
+
+$orig_x = "";
+$orig_y = "";
+$width = "";
+$height = "";
+$stage = 0;
+###########################################
+
+# get information from ini file
+getInit();
+
+# draw ppm with gtf information
+drawGTF();
+
+$status = 0;
+#draw ppm with rtf information
+drawRDF();
+
+
+sub drawGTF {
+    open(GTFFILE, $gtfFile) || die "CAN'T OPEN $gtfFile $!";
+
+    while (<GTFFILE>)
+    {
+	$Line = $_;
+	getValue();
+	
+	#printf "$field[0]\n";
+
+	if ($field[0] eq "#END_DATA")
+	{
+		#print " \n finish ";
+		close(GTFFILE);
+		last;
+	}
+
+	if ($field[0] eq "#BEGIN_DATA")
+	{
+		$status = 1;
+	}
+
+	if ($status == 1){
+		if ( ($field[0] eq "FILE"))
+		{
+			$Line = <GTFFILE>;
+			getValue();
+		       
+			if ($field[0] eq "SOURCEDIR")
+			{
+			    $Line = <GTFFILE>;
+			    getValue();
+			}
+			
+			if ($field[0] eq "SOURCEFILES")
+			{
+			    if ($type == 1) {
+				$count = 0;
+				$srcfile[0] = $field[4];
+				$srcfile[0] =~ s/.jpg//;
+				$Line = <GTFFILE>;
+				getValue();
+				#print "$srcfile[$count]";
+				
+				while ($field[0] ne "H-FRAME-SIZE")
+				{
+					$count +=1;
+					$srcfile[$count] = $field[1];
+
+				###############################
+				#cut off the jpg extension
+				#put on pgm extension
+				###############################
+				      	$srcfile[$count] =~ s/.jpg//;	
+					#print "$srcfile[$count]";
+					#$srcfile[$count] = "$srcfile[$count]pgm";
+
+					$Line = <GTFFILE>;
+					getValue();
+				}
+			    }
+			    elsif ($type == 0)
+			    {
+				$count = 0;				
+			      for ($i = 3; $i <= $#field; $i+=2)
+			      {
+				  $srcfile[$count]=$field[$i];
+				  $srcfile[$count]=~ s/.jpg//;
+				  $count += 1;
+			      }
+				$Line = <GTFFILE>;
+				getValue();
+			    }
+			    else {
+				die " wrong type entered, has to be 0 or 1 \n";
+			    }
+		       }
+		}
+	
+		if ($field[0] eq "OBJECT") {
+			$temp = $field[3];
+			@temp1 = split(/:/,$temp); 
+			#printf "$temp1[0] $temp1[1]\n";
+			#printf length($temp1[0]);
+			$startFrame = $temp1[0];
+			$endFrame = $temp1[1];	
+			#printf "$startFrame $endFrame\n"; 		
+		} 
+	
+
+		if ($field[0] eq $gtfAttribute) {
+			$orig_x = $field[2];
+			$orig_x =~ s/"//;
+			$orig_y = $field[3];
+			$width = $field[4];
+			$height = $field[5];
+			draw(); 
+
+		}
+	}
+}
+}
+
+
+sub drawRDF {
+    $stage = 1;
+    open(RDFFILE, $rdfFile) || die "CAN'T OPEN $rdfFile $!";
+
+    while (<RDFFILE>)
+    {
+	$Line = $_;
+	getValue();
+	
+	#printf "$field[0]\n";
+
+	if ($field[0] eq "#END_DATA")
+	{
+		print " \n finish ";
+		close (RTFFILE);
+		last;
+	}
+
+	if ($field[0] eq "#BEGIN_DATA")
+	{
+		$status = 1;
+	}
+
+	if ($status == 1){
+		if ($field[0] eq "OBJECT") {
+			$temp = $field[3];
+			@temp1 = split(/:/,$temp); 
+			#printf "$temp1[0] $temp1[1]\n";
+			#printf length($temp1[0]);
+			$startFrame = $temp1[0];
+			$endFrame = $temp1[1];	
+			#printf "$startFrame $endFrame\n"; 		
+		}
+	
+
+		if ($field[0] eq $rdfAttribute) {
+			$orig_x = $field[2];
+			$orig_x =~ s/"//;
+			$orig_y = $field[3];
+			$width = $field[4];
+			$height = $field[5];
+                        $height =~ s/"//;
+			draw(); 
+		}
+	}
+}
+}
+
+
+sub getValue {
+	chomp($Line);
+	$Line =~ s/^\s+//;
+	@field = split(/\s+/,$Line); 
+}
+
+sub draw {
+
+	for ($i = $startFrame;$i <= $endFrame; $i+=1)
+	{
+	    if ($stage == 0) {
+		printf "writePPM $orig_x $orig_y $width $height $ppmDir/$srcfile[$i-1] $gtfColor\n";	
+		system( "writePPM $orig_x $orig_y $width $height $ppmDir/$srcfile[$i-1] $gtfColor");
+	    }
+	    else {
+		printf "writePPM $orig_x $orig_y $width $height $ppmDir/$srcfile[$i-1] $rdfColor\n";	
+		system( "writePPM $orig_x $orig_y $width $height $ppmDir/$srcfile[$i-1] $rdfColor");
+	    }
+	}
+}
+
+
+sub getInit {
+  open (INIFILE, $ARGV[0]) || die "cannot open $ARGV[0] $!";
+  $count1 = 0;
+  while (<INIFILE>)
+  {
+      $Line = $_;
+      getValue();
+      if ($field[0] eq "GTF")
+      {
+	  $gtfFile = $field[2];
+	  $count ++;
+      }
+      elsif ($field[0] eq "RDF")
+      {
+	  $rdfFile = $field[2];
+	  $count ++;
+      }
+      elsif ($field[0] eq "PPM")
+      {
+	  $ppmDir = $field[2];
+	  $count ++;
+      }
+      elsif ($field[0] eq "GTFATTR")
+      {
+	  $gtfAttribute = $field[2];
+	  $count ++;
+      }
+      elsif ($field[0] eq "RDFATTR")
+      {
+	  $rdfAttribute = $field[2];
+	  $count ++;
+      }
+      elsif ($field[0] eq "GTFCOLOR")
+      {
+	  $gtfColor = $field[2];
+	  $count ++;
+      } 
+     elsif ($field[0] eq "RDFCOLOR")
+      {
+	  $rdfColor = $field[2];
+	  $count ++;
+      }
+      elsif ($field[0] eq "TYPE")
+      {
+	  $type = $field[2];
+	  $count ++;
+      }       
+  }
+  close(INIFILE);
+  if ($count != 8) {
+      die "not enough parameters in the ini file $!";
+  }
+}
+
+
+
+
+
+
+
+

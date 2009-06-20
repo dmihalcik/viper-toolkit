@@ -1,0 +1,25 @@
+<body>
+<p> Provides the classes necessary to read Attributes in
+from a file and compare them. </p>
+
+<!--
+<H3> Using the Attributes </H3>
+
+<P> The Attribute class has three major points:
+<OL>
+  <LI> The Data, defined in the base Attribute as an Object. It is good to have data that implements some additional functionality, but most of it should be placed in the Attribute object itself, or in some other Comparator and Combiner classes. </LI>
+  <LI> The Comparison, Composition, and Rule functions. These manipulate the data. </LI>
+  <LI> The Parsing and other maintenance Functions. These are mostly taken care of in the base Attribute class, with only basic data and some extisibility passed down to the subclasses. </LI>
+</OL>
+-->
+
+<H3> How to Create Your Own Attributes </H3>
+
+<p> In order to create a new attribute class, subclass {@link viper.descriptors.attributes.Attribute the Attribute class} or one of its subclasses. As you can see, they all follow the naming convention <code>Attribute_<i>typename</i></code>. Make certain that your subclasses follow this rule as well, or the Attribute reader will not be able to find them.</p>
+
+<p> There are certain methods and fields that you must change in your subclasses that are abstract in the superclass, some that could be changed and throw <code>MethodNotSupportedException</code> in the superclass, and still others that implement defaults that may or may not need to be changed, depending on your data types. The Rule methods -- the ones that help filter by rules -- namely, <code>public Vector convertRule (String unparsed_rule, ErrorWriter err)</code> and <code>public boolean passRule (String rule, String valueToCompareAgainst)</code>, do not throw anything, as they are often called from outside and need to be more nice to errors in the data.</p>
+
+
+@see descriptors the package defining Descriptors
+
+</body>

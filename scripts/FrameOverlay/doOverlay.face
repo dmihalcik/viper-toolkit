@@ -1,0 +1,46 @@
+#! /usr/imports/bin/tcsh -f
+
+#
+# Usage: doOverlay.face <rootName>
+#
+# This script sorts the input Ground Truth's objects by frame, cleans all HeadBoxes Objects
+# within the specified groundTruth, and generates face boxes for the objects in the specified
+# Ground Truth.
+# This script also creates the parameter file which is used by the FrameOverlay script and executes 
+# the FrameOverlay script with new parameter file.
+
+# Specifying the Input parameter file for FrameOverlay which is stored in $FO_CONF
+setenv FO_CONF $OVERLAYPATH/FrameOverlay_config
+
+# Sort the Objects by Frame 
+#$UNIFYPATH/UnifySplitGTF < $GTFFACEPATH/$1.gtf | $UNIFYPATH/UnifySplitGTF > ! $GTFFACEPATH/$1.gtf2
+
+# Move sorted Ground Truth to Original Ground Truth Specified
+#mv $GTFFACEPATH/$1.gtf2 $GTFFACEPATH/$1.gtf
+
+# Clean up Head objects that contain Extraneous Data.
+# If the object type is "HEAD", all Attributes with the Exception of (TYPE, HDBOX, and OCCLUSION) will be set to NULL
+#$PROCESSVIPERPATH/processViper $GTFFACEPATH/$1.gtf $GTFFACEPATH/$1.gtf2 $PROCESSVIPERPATH/plugin/cleanHeadObjects TYPE THEAD CHIN LEAR REAR NOSE CHEEK FOREHEAD HDBOX REYE LEYE CMOUTH LMOUTH RMOUTH 
+
+# Move Cleaned Head Ground Truth to Original Ground Truth Specified
+#mv $GTFFACEPATH/$1.gtf2 $GTFFACEPATH/$1.gtf
+
+# Calculate all the faceBoxes for the specified Ground Truth .
+#$PROCESSVIPERPATH/processViper $GTFFACEPATH/$1.gtf $GTFFACEBOXPATH/$1.gtf $PROCESSVIPERPATH/plugin/faceBox TYPE THEAD CHIN LEAR REAR NOSE CHEEK FOREHEAD HDBOX REYE LEYE CMOUTH LMOUTH RMOUTH
+
+# Create $FO_CONF
+rm -f $FO_CONF
+
+# Do the Rest 
+echo "SOURCE_FILES : " > $FO_CONF
+echo "SOURCE_DIR :   " >>  $FO_CONF
+echo "OUTPUT_FORMAT : jpg" >> $FO_CONF
+echo "DEST_DIR : $IMGDESTDIR/$1" >> $FO_CONF
+echo "ATTRIBTYPE : BBOX" >> $FO_CONF
+echo "DATAFILES :  $GTFFACEBOXPATH/$1.gtf" >> $FO_CONF
+echo "COLORS : *red" >> $FO_CONF
+echo "ATTRIBUTES : FACEBOX" >> $FO_CONF
+
+echo "***** Executing FrameOverlay Script ***"
+$OVERLAYPATH/FrameOverlay $FO_CONF
+echo Done

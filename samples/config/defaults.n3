@@ -1,0 +1,84 @@
+#######################################
+#:// L A M P . cfar . umd . edu       #
+#      AppLoader                      #
+#                                     #
+#      A tool for loading java apps   #
+#             from RDF descriptions.  #
+#                                     #
+# Distributed under the GPL license   #
+#        Terms available at gnu.org.  #
+#                                     #
+#  Copyright University of Maryland,  #
+#                      College Park.  #
+#######################################
+
+# W3 RDF Namespaces
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# LAMP AppLoader namespaces
+@prefix lal:  <http://viper-toolkit.sourceforge.net/owl/apploader#> .
+@prefix menu: <http://viper-toolkit.sourceforge.net/owl/apploader/menu#> .
+
+# This document's Namespace
+@prefix : <#> .
+
+# Command line arguments and properties
+
+## would like to be able to specify rules like:
+#[	a lal:CommandLineTrigger ;
+#	rdfs:label "file" ;
+#	lal:abbr "f" ;
+#	lal:var :file ;
+#	lal:implies {
+#		:mediator  lal:setProperty [
+#			lal:propertyName "FileName" ;
+#			lal:propertyValue :file ] } ] .
+#
+## This would convert "-f file.xml" into ":mediator lal:setProperty..."
+## perhaps if we switch to jena2 or another rdf parser...
+## I should be able to hack it together - a formula is a Model that
+## implements RDFNode. Unfortunately, they can't be serialized to RDF/XML and
+## are not part of the RDF M&S, which is wierd, since timbl uses them all
+## the time. One would assume that he would have the final say on these
+## sorts of things...
+
+[	a lal:PreferenceFlag ;
+	# This prints out the usage using the preferences format
+	# Unfortunately, this means the full usage won't get printed
+	# if the config file is not proper notation3.
+	rdfs:label "help"@en ; 
+	lal:abbr "h"@en ;
+	rdfs:description "Print out this help message"@en ; 
+	lal:invokes "edu.umd.cfar.lamp.apploader.prefs.PrintUsage" ] .
+
+[	a lal:PreferenceFlag ;
+	rdfs:label "version"@en ; 
+	lal:abbr "v"@en ;
+	rdfs:description "Print out the version of ViPER"@en ; 
+	lal:invokes "edu.umd.cfar.lamp.apploader.PrintVersion" ] .
+
+
+# Beans
+
+# Basic application settings
+# lal:Core is the only "bean" that is defined by default
+lal:Core
+	a lal:Bean ;
+	rdfs:label "LAMP AppLoader"@en ;
+	lal:shellCommand "Usage: appLoader <options>"@en .
+	# If a bean is in a frame or view, this is the name in the window pulldown
+	# or the name of the frame. What sucks is there is no way to alter this
+	# programmatically without events in the RDF model. 
+	# But I want it to be part of the RDF for l10n reasons.
+	# lal:nature "visible" ;
+	# lal:setProperty [ lal:propertyName "layout" ; lal:propertyValue "mdi" ] ;
+	# # other options could include "mac"(default) and "eclipse/docked" 
+
+
+# Remaining Questions:
+#  Tab order - would like to be able to tab from chronicle to canvas,
+#              how to allow this?
+#  other keystrokes
+#  first focus - it might be good to have focus always 
+#                start on another bean instead of the app window?

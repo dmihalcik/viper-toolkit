@@ -1,0 +1,32 @@
+<body>
+<p> Provides the classes necessary to read comparable Descriptors in
+from a file. </p>
+
+<p> A {@link viper.descriptors.Descriptor Descriptor} is a description of some
+action, event, object, state, etc. found in a video file. It
+can be as simple as a boolean value and as complex as tracking
+moving text in a bounding box as it changes color. This is
+acomplished by specifiying {@link descriptors.attributes Attributes}. These
+objects can then be compared to determine accuracy, or
+<a href="#distance">distance</a>. </p>
+
+<a name="distance"></a>
+<p>Distance is defined as a measure of the difference between
+two things, with certain desireable properties. Theseproperties are:
+<UL>
+  <li>Positiveness: If A != B, then dist(A,B)) &gt; 0.
+       If A == B, then  dist(A,B) = 0. </li>
+  <li>Symmetry: dist(A,B) = dist(B,A)</li>
+  <li>Triangle Inequality:
+       dist(A,C) &lt; dist(A,B) + dist(B,C)</li>
+</UL>
+The distances between Descriptors are all <em>bounded by 1</em>,
+which means they are never greater than 1. </p>
+
+
+</body>
+
+@see viper.descriptors.attributes The package defining Attributes.
+@see viper.comparison Functions for comparing sets of attributes and saving the results for analysis.
+@see <a href="http://www.cut-the-knot.com/do_you_know/far_near.html">Cut the Knot's explanation of distance</a>
+

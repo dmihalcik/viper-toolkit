@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="viper-api" basedir="." default="all">
+	<description>Builds the ViPER api for Java.</description>
+	
+	<!-- to invoke this recursively, overload chronicleroot, libdir, and cp.alljars -->
+	
+	<property name="chronicleroot" location="." />
+	<property name="libdir" location="../common/lib" />
+	<property name="apihome" location="../api/bin" />
+	
+	
+	<property name="chronicle.src" location="${chronicleroot}/src" />
+	<property name="chronicle.classes" location="${chronicleroot}/classes" />
+	<property name="chronicle.bin" location="${chronicleroot}/bin" />
+	<property name="chronicle.doc" location="${chronicleroot}/doc" />
+	
+	<path id="viper.cp.base">
+		<pathelement path="${libdir}/dom.jar"/>
+		<pathelement path="${libdir}/junit.jar"/>
+		<pathelement path="${libdir}/xerces.jar"/>
+		<pathelement path="${libdir}/concurrent-1.3.0.jar"/>
+		<pathelement path="${libdir}/db3-3-11.jar"/>
+		<pathelement path="${libdir}/icu4j.jar"/>
+		<pathelement path="${libdir}/jakarta-oro-2.0.5.jar"/>
+		<pathelement path="${libdir}/log4j-1.2.7.jar"/>
+		<pathelement path="${libdir}/xercesImpl.jar"/>
+		<pathelement path="${libdir}/xmlParserAPIs.jar"/>
+		<pathelement path="${libdir}/concurrent.jar"/>
+		<pathelement path="${libdir}/junitperf.jar"/>
+		<pathelement path="${libdir}/antlr.jar"/>
+		<pathelement path="${libdir}/piccolo.jar"/>
+		<pathelement path="${libdir}/piccolox.jar"/>
+		<pathelement path="${apihome}/viper-api.jar"/>
+	</path>
+
+	<property name="cp.alljars" refid="viper.cp.base" />
+	
+	
+	<target name="all" depends="jar" />
+	
+	<target name="jar" depends="compile">
+		<mkdir dir="${chronicle.bin}" />
+		<jar destfile="${chronicle.bin}/viper-chronicle.jar" basedir="${chronicle.classes}"/>
+	</target>
+	<target name="compile" depends="init">
+		<mkdir dir="${chronicle.classes}" />
+		<javac srcdir="${chronicle.src}" destdir="${chronicle.classes}" source="1.4" classpath="${cp.alljars}" />
+	</target>
+	<target name="javadocs" depends="init">
+		<mkdir dir="${chronicle.doc}" />
+		<javadoc sourcepath="${chronicle.src}" destdir="${chronicle.doc}" />
+	</target>
+	<target name="clean">
+		<delete dir="${chronicle.classes}" />
+		<delete>
+			<fileset dir="${chronicle.bin}" includes="*.jar"/>
+		</delete>
+	</target>
+
+	<target name="init">
+		<tstamp />
+	</target>
+</project>

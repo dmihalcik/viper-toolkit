@@ -1,0 +1,7 @@
+#BEGIN_CONFIG
+
+FILE Information
+	SOURCEFILES: svalue
+	SOURCETYPE: svalue
+
+#END_CONFIG

@@ -1,0 +1,222 @@
+===================================
+Overlay the ground truth with
+detected result on PPM image.
+===================================
+----------------
+1. Perl Script
+----------------
+
+##########
+PPM2
+##########
+
+usage
++++++++++
+
+PPM2 <ini_file>
+<ini_file> : the settings for PPM2. it is define as following, in this
+directory we have a file called ppmrc, which you can modify with or you can
+build a new one by yourself.
+
+
+GTF : /fs/orion4/LAMP/ViPER-Data/FaceTextDB/GTF-TEXT/vehicle.gtf
+RDF : /fs/orion4/LAMP/ViPER-Data/FaceTextDB/UMD_RESULTS/TEXT/RDF/vehicle.rdf
+PPM : /fs/orion4/LAMP/ViPER-Data/FaceTextDB/PPM-GT-OVERLAY/vehicle
+GTFATTR : LOCATION
+RDFATTR : BBOX
+GTFCOLOR : "red"
+RDFCOLOR : "green"
+TYPE : 0
+
+GTF 		the ground truth file name 
+RDF 		the result file name
+PPM		the directory name of PPM file to be overlayed on
+GTFATTR 	the attribute name in gtf file you want to overlay,
+RDFATTR 	the attribute name in rdf file you need to overlay, and
+		the type of both of them should be either bbox or obox.
+GTFCOLOR and RDFCOLOR 
+		is the color you want to use for gtf and
+		rdf files seperately, the valid colors you can use is:
+		"black","green","red","white","blue"
+TYPE 		you can alway leave it as 0, it is for compatible purpose.
+
+
+=========
+NOTICE
+=========
+Please keep the file called writePPM in the same directory as PPM2,
+it will be called by PPM2.
+
+ 
+---------------------------------
+2. c++ source and excutable file
+---------------------------------
+
+#####################
+writePPM.cc writePPM
+#####################
+
+The program to read in old pgm or ppm file and output the new ppm
+file with bounding box around the text.
+
+usage
+++++++
+usage : writePPM <orig_x> <orig_y> <width> <height> <filename> <color>
+
+<orig_x> <orig_y> <width> <height>:
+	The first four parameters of the attribute "LOCATION", which 
+	represent the x and y coordinate of the origin and the width
+	and height of the bounding box.
+<filename>
+	The ppm or pgm file name to convert. But without any extension,
+cause I will try to search for both of them and recognize them based on
+the internal format.
+For example: if you have file "test.ppm" just put "test" as argument.
+
+<color> The color you like the bounding box to have.
+	valid colors are: black, red, green, blue, white.
+	
+
+Assumption
++++++++++++
+Program will output the file with the same name as input but with 'ppm' as
+extension. If the input file is ppm will be overwritten while if the input
+file is pgm, it will create a new one.
+
+
+====================================
+Update the GTF file 
+====================================
+----------------
+1. Perl Script
+----------------
+
+##########
+UPDATE
+##########
+
+usage
++++++++++
+
+UPDATE <GTF infile> <GTF outfile> <program_name> [attributes]
+<GTF infile> : the GTF file you want to modify.
+<GTF outfile> : the new GTF file you want to save as.
+<program_name> : the plugin program you want to call.
+<attributes> : the attributes list your update is based on.
+
+-------
+Notice
+-------
+All the plugin program is located in plugin directory, can be
+expended later on. Currently we can three plugin programs:
+
+1) calArea	calculate the area for bbox or obox
+2) countChar	count the number of characters
+3) fileInfo	update the SOURCEDIR and SOURCEFILE attributes. It need a
+		init file to locate the JPEG info file. Here we have a file
+		called firc inside the scripts directory, you can modified
+		it for your need.
+
+----------------
+1. Csh Script
+----------------
+###########
+update_all
+###########
+update all the gtf files in one directory, and save result into another
+directory.
+
+Usage
+	update_all <in_dir> <out_dir> <type>
+
+<in_dir> the input directory name
+<out_dir> the output directory name
+<type>	0: update area
+	1: update character count
+
+====================================
+CONVERT THE OLD GTF TO NEW GTF
+====================================
+---------------
+1. CSH SCRIPT
+----------------
+##############
+convert_all
+#############
+Convert old viper 3.0 script to 3.1 type.
+
+call convert_version script with follow arguments:
+
+convert_version /fs/orion4/LAMP/Evaluation/FACETEXT/GTF/OLD_GTF_DONE \
+/fs/orion4/LAMP/Evaluation/GTF/FACETEXT/HOLD \
+/fs/orion4/LAMP/Evaluation/FACETEXT/JPEG_FRAMES
+
+which is set up for our system.
+
+IF YOU ARE ON DIFFERENT SYSTEM, ALL YOU NEED IS TO MODIFY THREE ARGUMENTS.
+
+
+##################
+convert_version
+##################
+The script to convert all the GTF files in a dirctory at one time.
+
+Usage:	
+++++++++
+convertversion <from_directory> <to_direcetory> <info_directory>
+<from_directory> : the directory where the old GTF files are.
+<to_direcetory> : the directory where new converted GTF files will be.
+<info_directory>: the parent directory where all the video sequence
+directories with .info files sit in.
+For example:
+in our system the info_directory is
+/fs/orion4/LAMP/Evaluation/JPEG_FRAMES/
+
+
+Assumption
+++++++++++++
+The video sequence directory for each GTF file has the same name
+as GTF file but WITHOUT the extension ".gtf"
+For example:
+advertisements.gtf
+the video sequence directory will be:
+<info_directory>/advertisements =
+/fs/orion4/LAMP/Evaluation/JPEG_FRAMES/advertisements
+
+---------------------------------------
+2. c++ source code and executable file
+---------------------------------------
+###################
+VerGTF1.cc VerGTF
+##################
+The real program doing the conversion job.
+
+usage
++++++++
+VerGTF <infile> <outfile> <info_dir> <info_file>
+<infile> : filename of old GTF
+<outfile> : filename of output new GTF
+<info_dir> : use for debug purpose
+<info_file> : the file name including the directory of
+the info_file for the video sequence.
+
+Assumption
+++++++++++++
+
+assume the old GTF all looks like those one in
+the directory of /fs/orion4/LAMP/Evaluation/GTF/OLD_GTF_DONE/
+
+ 
+====================================
+Create PPM files based on the GTF
+====================================
+
+
+
+
+
+
+
+
+
+

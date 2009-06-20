@@ -1,0 +1,99 @@
+#! /usr/bin/perl
+
+#####################################################################
+# usage : GTF_PPM <GTF file> <out file> <program_name> [attribute]
+# [attribute]  
+#####################################################################
+
+
+if (("x".$ARGV[3]) eq "x") {
+        die "USAGE: UPDATE <GTF infile> <GTF outfile> <program_name> [attributes]";
+}
+
+$status = 0;
+$Line = "";
+$Line1 = "";
+@field = ();
+$result = "";
+$srcdir = "";
+@srcfile = ();
+$readability = "";
+($gtfFile,$outFile,$program,@attribute) = @ARGV;
+@callParam = ();
+$ready = 0;
+$index = 0;
+
+open(GTFFILE, $gtfFile) || die "CAN'T OPEN $gtfFile $!";
+open(OUTFILE, ">$outFile") || die "CAN'T OPEN $ARGV[1] $!";
+while (<GTFFILE>)
+{
+	$Line = $_;
+	getValue();
+	
+
+	if ($field[0] eq "#END_DATA")
+	{
+	    print " \n finish ";
+	    print OUTFILE "$Line1";
+	    close GTFFILE;
+	    close OUTFILE;
+	    system "rm -Rf TEMPFILE";
+	    exit(1);
+	}
+	elsif ($field[0] eq "#BEGIN_DATA")
+	{
+		$status = 1;
+		print OUTFILE "$Line1";
+	}
+	elsif ($status == 1){
+	    inSet();
+	    if ($index > $#attribute)
+	    {
+		print "$program @callParam TEMPFILE\n";
+		system($program,@callParam,"TEMPFILE");
+                open(hTEMPFILE,"TEMPFILE") || die "CAN'T OPEN TEMPFILE $!";
+		while (<hTEMPFILE>)
+		{
+		    print OUTFILE $_;
+		}
+		close(hTEMPFILE);
+  	        $index = 0;
+		@callParam = ();
+	    }
+	}	
+       else { print OUTFILE "$Line1";
+	    }
+	
+}
+
+
+sub getValue {
+        $Line1 = $Line;
+	chomp($Line);
+	$Line =~ s/^\s+//;
+	@field = split(/\s+/,$Line); 
+}
+
+
+sub inSet {
+    my $found = 0;
+    foreach $attribute (@attribute) { 
+	if ($field[0] eq $attribute)  {
+	    $noQuato = $Line;
+	    $noQuato =~ s/"//;    $noQuato =~ s/"//;
+	    $callParam[$index] = "\"$noQuato\" ";
+	    $index ++;
+            $found = 1;
+	    last;
+	}
+    }
+    if ($found == 0)
+    {
+            print OUTFILE $Line1;
+    }
+}
+
+
+
+
+

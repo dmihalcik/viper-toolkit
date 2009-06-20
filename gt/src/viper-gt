@@ -1,0 +1,7 @@
+#!/bin/sh
+
+test ${VIPER_DATA_PREFS:?"not set; source a prefs file for Config Editor"};
+test ${CLASSPATH:?"not set; source a config file"};
+test ${VIPER_HOME:?"not set; source a config file"};
+
+${JAVA} edu.umd.cfar.lamp.viper.gui.core.RunGT $*

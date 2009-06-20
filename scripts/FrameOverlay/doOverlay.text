@@ -1,0 +1,54 @@
+#! /usr/imports/bin/tcsh -f
+
+#
+# Usage: doEverything <rootname>
+#
+#
+
+echo "Processing $1"
+
+#######################################
+# make FrameConfig file
+#
+echo "   Creating FrameOverlay_config"
+
+setenv FO_CONF $OVERLAYPATH/frame_overlay_config
+
+echo "SOURCE_FILES : " > $FO_CONF
+#echo "SOURCE_DIR :  /fs/orion3/LAMP/viper-tmp/GTF-FACE-TEXT-OVERLAY/$1" >> $FO_CONF
+echo "SOURCE_DIR :  " >> $FO_CONF
+echo "OUTPUT_FORMAT : jpg" >> $FO_CONF
+echo "DEST_DIR : $IMGDESTDIR/$1" >> $FO_CONF
+
+if ($RDFFLAG == 1) then
+   echo "ATTRIBTYPE : OBOX BBOX" >> $FO_CONF
+   echo "DATAFILES : $GTFPATH/$1.gtf $RDFPATH/$1.rdf" >> $FO_CONF
+   echo "COLORS : red green" >> $FO_CONF
+   echo "ATTRIBUTES : LOCATION BBOX" >> $FO_CONF
+else
+   echo "ATTRIBTYPE : OBOX" >> $FO_CONF
+   echo "DATAFILES : $GTFPATH/$1.gtf" >> $FO_CONF
+   echo "COLORS : *green" >> $FO_CONF
+   echo "ATTRIBUTES : LOCATION" >> $FO_CONF
+endif
+
+#cat FrameOverlay_config
+#######################################
+# Create the overlay image files
+#
+echo "   Creating overlay files"
+$OVERLAYPATH/FrameOverlay $FO_CONF
+
+#  Split the Frames
+#$DUMPOVERLAYPATH/DumpThem.csh $1
+
+echo "FINISH"
+
+
+
+
+
+
+
+
+

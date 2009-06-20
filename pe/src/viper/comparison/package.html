@@ -1,0 +1,71 @@
+<body>
+<p> Provides the classes necessary to compare Descriptors,
+including a simple command line application useful for
+generating graphs between a large number of cases. </p>
+
+<p>  Two sets of Descriptors can be compared against each other
+via the {@link viper.comparison.CompEvaluator} class. This class
+takes in two sets of Descriptors in {@link viper.descriptors.DescriptorList
+list form} and, via {@link viper.comparison.CompEvaluator#doAnalysis(int,java.io.PrintWriter,java.io.PrintWriter,java.io.PrintWriter,DescriptorConfigs) various methods} to perform certain computations,
+can compare them to determine the overall distance between the two sets. </p>
+
+<p> In order to compare two sets of descriptors from files,
+the following sequence might be followed (this is pretty much what {@link viper.comparison.GtfC#main(String[]) GtfC} does):
+<ol>
+  <li> Read in the {@link viper.descriptors.DescriptorConfigs Descriptor
+       configuration} data. </li>
+  <li> Read in the {@link viper.util.Equivalencies Equivalencies}. </li>
+  <li> Read in the {@link viper.descriptors.DescVector#parseEvaluations(String,
+       Equivalencies) Evaluations} and {@link viper.reader.LimitationsParser
+       Limitations}. </li>
+  <li> Read in the {@link viper.descriptors.DescVector Descriptor data}. </li>
+  <li> Initialize the {@link viper.comparison.CompMatrix CompMatrix}. </li>
+  <li> Cycle through the comparison functions to the desired
+       accuracy of distance measure. After each, {@link
+       viper.comparison.CompEvaluator#printCurrentFM(PrintWriter, PrintWriter,
+       DescriptorConfigs) print the results} if wanted. Remember,
+       Cropping may be performed at any time, but the rest must
+       be performed in order.
+       <ol>
+	 <li>{@link viper.comparison.CompMatrix#detect() Detection}</li>
+ 	 <li>{@link viper.comparison.CompMatrix#localize() Localization}</li>
+	 <li>{@link viper.comparison.CompMatrix#statistical(double) Statistical Match}</li>
+	 <li>{@link viper.comparison.CompMatrix#removeDuplicates(int) Cropping}</li>
+      </ol></li>
+ <li> Display results, either in the {@link viper.comparison.CompMatrix#printPR
+      standard format} or by parsing the raw format into a graph. </li>
+</ol> </p>
+<H3>Standard Output Format</H3>
+<P>The format prints out the results in a readable format. It's format is as follows:
+<ul>
+  <li> Input Parameters
+       <ul>
+	 <li> The different filenames read in. The properties file, data files, etc. </li>
+	 <li> The level and match type, eg level 3 (Statistics) and Multiple type matching </li>
+	 <li> The statistic and tolerance used for thresholding. </li>
+       </ul>
+  </li>
+  <li> Filters </li>
+  <li> Metrics and tolerances for different descriptor types and their attributes </li>
+  <li> False and Missed Descriptors
+       <ul> Depending on the level, these may include:
+	 <li> Level 1: Detection. Do some some frames of a target/candidate pair overlap with similar attributes? </li>
+	 <li> Level 2: Localization. Do enough of the frames contain matching data? </li>
+	 <li> Level 3: Statistics. Does some statistic (Mean, Median, Max) of the frame distances meet some threshold? </li>
+	 <li> Cropping: What is the best match for given targets? What set of pairs minimizes overall distance?</li>
+       </ul>
+  </li>
+  <li> Detections. What targets get what candidates and how close the match is. </li>
+  <li> Summary Results. The overall precision and recall. </li>
+  <li> Variable Attribute Results.</li>
+</ul>   
+ 
+    <p><div>
+@see viper.descriptors the package defining Descriptors
+</div><div>
+@see viper.descriptors.attributes the package defining Attributes
+</div></p>
+</body>
+
+
+

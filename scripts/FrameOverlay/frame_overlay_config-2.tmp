@@ -1,0 +1,8 @@
+SOURCE_FILES :
+SOURCE_DIR : /tmp/dice-all
+OUTPUT_FORMAT : jpg
+DEST_DIR : /fs/lamp/Projects/VACE/Evaluations/DryRun/OVERLAYS/SRI/dice-all
+DATAFILES : dice-all.false  dice-all.detectrdf
+COLORS : *red *green
+ATTRIBUTES : bounding_box bounding_box
+ATTRIBTYPE : BBOX BBOX

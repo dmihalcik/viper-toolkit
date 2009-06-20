@@ -1,0 +1,100 @@
+#! /usr/bin/csh -f
+
+#
+# Usage: filterVIPEROverlay <rootname>
+#
+# NOTE:  Since FrameOverlay only uses the first GTF/RDF file for deciding 
+# the file IDs, we need to call separatly for the GTF and RDF files.
+# Typically, the RDF files are only a subset of the orignal files so 
+# we need to read them in again
+#
+# NOTE: When we call FrameOverlay twice, the images must be kept
+# in an intermedite directory.  We use /tmp/$1
+
+echo "Processing $1"
+
+
+#######################################
+# make FrameConfig file
+#
+
+setenv FO_CONF $OVERLAYPATH/frame_overlay_config.tmp
+
+##############################################################
+echo "   Creating frame_overlay_config in $FO_CONF"
+
+if ($GTFFLAG == 1) then
+   echo "SOURCE_FILES :" > $FO_CONF
+   echo "SOURCE_DIR : $IMGSRCDIR  " >>  $FO_CONF
+   echo "OUTPUT_FORMAT : jpg" >> $FO_CONF
+
+   if ($RDFFLAG == 1) then
+      echo "DEST_DIR : /tmp/$1" >> $FO_CONF
+   else
+      echo "DEST_DIR : $IMGDESTDIR/$1" >> $FO_CONF
+   endif
+
+   echo "DATAFILES : $1.missed $1.detectgtf " >> $FO_CONF
+   echo "COLORS : red green " >> $FO_CONF
+   echo "ATTRIBUTES : $GTFATTR $GTFATTR " >> $FO_CONF
+   echo "ATTRIBTYPE : $GTFTYPE $GTFTYPE" >> $FO_CONF
+
+   echo " "
+   echo "Calling:   $OVERLAYPATH/FrameOverlay $FO_CONF"
+   $OVERLAYPATH/FrameOverlay $FO_CONF
+endif
+
+setenv FO_CONF $OVERLAYPATH/frame_overlay_config-2.tmp
+
+##############################################################
+#
+# Note: For the second pass, we need to pull the data from the 
+#       Destination Directory
+#
+echo "   Creating frame_overlay_config_GTF in $FO_CONF"
+
+if ($RDFFLAG == 1) then
+   echo "SOURCE_FILES :" > $FO_CONF
+   if ($GTFFLAG == 1) then
+      echo "SOURCE_DIR : /tmp/$1" >> $FO_CONF
+   else
+      echo "SOURCE_DIR : $IMGSRCDIR/$1" >> $FO_CONF
+   endif
+
+   echo "OUTPUT_FORMAT : jpg" >> $FO_CONF
+   echo "DEST_DIR : $IMGDESTDIR/$1" >> $FO_CONF
+
+   echo "DATAFILES : $1.false  $1.detectrdf" >> $FO_CONF
+   echo "COLORS : *red *green" >> $FO_CONF
+   echo "ATTRIBUTES : $RDFATTR $RDFATTR" >> $FO_CONF
+   echo "ATTRIBTYPE : $RDFTYPE $RDFTYPE" >> $FO_CONF
+
+   echo " "
+   echo "Calling:   $OVERLAYPATH/FrameOverlay $FO_CONF"
+   $OVERLAYPATH/FrameOverlay $FO_CONF
+
+endif
+
+##############################################################
+#
+# Remove the Temporary directories
+#
+
+\rm -r /tmp/$1
+
+echo "FINISHED"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

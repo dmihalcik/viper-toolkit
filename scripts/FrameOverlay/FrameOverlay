@@ -1,0 +1,589 @@
+#!/usr/bin/perl
+
+##################################################################
+# usage : FrameOverlay <init file>
+##################################################################
+
+if (("x".$ARGV[0]) eq "x") {
+        die "USAGE: FrameOverlay <init file>";
+}
+
+# variables declaration
+########################################
+$status = 0;
+$Line = "";
+@field = ();
+$result = "";
+$srcdir = "";
+$dstdir = "";
+@srcfile = ();
+@datafiles = ();
+@colors = ();
+@attribs = ();
+@attribstype = ();
+$current = "";
+$ot_format = "";
+$type = 1;
+$startFrame = 0;
+$endFrame = 0;
+$orig_x = "";
+$orig_y = "";
+$width = "";
+$height = "";
+$radius = "";
+$stage = 0;
+$attribType = "";  
+@paramBit = (0,0,0,0,0,0,0,0);  
+$whichBit=0;  
+@configFields=("DATAFILES", "COLORS", "ATTRIBUTES", "BOXTYPE", "SOURCE_FILES", "SOURCE_DIR", "DEST_DIR", "OUTPUT_FORMAT");
+
+###########################################
+
+# get information from ini file
+print "#################################################\n";
+print "Frame Overlay: $ARGV[0]\n";
+print "   Reading Information from Init File\n";
+
+getInit();
+
+debug_print();
+
+print "getInit() complete...\n";
+
+#if not specifyed, get srcdir and/or srcfile from the first data file
+
+if(!$srcdir || !@srcfile)
+{
+    print "Reading Information from the first GTF file\n";
+    readGTF();
+}
+else {
+    print "Found srcfile and srcdir in FrameOverlay_config, starting draw Process !! \n";
+}
+
+print "#################################################\n";
+print "Copying and converting files to destination...\n";
+copy_files();
+
+print "#################################################\n";
+print "Drawing Data\n";
+for($current  = 0; $current <= $#datafiles; $current++)
+{
+    $bicolorkey = substr $colors[$current],0,1;
+    if ($bicolorkey eq "*") {
+	$bicolorflag = 1;
+	$colors[$current] = substr $colors[$current],1;
+	print "************BI COLOR\n";
+    }
+    else {
+	$bicolorflag = 0;
+	print "************SINGLE COLOR\n";
+    }
+
+    drawData();
+
+}
+
+if($ot_format eq "jpg")
+{
+   print "#################################################\n";
+   print "Converting Files to JPGS \n"; 
+   my $curr_file = "";				
+   foreach $curr_file(@srcfile)
+   {
+       print("  convert $dstdir/$curr_file.ppm $dstdir/$curr_file.jpg\n");
+       system("convert $dstdir/$curr_file.ppm $dstdir/$curr_file.jpg");
+       print("  rm $dstdir/$curr_file.ppm\n\n");
+       system("rm $dstdir/$curr_file.ppm");
+   }
+}
+######################################################
+sub debug_print
+{
+    print("-------------------\n");
+    print("DATAFILES: "); print_arr(@datafiles);
+    print("\nCOLORS: ");print_arr(@colors);
+    print("\nATTRIBUTES: ");print_arr(@attribs);
+    print("\nATTRIBUTE TYPES: ");print_arr(@attribstype);
+    print("\nSRC_FILES: ");print_arr(@srcfile);
+    print("\nSRC_DIR: $srcdir \nDEST_DIR: $dstdir\nOUTPUT_FORMAT: $ot_format\n");
+    print("-------------------\n");
+}
+
+#################################################
+sub drawData
+{
+    
+    open(CURR_FILE, $datafiles[$current]) || die "ERROR -- CAN'T OPEN $datafiles[$current] $!";
+    @field = ();
+    $attribType = $attribstype[$current];
+#    print "Attribute Types: @attribstype\n";
+    #get read of the config
+    while(<CURR_FILE> !~ /^#BEGIN_DATA/)
+    {
+#	print "$_\n";
+    }
+	  
+    while($field[0] ne "#END_DATA")
+    {	
+#	print "$current ";
+	$Line = <CURR_FILE>;
+	getValue();
+#	print "$field[0]\n";    
+
+	if ($field[0] eq "OBJECT") 
+	{
+		$temp = $field[3];
+		@temp1 = split(/:/,$temp); 
+		#printf "$temp1[0] $temp1[1]\n";
+		#printf length($temp1[0]);
+		$startFrame = $temp1[0];
+		$endFrame = $temp1[1];	
+		#printf "$startFrame $endFrame\n"; 		
+	} 	
+
+	elsif ($field[0] eq $attribs[$current]) 
+	{
+		$orig_x = $field[2];
+		$orig_x =~ s/"//;
+		$orig_y = $field[3];
+                ############## Modified Code by Alphonso Desselle  #################
+                if($attribType eq "OBOX") {
+                   print " Attrib type is $attribType in drawData()\n"; 
+		   $width = $field[4];
+		   $height = $field[5]; 
+		   $orient = $field[6];
+                   $orient =~ s/"//;
+                }
+	        elsif($attribType eq "BBOX") {
+		    print " Attrib type is BBOX in drawData()\n";
+		    $width = $field[4];
+		    $height = $field[5]; 
+		    $height =~ s/"//;
+	        }
+	        elsif($attribType eq "CIRCLE") {
+                   print " Attrib type is CIRCLE in drawData()\n"; 
+		   $radius = $field[4];
+                   $radius =~ s/"//;
+		  print "After parse radius = $radius \n";
+                }
+	        else {
+		   die "ERROR -- $attribType is Invalid Aborting ...\n";
+		}
+                #################################################
+		draw(); 
+	}
+    }#while loop
+    close(CURR_FILE);
+}# drawData func
+######################################################
+
+
+################# This whole function was Modified by Alphonso Desselle ##############################################
+sub draw
+{
+    if($attribType eq "BBOX" || $attribType eq "OBOX") {
+	$newx=$orig_x-1;
+	$newy=$orig_y-1;
+	$newHeight=$height+2;
+	$newWidth=$width+2;
+    }
+    else {
+	$newRad=$radius + 2;
+    }
+    for ($i = $startFrame;$i <= $endFrame; $i+=1)
+    {
+	print "\n";
+
+###########################################################################
+# Process BBOX
+#    - fixed write to write with the -bb opiton
+###########################################################################
+	if($attribType eq "BBOX"){
+	    print "in BBOX file i = $i srcfile is $srcfile[$i-1] \n";
+	    print " COMMAND: writePPM -bb $orig_x $orig_y $width $height $dstdir/$srcfile[$i-1] \"$colors[$current]\"\n";
+	    if($bicolorflag == 1) {
+		print " Drawing Two Color Boxes\n";
+#		print " COMMAND: writePPM -bb $newx $newy $newWidth $newHeight $dstdir/$srcfile[$i-1] \"$colors[$current]\"\n";
+		system( "writePPM -bb $orig_x $orig_y $width $height $dstdir/$srcfile[$i-1] white");	
+		system( "writePPM -bb $newx $newy $newWidth $newHeight $dstdir/$srcfile[$i-1]  $colors[$current]");	
+	    }
+	    else {
+		print " Drawing $colors[$current] Box\n";
+		system( "writePPM -bb $orig_x $orig_y $width $height $dstdir/$srcfile[$i-1] $colors[$current]");
+	    }
+	}
+###########################################################################
+# Process OBOX
+###########################################################################
+	elsif($attribType eq "OBOX"){
+	    print "processing Obox\n";
+	    print " COMMAND: writePPM -ob $orig_x $orig_y $width $height $orint $dstdir/$srcfile[$i-1] \"$colors[$current]\"\n";
+	    if($bicolorflag == 1) {
+		print " Drawing Two Color Boxes\n";
+#		print " COMMAND: writePPM -ob $newx $newy $newWidth $newHeight $orient $dstdir/$srcfile[$i-1] \"$colors[$current]\"\n";
+		system( "writePPM -ob $orig_x $orig_y $width $height $orient $dstdir/$srcfile[$i-1] white");	
+		system( "writePPM -ob $newx $newy $newWidth $newHeight $orient $dstdir/$srcfile[$i-1]  $colors[$current]");
+	    }
+	    else {
+		print " Drawing $colors[$current] Box\n";
+		system( "writePPM -ob $orig_x $orig_y $width $height $orient $dstdir/$srcfile[$i-1] $colors[$current]");
+	    }
+	}
+###########################################################################
+# Process Circle?
+###########################################################################
+	else {
+	    printf " COMMAND: writePPM -c $orig_x $orig_y $radius $dstdir/$srcfile[$i-1] \"$colors[$current]\"\n";	
+	    if($bicolorflag == 1) {
+		print " Drawing Two Color Circles\n";
+#		printf " COMMAND: writePPM -c $orig_x $orig_y $newRad $dstdir/$srcfile[$i-1] \"$colors[$current]\"\n";	
+		system( "writePPM -c $orig_x $orig_y $radius $dstdir/$srcfile[$i-1] white");
+		system( "writePPM -c $orig_x $orig_y $newRad $dstdir/$srcfile[$i-1]  $colors[$current]");
+	    }
+	    else {
+		print " Drawing $colors[$current] Circle\n";
+		system( "writePPM -c $orig_x $orig_y $radius $dstdir/$srcfile[$i-1] $colors[$current]");
+	    }
+	}
+    }
+}
+########################## End of Modified funct Draw()  #######################################################################
+
+
+
+################################################ Modified by Alphonso Desselle ############################################
+sub read_files
+{
+    my $image_num = 0;				
+    $i=3;
+    print "Reading Files from:\n";
+    print "@field\n";
+    while ($i <= $#field)
+    {	
+	print "   field = $field[$i]\n";
+	if($field[$i] =~ /jpg/) {
+	    #print "found a file\n";
+	    $srcfile[$image_num]=$field[$i];
+	    $image_num += 1;
+	}
+	$i +=2;
+    }
+    if ($srcfile[@srcfile - 1] =~ /\"$/)
+    {
+        chop($srcfile[@srcfile - 1]);
+    }
+    print "\n";
+    print "   read_files() complete\n";
+    print "   srcfiles are: @srcfile\n";
+}
+###########################################################################################################################
+sub copy_files
+{
+    print "Source file dir is $srcdir\n";
+   my $curr_file = "";				
+   foreach $curr_file(@srcfile)
+   {
+       #copy the files
+       print(" COMMAND: cp $srcdir/$curr_file $dstdir/$curr_file\n");
+       system("cp $srcdir/$curr_file $dstdir/$curr_file"); 
+
+       if ($curr_file =~ /.jpg$/)
+       {
+	   #cut the extention off
+	   $curr_file =~ s/.jpg//;
+	   
+	   #convert to .ppm and remove the .jpeg
+	   print(" COMMAND: convert $dstdir/$curr_file.jpg $dstdir/$curr_file.ppm\n");
+	   system("convert $dstdir/$curr_file.jpg $dstdir/$curr_file.ppm");
+	   print(" rm $dstdir/$curr_file.jpg\n\n");
+	   system("rm $dstdir/$curr_file.jpg");
+       }
+       elsif($curr_file =~ /.ppm$/)
+       {
+	   $curr_file =~ s/.ppm//;
+       }
+       else
+       {
+	   die "ERROR -- $curr_file unkown file format.  Must be .jpg or .ppm.";
+       }
+   }
+}
+######################################################
+sub getValue {
+	chomp($Line);
+	$Line =~ s/^\s+//;
+	@field = split(/\s+/,$Line); 
+}
+
+######################################################
+
+##########################################################################################################################
+# getInit(), modified by Alphonso Desselle
+#
+#  Comments
+#  This function retrieves data from the FrameOverlay_config file 
+#  I modified the code to specifically check that each required field is included in FrameOverlay_config
+#  I've accomplished this task by using an array named "paramBit" which sets the corresponding array element 
+#  to 1 when the field is found.
+#  This function is now able to insure that all of the proper fields are present in the FrameOverlay_config file..
+#  However, it does not insure the accuracy of the data,,,, Sorry ..
+#
+#  Note:  This array is not really a bit array, but an array of integers.  However, it's being implemented as such.
+#  Conceptually, you are setting bits off and on.  This is why the array and some of it's helper functions(resetParamBits 
+#  and allBitsSet) contain the word "bit" in it's name ...
+#
+#  Here is the indexing scheme for the paramBit array ....
+#  0 = DATAFILES
+#  1 = COLORS
+#  2 = ATTRIBUTES
+#  3 = BOXTYPE
+#  4 = SOURCE_FILES
+#  5 = SOURCE_DIR
+#  6 = DEST_DIR
+#  7 = OUTPUT_FORMAT
+############################################################################################################################
+
+sub getInit {
+  open (INIFILE, $ARGV[0]) || die " ERROR -- cannot open $ARGV[0] $!";
+  resetParamBit();
+  while (<INIFILE>)
+  {
+      $Line = $_;
+      getValue();
+      if ($field[0] eq "DATAFILES")
+      {
+	  shift(@field);
+	  shift(@field);
+	  @datafiles = @field;
+	  $paramBit[0]=1;
+      }
+      elsif ($field[0] eq "COLORS")
+      {	  
+	  shift(@field);
+	  shift(@field);
+	  @colors = @field;
+	  $paramBit[1]=1;
+      }
+      elsif ($field[0] eq "ATTRIBUTES")
+      {
+	  shift(@field);
+	  shift(@field);
+	  @attribs = @field;
+	  $paramBit[2]=1;
+      }
+      elsif ($field[0] eq "ATTRIBTYPE"){ 
+	  shift(@field);
+	  shift(@field);
+	  @attribstype = @field;
+#
+# This will not work since attribType can have many types
+#	  $attribType = $field[2];	
+	  $paramBit[3]=1;
+      }
+      elsif ($field[0] eq "SOURCE_FILES") 
+      {
+	  read_files();
+	  $paramBit[4]=1;
+      }      
+      elsif ($field[0] eq "SOURCE_DIR")
+      {
+	  $srcdir = $field[2];
+	  $paramBit[5]=1;
+      }
+      elsif ($field[0] eq "DEST_DIR")
+      {
+	  $dstdir = $field[2];
+	  mkdir($dstdir,0775);
+	  $paramBit[6]=1;
+      }
+      elsif ($field[0] eq "OUTPUT_FORMAT")
+      {
+	  $ot_format = $field[2];
+	  $paramBit[7]=1;
+      }
+  }
+  close(INIFILE);
+  if(allBitsSet() == 0)  {
+      die "ERROR -- $configFields[$whichBit] was not found in FrameOverlay_config, aborting\n";
+  }
+  elsif ($srcdir eq $dstdir)
+  {
+      die "ERROR -- Source directory must not be the same as destination directory.\n";
+  }
+} # end of funct. getInit()
+
+#######################################################################################################
+#  resetParamBit() by Alphonso Desselle 
+#  Comments
+#  This function sets all the elmts in the paramBit array to 0 ...
+#######################################################################################################
+sub resetParamBit() {
+    #print "Resetting paramBits \n";
+    $i=0;
+    while($i <= $#paramBit) {
+	$paramBit[$i]=0;
+	$i++;
+    }
+} # end of funct. resetParamBits()
+
+#########################################################################################################
+#  allBitsSet() by Alphonso Desselle 
+#  Comments
+#  This function checks all of the elmts in the paramBit array 
+#  If all elmts = 1, than it returns 1 else it returns 0 ...
+#########################################################################################################
+sub allBitsSet {
+    $whichBit=0;
+    while($whichBit <= $#paramBit && $paramBit[$whichBit] ==1) {
+	$whichBit++;
+    }
+    return($whichBit > $#paramBit);
+} # end of funct. allBitsSet()
+
+sub print_arr
+{
+    foreach (@_)
+    {
+        print "$_ ";
+    }
+} # end of funct. print_err()
+
+sub readGTF 
+{
+    print "in readGTF\n";
+    open(GTFFILE, $datafiles[0]) || die "ERROR -- CAN'T OPEN $gtfFile $!";
+    print "Reading from $datafiles[0] \n";
+    #get rid of the config
+    #while(<GTFFILE> !~ /^#BEGIN_DATA/)
+    while(<GTFFILE>)
+    {
+#	print "in begin data loop\n";
+#	print "$_\n";
+	if($_ =~ /#BEGIN_DATA/) {
+	   last;
+       }
+    }
+
+    # Added by Alphonso Desselle, Initializes field0, so the while loop
+    # will always execute at least once.
+    $field[0] = "";
+
+    while ($field[0] ne "COMMENT")
+    {
+	$Line = <GTFFILE>;
+	getValue();
+	print "FIELD FOUND: $field[0]\n";
+	print "             @field\n";
+	
+	if ($field[0] eq "SOURCEDIR")
+	{ 
+	    if(not $srcdir)
+	    {
+		$srcdir = $field[2];	    
+		
+#ADDED BY DOERMANN TO REMOVE QUOTES
+                $srcdir =~ s/"//;
+                $srcdir =~ s/"//;
+		print "Found SRCDIR: $srcdir\n";
+	    }
+      	}
+
+	elsif ($field[0] eq "SOURCEFILES")
+	{
+	    if(not @srcfile)
+	    {
+		read_files();
+	    }
+	    # Added by Alphonso Desselle to Force the Loop to Break
+	    last;
+	}
+    }
+    close(GTFILE);	
+       print "finished readGTF() \n\n";
+       print "SRCFILES: @srcfile\n";
+       print "SRCDIR: $srcdir\n";
+
+}		
+######################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

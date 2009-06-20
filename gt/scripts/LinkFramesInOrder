@@ -1,0 +1,50 @@
+#!/bin/csh
+
+# Usage: linkFrames <dataDir> <basename>
+#
+# This script takes a directory of pgms and changes their list of filenames
+# into a list of filenames in subsequent order by number with the basename
+# as given.
+#
+
+if ($2x == x) then
+	echo "Usage:  linkFrames <dataDir> <basename>"
+	exit
+endif
+
+# Variables
+set dataD = $1
+set basename = $2
+set flag = true
+@ counter = 1
+
+foreach jpgfile ($dataD/*.pgm)
+
+   echo $jpgfile
+   echo $counter
+
+  if ($counter<10) then
+    ln -s $jpgfile $basename:r_0000$counter:r.pgm
+    echo $jpgfile
+      
+  else if ($counter<100) then 
+     ln -s $jpgfile $basename:r_000$counter:r.pgm
+     echo $jpgfile
+  
+  else if  ($counter<1000) then
+     ln -s $jpgfile $basename:r_00$counter:r.pgm
+     echo $jpgfile
+    
+  else if ($counter<10000)  then
+     ln -s $jpgfile $basename:r_0$counter:r.pgm
+     echo $jpgfile
+  end
+  
+  else 
+    ln -s $jpgfile $basename:r_$counter:r.pgm
+  endif 
+  
+
+  @ counter = ($counter + 1)
+ 
+end

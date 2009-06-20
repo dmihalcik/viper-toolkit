@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="viper-api" basedir="." default="all">
+	<description>Builds the ViPER api for Java.</description>
+	
+	<!-- to invoke this recursively, overload apiroot, libdir, and cp.alljars -->
+	
+	<property name="apiroot" location="." />
+	<property name="libdir" location="../common/lib" />
+	
+	<property name="api.src" location="${apiroot}/src" />
+	<property name="api.classes" location="${apiroot}/classes" />
+	<property name="api.bin" location="${apiroot}/bin" />
+	<property name="api.doc" location="${apiroot}/doc" />
+	
+	<path id="viper.cp.base">
+		<pathelement path="${libdir}/dom.jar"/>
+		<pathelement path="${libdir}/junit.jar"/>
+		<pathelement path="${libdir}/xerces.jar"/>
+		<pathelement path="${libdir}/concurrent-1.3.0.jar"/>
+		<pathelement path="${libdir}/commons-collections-3.1.jar"/>
+		<pathelement path="${libdir}/commons-lang-2.0.jar"/>
+		<pathelement path="${libdir}/db3-3-11.jar"/>
+		<pathelement path="${libdir}/icu4j.jar"/>
+		<pathelement path="${libdir}/jakarta-oro-2.0.5.jar"/>
+		<pathelement path="${libdir}/log4j-1.2.7.jar"/>
+		<pathelement path="${libdir}/xercesImpl.jar"/>
+		<pathelement path="${libdir}/xmlParserAPIs.jar"/>
+		<pathelement path="${libdir}/concurrent.jar"/>
+		<pathelement path="${libdir}/junitperf.jar"/>
+		<pathelement path="${libdir}/antlr.jar"/>
+		<pathelement path="${libdir}/piccolox.jar"/>
+	</path>
+
+	<property name="cp.alljars" refid="viper.cp.base" />
+	
+	
+	<target name="all" depends="jar" />
+	
+	<target name="jar" depends="compile">
+		<mkdir dir="${api.bin}" />
+		<jar destfile="${api.bin}/viper-api.jar" basedir="${api.classes}"/>
+	</target>
+	<target name="compile" depends="init">
+		<mkdir dir="${api.classes}" />
+		<!-- 
+		<javac compiler="gcj" executable="C:/dev/msys/1.0/home/davidm/thisiscool-gcc/gcc-4.0/bin/gcj.exe" srcdir="${api.src}" destdir="${api.classes}" source="1.4" classpath="${cp.alljars}" />
+		-->
+		<javac srcdir="${api.src}" destdir="${api.classes}" source="1.4" classpath="${cp.alljars}" />
+	</target>
+	<target name="javadocs" depends="init">
+		<mkdir dir="${api.doc}" />
+		<javadoc sourcepath="${api.src}" destdir="${api.doc}" />
+	</target>
+	<target name="clean">
+		<delete dir="${api.classes}" />
+		<delete>
+			<fileset dir="${api.bin}" includes="*.jar"/>
+		</delete>
+	</target>
+
+	<target name="init">
+		<tstamp />
+	</target>
+</project>

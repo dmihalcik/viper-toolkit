@@ -1,0 +1,223 @@
+This directory contains FrameOverlay program and helper Scripts that 
+are used in conjunction with the FrameOverlay program.
+
+This file is broken into 2 sections:  
+  1) Scripts
+  2) Config files
+
+************************** Scripts Section **********************************************
+=================
+1. FrameOverlay  
+=================
+------------
+Perl Script
+------------
+
+FrameOverlay is used to overlay objects(bboxes, oboxes, circles) from .gtf .rdf or .face 
+files onto the image frame they correspond to.  Unlike previous overlay scripts,
+more than two input files can be specified.  As input it takes .ppm or
+.jpg images.  Output files also can be .jpg or .ppm.
+
+This is the command line used to execute the script (% stands for Unix prompt)
+%FrameOverlay <Input Parameter file>
+
+Input Parameter file is the file that supplies the FrameOverlay program
+with all the information it needs for execution.  Here is an example,
+
+DATAFILES : input_file_1 input_file_2 ... input_file_N
+COLORS : color_1 color_2 ... color_N
+ATTRIBUTES : attr_1 attr_2 ... attr_N
+SOURCE_DIR : dir1/images/ dir2/images .. dirN/images
+SOURCE_FILES : 0 file1.jpg 1 file2.jpg 2 ... N fileN.jpg | same sequence of .ppm files | 
+DEST_DIR : dir1/images0/ dir2/images/ ... dirN/images
+OUTPUT_FORMAT : jpg | ppm
+ATTRIBTYPE : 1(OBOX | BBOX | CIRCLE) .... N(OBOX | BBOX | CIRCLE)
+
+Note: The name that we've been using for the input parameter file is "FrameOverlay_config".  However, the name of the file
+doesn't matter.  Only the contents within the file matters.  However, it's probably good to stick to "FrameOverlay_config".
+
+Field Descriptors:
+
+DATAFILES - the files that contain the information to be overlaid
+COLORS - the colors corresponding to datafiles (black | red | green | blue | white)
+
+NOTE: If you put * in front of the color, then the image will contain
+2 of the same type of shapes, one is the original color and the other
+white.  This helps with intensity changes
+
+ATTRIBUTES - This field tells FrameOverlay where to find the coordinates of where the shape will be placed on the image.
+This field should be located in the file specified by the DATAFILE field (ex. FACEBOX, LOCATION)
+
+SOURCE_DIR - location of the frame images.  
+SOURCE_FILES - the list of .jpg or .ppm source files with number between them, separated by spaces.
+DEST_DIR - that's where the resulting image files will go
+OUTPUT_FORMAT - the format of the resulting files.  It can have one of two values: jpg or ppm.  
+ATTRIBTYPE - this tells FrameOverlay program what type of object should overlaid on the image file.
+             Valid ATTRIBTYPES are: (BBOX, OBOX, and CIRCLE)
+
+Assumptions:
+
+The order in which the fields are entered is not significant.  As long as all fields are present..
+Be very careful, FrameOverlay doesn't catch all of the input errors.  Make sure that your input file is of the correct
+format and it contains the appropriate fields.  
+
+*** Special Note: If you do not want to deal with creating an Input Parameter File, you can use the "doOverlay script" which
+automatically generates this file.  There are primarily three flavors of doOverlay: doOverlay.gtf, doOverlay.face, and doOverlay.
+Descriptions of each are listed further down.
+
+ATTRIBUTES and COLORS are associated with DATAFILES in the order that
+they are presented in the file.  In input_file_1 the script will look
+for attr_1 and overlay it in the proper image using color1.  In
+input_file_2 the script will look for attr_2 and overlay it in the
+proper image using color2. Etc.  Because of this, the number of
+DATAFILES must be the same as the number of COLORS as the number of
+ATTRIBUTES.
+
+SOURCE_DIR and/or SOURCE_FILES parameters may be omitted.  If so, the
+first input_file_1 must be in standard .gtf format, so the script can
+get that information from there.
+
+IMPORTANT: there must be at least one space on either side of the
+colon between the name of the attribute and the value( This should be modified in the future).
+
+==============
+2. doOverlay
+==============
+-----------
+tcsh Script
+-----------
+
+Automatically creates Input Parameter File for the FrameOverlay script, calls FrameOverlay with new Input Parameter File.  
+
+The usage is very simple:
+   doOverlay <input file>
+
+inputfile : ?
+
+Note: There's also some extra stuff in this script that is commented out.
+This stuff can be omitted, it has been deprecated.
+
+** Also, To use doOverlay, you must source doOverlay.config
+Note:  If you're processing gtf, rdf, or face data.  It is best to used the doOverlay it's corresponding doOverlay file.
+More Details below.  This script is just a template, which can be used for future development.
+
+===============
+3. processAll
+===============
+-----------
+tcsh Script
+-----------
+
+This script can be used to call doOverlay on a whole Set of gtf and rdf files. 
+Note: This is also a template script.
+
+================
+4. doOverlay.text
+================
+-----------
+tcsh Script
+-----------
+
+Creates an input parameter file for FrameOverlay.  Calls FrameOverlay script with new input parameter file.
+
+The usage is very simple:
+   doOverlay.gtf <input file>
+
+inputfile : the gtf and/or rdf file that will be used.  
+Note: do not include the extension.
+
+** Also, To use doOverlay, you must source doOverlay.config.gtf
+
+Special Note: There are 2 options when specifying the type of file to be processed.  If only gtf file(s) are to be processed,
+than RDFLAG should equal 0.  If RDFLAG equals 1, than both gtf and rdf files will be processed. The RDFLAG can be set by 
+modifying it's value in doOverlay.config.gtf. Once the value has been modified and the value has been saved, you must 
+source doOverlay.config.gtf again.  More info on config files are listed below.
+
+=================
+5. processAll.gtf
+=================
+-----------
+tcsh Script
+-----------
+
+This script can be used to call doOverlay.gt on a whole Set of face files.
+
+==================
+6. doOverlay.face
+==================
+-----------
+tcsh Script
+-----------
+
+Creates an input parameter file for FrameOverlay.  Calls FrameOverlay script with new input parameter file.
+
+The usage is very simple:
+   doOverlay.face <input file>
+
+inputfile : the face file.
+Note: donot include the .face extension.
+
+** Also, To use doOverlay, you must source doOverlay.config.face
+
+===================
+7. processAll.face
+===================
+-----------
+tcsh Script
+-----------
+
+This script can be used to call doOverlay.face on a whole Set of face files.
+
+===============
+8. getFileInfo
+===============
+-----------
+tcsh Script
+-----------
+
+Syntax: getFileInfo <infile> <outfile>
+
+Looks for SOURCEFILE and SOURCEDIR field in infile.  If one or both fields are found, it will append the field(s) line to the specified
+outfile. This script is very useful when processing the face files.  Face files donot contain SOURCEFILE and SOURCEDIR info.
+Since the text gtf files contain this data, we can use getFileInfo to copy this data to another file, such as the 
+input parameter file used by "FrameOverlay".
+
+===============
+8. doBoth
+===============
+-----------
+tcsh Script
+-----------
+
+Syntax: doBoth
+
+Executes doOverlay.face and doOverlay.text scripts for all of the groundtruth datafiles in the face dataset and it's
+corresponding datafile in the text dataset.  
+
+*************************************** End of Script Section ****************************************************************
+
+*************************************** Config file Section   ****************************************************************
+Note1: All config files in this directory are of tcsh format
+
+**Reminder: FrameOverlay_config is not a config file, this file is used as an Input Parameter File, which is only used by the
+FrameOverlay script.  This may be a bit confusing at first.
+
+The following are considered to be config files:
+  1) doOverlay.config.face
+  2) doOverlay.config.gtf
+  3) doOverlay.config
+
+All of these files primarily serve the same purpose. They contain paths for files that are used in the
+corresponding doOverlay.<type> script.
+
+There is one significant difference between doOverlay.config.face and doOverlay.config.gtf, which is the RDFLAG.
+As of now, only gtf text are processed with rdf files, so only doOverlay.config.gtf contains an RDFLAG.
+In the future, this may change.
+*************************************** End of Config file Section *************************************************************
+
+
+
+
+
+
+

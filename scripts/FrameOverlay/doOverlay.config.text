@@ -1,0 +1,41 @@
+#
+# These environment variables are used by doEverything to setup thats for
+#    various files
+#
+
+#
+# Image Location
+#
+#setenv IMGPATH /fs/orion3/LAMP/viper-tmp/GTF-OVERLAY
+setenv IMGPATH /fs/orion3/LAMP/viper-tmp/GTF-FACE-TEXT-OVERLAY
+
+#
+# GTF Files
+#
+#setenv GTFPATH /fs/orion4/LAMP/ViPER-Data/FaceTextDB/GTF-TEXT
+setenv GTFPATH /fs/orion4/LAMP/ViPER-Scripts/ViPERSplit/SampleRuns/ViPER-Data-1/GTF-TEXT
+setenv GTFFLAG 1
+
+#
+# RDF Files
+#
+setenv RDFPATH /fs/orion4/LAMP/ViPER-Data/FaceTextDB/UMD_RESULTS/TEXT2/RDF/
+setenv RDFFLAG 0
+
+#
+# Output Image Destination
+#
+setenv IMGDESTDIR /fs/orion3/LAMP/viper-tmp/GTF-FACE-TEXT-OVERLAY
+
+#
+# Location of Scripts
+#
+#setenv UPDATEPATH /fs/orion4/LAMP/ViPER-Scripts/updateGTFFields 
+#setenv UNIFYPATH /fs/orion4/LAMP/ViPER-Scripts/UnifyGTF
+setenv OVERLAYPATH /fs/orion4/LAMP/ViPER-Scripts/FrameOverlay
+#setenv DUMPOVERLAYPATH /fs/orion4/LAMP/ViPER-Scripts/DumpOverlay
+
+#setenv DUMPOPT 1
+
+
+

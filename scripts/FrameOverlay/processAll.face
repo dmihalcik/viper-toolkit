@@ -1,0 +1,18 @@
+#! /usr/imports/bin/tcsh -f
+
+#rm -f debug
+# This scripts passes all face GTF files in a specified doOverlay.face
+# Which in turn sets the GTF file up for FrameOverlay processing 
+# Note: this script does not check for any garbage files that may be in the directory
+# specified
+
+#foreach file(`ls $GTFFACEPATH`)
+foreach file(`ls $GTFFACEPATH/*.gtf`)
+    echo " "
+    echo "######################################"
+    #echo "Processing: $file:r"
+    #doOverlay.face $file:r
+    echo "Processing: $file:t:r"
+    #doOverlay.face $file:r
+end
+

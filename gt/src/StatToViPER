@@ -1,0 +1,78 @@
+BEGIN{}
+{
+if ($1=="Width:") {
+    width = $2; 
+    height = $4;
+}
+
+if ($1=="Total") {
+    if ($2 == "Bytes") {
+	size = $4;
+	nframes = $9;
+    }
+    if ($2 == "Compression") {
+	getline;
+	compression = $2;
+    }
+}
+
+
+if ($1=="Number") {
+    mbwidth = $9;
+    mbheight = $11;
+}
+
+if ($1=="Skipped") {
+    mbskipped = $4;
+}
+
+if ($2 == "I") {
+    IframeN = $1;
+    getline;
+    IframeS = $2;
+    getline;
+    IframeC = $3;
+}
+
+if ($2 == "P") {
+    PframeN = $1;
+    getline;
+    PframeS = $2;
+    getline;
+    PframeC = $3;
+}
+
+if ($2 == "B") {
+    BframeN = $1;
+    getline;
+    BframeS = $2;
+    getline;
+    BframeC = $3;
+}
+
+if ($1=="Avg.") {
+    aframesize = $4;
+}
+
+}
+END {
+    print "     FWIDTH = ", width;
+    print "    FHEIGHT = ", height;
+    print "      VSIZE = ", size ;
+    print "  AVG_FSIZE = ", aframesize ;
+    print "    NFRAMES = ", nframes ;
+    print " BITS_PIXEL = ",compression ;
+    print "    MBWIDTH = ", mbwidth;
+    print "   MBHEIGHT = ", mbheight;
+    print "  MBSKIPPED = ", mbskipped ;
+    print "NUM IFRAMES = ", IframeN ;
+    print "SIZ IFRAMES = ", IframeS ;
+    print "COM IFRAMES = ", IframeC ;
+    print "NUM PFRAMES = ", PframeN ;
+    print "SIZ PFRAMES = ", PframeS ;
+    print "COM PFRAMES = ", PframeC ;
+    print "NUM BFRAMES = ", BframeN ;
+    print "SIZ BFRAMES = ", BframeS ;
+    print "COM BFRAMES = ", BframeC ;
+
+}

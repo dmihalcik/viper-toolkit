@@ -1,0 +1,854 @@
+#######################################
+#            ViPER                    #
+#  The Video Processing               #
+#         Evaluation Resource         #
+#                                     #
+#  Distributed under the GPL license  #
+#        Terms available at gnu.org.  #
+#                                     #
+#  Copyright University of Maryland,  #
+#                      College Park.  #
+#######################################
+
+# W3 RDF Namespaces
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix html: <http://www.w3.org/1999/xhtml#> .
+
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+# LAMP AppLoader namespaces
+@prefix lal:   <http://viper-toolkit.sourceforge.net/owl/apploader#> .
+@prefix menu:  <http://viper-toolkit.sourceforge.net/owl/apploader/menu#> .
+@prefix mru:   <http://viper-toolkit.sourceforge.net/owl/apploader/mru#> .
+@prefix undo:  <http://viper-toolkit.sourceforge.net/owl/apploader/undo#> .
+@prefix props: <http://viper-toolkit.sourceforge.net/owl/apploader/props#> .
+@prefix hotkeys: <http://viper-toolkit.sourceforge.net/owl/apploader/hotkeys#> .
+
+# ViPER Metadata Namespaces
+@prefix data: <http://lamp.cfar.umd.edu/viperdata#> .
+
+# ViPER-GT Program namespaces
+@prefix gt:     <http://viper-toolkit.sourceforge.net/owl/gt#> .
+@prefix canvas: <http://viper-toolkit.sourceforge.net/owl/gt/canvas#> .
+@prefix chrono: <http://viper-toolkit.sourceforge.net/owl/gt/chronicle#> .
+@prefix table:  <http://viper-toolkit.sourceforge.net/owl/gt/table#> .
+
+@prefix viper-impl: <http://viper-toolkit.sourceforge.net/owl/api/impl#> .
+
+
+# This document's Namespace
+@prefix : <#> .
+
+#<>	owl:imports <http://viper-toolkit.sourceforge.net/owl/apploader/defaults> .
+# haven't worked out the bugs in the spec for this yet.
+# need 
+
+# Command line arguments and properties
+
+## would like to be able to specify rules like:
+#[	a lal:CommandLineTrigger ;
+#	rdfs:label "file" ;
+#	lal:abbr "f" ;
+#	lal:var :file ;
+#	lal:implies {
+#		:mediator  lal:setProperty [
+#			lal:propertyName "FileName" ;
+#			lal:propertyValue :file ] } ] .
+#
+## This would convert "-f file.xml" into ":mediator lal:setProperty..."
+## perhaps if we switch to jena2 or another rdf parser...
+## I should be able to hack it together - a formula is a Model that
+## implements RDFNode. Unfortunately, they can't be serialized to RDF/XML and
+## are not part of the RDF M&S, which is wierd, since timbl uses them all
+## the time. One would assume that he would have the final say on these
+## sorts of things...
+
+## For now, at least until I implement cwm in java, I will do something like this:
+[	a lal:PreferenceTrigger ;
+	rdfs:label "file"@en ; # used for --file <file>
+	lal:longName "firstFile"@en ; # used for -DfirstFile=<file>; if not specified, use label
+	lal:abbr "f"@en ; #used for -f <file>; if not specified, none
+	rdfs:description "the metadata file to load first"@en ; # printed by '-h'
+		# ones without a description are not printed by -h
+		# may add a -H option that uses dc:description to print out 
+		# more detailed messages.
+	lal:invokes "edu.umd.cfar.lamp.viper.gui.core.SetFilePref" ] .
+		# invokes the trigger method given the prefs
+		# and the value. Class must implement the 
+		# TriggerHandler interface.
+## which is considerably less cool, in that you have to write java
+## code to allow a different pref to be set from the command line,
+## although you still get l10n, at least whenever jena supports the
+## '"string"@en' literal format.
+
+[	a lal:PreferenceFlag ;
+	# This prints out the usage using the preferences format
+	# Unfortunately, this means the full usage won't get printed
+	# if the config file is not proper notation3.
+	rdfs:label "help"@en ; 
+	lal:abbr "h"@en ;
+	rdfs:description "Print out this help message"@en ; 
+	lal:invokes "edu.umd.cfar.lamp.apploader.prefs.PrintUsage" ] .
+
+[	a lal:PreferenceFlag ;
+	rdfs:label "version"@en ; 
+	lal:abbr "v"@en ;
+	rdfs:description "Print out the version of ViPER"@en ; 
+	lal:invokes "edu.umd.cfar.lamp.viper.gui.core.PrintVersion" ] .
+
+[	a lal:PreferenceTrigger ;
+	lal:longName "user.name" ;
+	lal:inserts [ # adds the triple, with the value as the untyped/nolang object
+		a rdf:Statement ;
+		rdf:subject :currentUser ; # if subject is missing, creates a new bnode
+		rdf:predicate foaf:name ] ;
+	lal:invokes "edu.umd.cfar.lamp.apploader.prefs.PropsToPrefs" ] .
+[	a lal:PreferenceTrigger ;
+	lal:longName "user.home" ;
+	lal:inserts [ # adds the triple, with the value as the untyped/nolang object
+		a rdf:Statement ;
+		rdf:subject :currentUser ; # if subject is missing, creates a new bnode
+		rdf:predicate lal:userDirectory ] ;
+	lal:invokes "edu.umd.cfar.lamp.apploader.prefs.PropsToPrefs" ] .
+
+
+
+# Beans
+# need to add support for loading jar files
+# for now, just assume everything is in the classpath
+
+# Basic application settings
+# lal:Core is the only "bean" that is defined by default
+lal:Core
+	a lal:ApplicationBean ;
+	lal:abbr "viper" ;
+	lal:icon <file:common/icons/logo-32.png> ;
+	rdfs:label "ViPER: Ground Truth Editor"@en ;
+	lal:shellCommand "Usage: viper <options>" ;
+
+	## Standard Window Controls
+	hotkeys:windowInputAction [
+		hotkeys:when hotkeys:DuringPost ;
+		hotkeys:hotkey "control Z" ;
+		hotkeys:hasAction :undoActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "control Y" ;
+		hotkeys:hasAction :redoActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "control O" ;
+		hotkeys:hasAction :openMetadataActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "control S" ;
+		hotkeys:hasAction :saveMetadataActionate ] ;
+
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "P" ;
+		hotkeys:hasAction :pauseActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "ctrl \ " ;
+		hotkeys:hasAction :previousFrameActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "\ " ;
+		hotkeys:hasAction :nextFrameActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "+" ;
+		hotkeys:hasAction :accelerateActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "-" ;
+		hotkeys:hasAction :decelerateActionate ] ;
+
+
+
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "pressed UP" ;
+		hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "N  1" ] ] ,
+		[ hotkeys:hotkey "pressed PAGE_UP" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "NE 1" ] ] ,
+		[ hotkeys:hotkey "pressed RIGHT" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "E  1" ] ] ,
+		[ hotkeys:hotkey "pressed PAGE_DOWN" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "SE 1" ] ] ,
+		[ hotkeys:hotkey "pressed DOWN" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "S  1" ] ] ,
+		[ hotkeys:hotkey "pressed END" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "SW 1" ] ] ,
+		[ hotkeys:hotkey "pressed LEFT" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "W  1" ] ] ,
+		[ hotkeys:hotkey "pressed HOME" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "NW 1" ] ] ,
+
+		[ hotkeys:hotkey "pressed shift UP" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "N 5" ] ] ,
+		[ hotkeys:hotkey "pressed shift PAGE_UP" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "NE 5" ] ] ,
+		[ hotkeys:hotkey "pressed shift RIGHT" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "E  5" ] ] ,
+		[ hotkeys:hotkey "pressed shift PAGE_DOWN" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "SE 5" ] ] ,
+		[ hotkeys:hotkey "pressed shift DOWN" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "S  5" ] ] ,
+		[ hotkeys:hotkey "pressed shift END" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "SW 1" ] ] ,
+		[ hotkeys:hotkey "pressed shift LEFT" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "W  5" ] ] ,
+		[ hotkeys:hotkey "pressed shift HOME" ;
+		  hotkeys:hasAction [
+			a lal:Action ; lal:sendsTo :moveMovableAttributeActionListener ;
+			lal:actionCommand "NW 5" ] ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "ctrl N" ;
+		hotkeys:hasAction :createDescriptorInstanceActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "ctrl D" ;
+		hotkeys:hasAction :deleteDescriptorInstanceActionate ] ;
+
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "shift (" ;
+		hotkeys:hasAction :previousConfigActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "shift )" ;
+		hotkeys:hasAction :nextConfigActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "[" ;
+		hotkeys:hasAction :previousDescriptorActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "]" ;
+		hotkeys:hasAction :nextDescriptorActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "control {" ;
+		hotkeys:hasAction :previousAttributeActionate ] ;
+	hotkeys:windowInputAction [
+		hotkeys:hotkey "control }" ;
+		hotkeys:hasAction :nextAttributeActionate ] ;
+
+
+
+	## Actions 
+	
+
+	rdfs:description "Tool for editing video metadata."@en .
+	# If a bean is in a frame or view, this is the name in the window pulldown
+	# or the name of the frame. What sucks is there is no way to alter this
+	# programmatically without events in the RDF model. 
+	# But I want it to be part of the RDF for l10n reasons.
+	# lal:nature "visible" ;
+	# lal:setProperty [ lal:propertyName "layout" ; lal:propertyValue "mdi" ] ;
+	# # other options could include "mac"(default) and "eclipse/docked" 
+
+# First, load the mediator
+:mediator
+	a lal:ApplicationBean ;
+	lal:className "edu.umd.cfar.lamp.viper.gui.core.ViperViewMediator" ;
+	lal:requires lal:Core ;
+	lal:setProperty [
+		a lal:BeanProperty ;
+		lal:propertyName "prefs" ;
+		lal:propertyValue [
+			a lal:BeanProperty ;
+			lal:propertyName "prefs" ;
+			lal:propertyOf lal:Core ] ] ;
+	lal:setProperty [
+		a lal:BeanProperty ;
+		lal:propertyName "actionHistory" ;
+		lal:propertyValue :actionManager ] ;
+	lal:setProperty [
+		a lal:BeanProperty ;
+		lal:propertyName "dataFactory" ;
+		lal:propertyValue :datatypes ] ;
+	lal:setProperty [
+		a lal:BeanProperty ;
+		lal:propertyName "historyManager" ;
+		lal:propertyValue :historyManager ].
+
+:datatypes
+	a lal:ApplicationBean ;
+	rdfs:comment "This loads the datatypes. It comes with all the default viper-data types loaded already." ;
+	lal:className "viper.api.datatypes.ViperDataFactoryImpl" .
+
+
+[	a gt:ChoosableFile ;
+	gt:extension "xml", "xgtf", "xrdf" ;
+	gt:mimeType "application/xml", "application/viper+xml" ;
+	rdfs:label "XML Files" ] .
+
+
+:canvas
+	a lal:ApplicationBean ;
+	rdfs:label "Image Canvas" ;
+	lal:className "edu.umd.cfar.lamp.viper.gui.canvas.ScrollableViperDataCanvas" ;
+	lal:addTo lal:Core ;
+	lal:requires :mediator ;
+	lal:setProperty [
+		lal:propertyName "Mediator" ;
+		lal:propertyValue :mediator ] .
+# alright, this should work. Then, what about getting properties,
+# or setting up handlers between properties, and events?
+# So far, the mediator solves these problems, but for some reason
+# I think that it may become necessary to have 
+# the ability to do this sort of thing from the configs. 
+# 
+
+:historyManager
+	a lal:ApplicationBean ;
+	lal:className "edu.umd.cfar.lamp.apploader.prefs.FileHistoryManager" ;
+	lal:requires :mediator ;
+	lal:setProperty [
+		a lal:BeanProperty ;
+		lal:propertyName "prefs" ;
+		lal:propertyValue [
+			a lal:BeanProperty ;
+			lal:propertyName "prefs" ;
+			lal:propertyOf lal:Core ] ] ;
+	lal:setProperty [
+		lal:propertyName "MRULength" ;
+		lal:propertyValue "4"^^xsd:int ] ;
+	lal:setProperty [
+		lal:propertyName "actionListenerResource" ;
+		lal:propertyValue [
+			lal:listenerBean :mediator ;
+			lal:listenerType "RecentlyViewedFileActionListener" ] ] ;
+	lal:setProperty [
+		lal:propertyName "parentResource" ;
+		lal:propertyValue :filemenu ] .
+
+:actionManager
+	a lal:ApplicationBean ;
+	rdfs:label "Undo History" ;
+	rdfs:comment "Action History Manager manages the user's undo history" ;
+	lal:className "edu.umd.cfar.lamp.apploader.undo.ActionHistoryPane" .
+
+
+:viperRemote
+	a lal:ApplicationBean ;
+	rdfs:label "Remote Control" ;
+	rdfs:comment "Remote Control and Jog Dial" ;
+	lal:className "edu.umd.cfar.lamp.viper.gui.remote.ViperRemote" ;
+	lal:requires :mediator ;
+	lal:setProperty [
+		lal:propertyName "Mediator" ;
+		lal:propertyValue :mediator ] .
+
+
+:sourcefileEditor
+	a lal:ApplicationBean ;
+	rdfs:label "Sourcefile Editor" ;
+	rdfs:comment "Edits and selects which media files are loaded with this metadata file" ;
+	lal:className "edu.umd.cfar.lamp.viper.gui.sourcefiles.SourcefileEditor" ;
+	lal:setProperty [
+		lal:propertyName "Mediator" ;
+		lal:propertyValue :mediator ] .
+
+#############
+#   ViPER   #
+# Datatypes #
+#############
+:setNodeToParent
+	lal:propertyValue lal:Parent ;
+	lal:propertyName "Node" .
+
+data:bvalue
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.bvalue.BvalueEditor" ;
+		lal:setProperty :setNodeToParent ] .
+data:dvalue
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.dvalue.DvalueEditor" ;
+		lal:setProperty :setNodeToParent ] .
+data:fvalue
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.fvalue.FvalueEditor" ;
+		lal:setProperty :setNodeToParent ] .
+data:svalue
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.svalue.SvalueEditor" ;
+		lal:setProperty :setNodeToParent ] .
+
+data:bbox
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.bbox.BboxEditor" ;
+		lal:setProperty :setNodeToParent ] ;
+	canvas:viewCreator "edu.umd.cfar.lamp.viper.gui.canvas.datatypes.BboxNodeWrapper" ;
+	chrono:segmentFactory "edu.umd.cfar.lamp.viper.gui.canvas.chronology." .
+data:circle
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.circle.CircleEditor" ;
+		lal:setProperty :setNodeToParent ] .
+data:ellipse
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.ellipse.EllipseEditor" ;
+		lal:setProperty :setNodeToParent ] .
+data:obox
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.obox.OboxEditor" ;
+		lal:setProperty :setNodeToParent ] .
+data:point
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.point.PointEditor" ;
+		lal:setProperty :setNodeToParent ] .
+data:polygon
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.polygon.PolygonEditor" ;
+		lal:setProperty :setNodeToParent ] .
+
+data:lvalue
+	props:editor [ 
+		a lal:TemporaryBean , props:Editor ; 
+		lal:className "edu.umd.cfar.lamp.viper.gui.data.lvalue.LvalueEditor" ;
+		lal:setProperty :setNodeToParent ] ;
+	props:hasProperty [
+		rdfs:label "List" ;
+		lal:propertyName "possibles" ;
+		props:interfacer :setLvaluePossibles ;
+		props:renderer :lvaluePossiblesRenderer ;
+		props:editor :lvaluePossiblesEditor ] .
+:setLvaluePossibles
+	a lal:ApplicationBean ;
+	rdfs:label "Set lvalue possibility list functor" ;
+	lal:className "edu.umd.cfar.lamp.viper.gui.data.lvalue.SetLvaluePossibles" .
+:lvaluePossiblesEditor
+	a props:Editor , lal:TemporaryBean ;
+	lal:className "edu.umd.cfar.lamp.viper.gui.data.lvalue.LvaluePossiblesEditor" ;
+	lal:setProperty :setNodeToParent .
+:lvaluePossiblesRenderer
+	a props:Renderer , lal:TemporaryBean ;
+	lal:className "edu.umd.cfar.lamp.viper.gui.data.lvalue.LvaluePossiblesRenderer" ;
+	lal:setProperty [ 
+		lal:propertyValue lal:Parent ;
+		lal:propertyName "AttrConfig" ] .
+
+######################
+#      Actions       #
+######################
+:moveMovableAttributeActionListener
+	lal:listenerBean :mediator ;
+	lal:listenerType "MoveAttributeActionListener" .
+
+:undoActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "UndoActionListener" ] .
+
+:deleteDescriptorInstanceActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "DeleteInstanceActionListener" ] .
+
+:createDescriptorInstanceActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "CreateInstanceActionListener" ] .
+
+:previousConfigActionate
+	a lal:Action ;
+	lal:actionCommand "previous" ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "selectDescriptorConfigActionListener" ] .
+:nextConfigActionate
+	a lal:Action ;
+	lal:actionCommand "next" ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "selectDescriptorConfigActionListener" ] .
+:previousDescriptorActionate
+	a lal:Action ;
+	lal:actionCommand "previous" ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "selectDescriptorInstanceActionListener" ] .
+:nextDescriptorActionate
+	a lal:Action ;
+	lal:actionCommand "next" ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "selectDescriptorInstanceActionListener" ] .
+:previousAttributeActionate
+	a lal:Action ;
+	lal:actionCommand "previous" ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "selectAttributeActionListener" ] .
+:nextAttributeActionate
+	a lal:Action ;
+	lal:actionCommand "next" ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "selectAttributeActionListener" ] .
+
+
+
+:redoActionate 
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "RedoActionListener" ] .
+
+:newMetadataActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "NewFileActionListener" ] .
+
+:openMetadataActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "OpenFileActionListener" ] .
+
+:saveMetadataActionate
+		a lal:Action ;
+		lal:sendsTo [
+			lal:listenerBean :mediator ;
+			lal:listenerType "SaveActionListener" ] .
+
+:saveAsMetadataActionate 
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :mediator ;
+		lal:listenerType "SaveAsActionListener" ] .
+
+:showUndoHistoryActionate
+	a lal:Action ;
+	lal:actionCommand :actionManager ;
+	lal:sendsTo [
+		lal:listenerBean lal:Core ;
+		lal:listenerType "ShowWindowActionListener" ] .
+:showSourcefileSelectorActionate
+	a lal:Action ;
+	lal:actionCommand :sourcefileEditor ;
+	lal:sendsTo [
+		lal:listenerBean lal:Core ;
+		lal:listenerType "ShowWindowActionListener" ] .
+:showRemoteControlActionate
+	a lal:Action ;
+	lal:actionCommand :viperRemote ;
+	lal:sendsTo [
+		lal:listenerBean lal:Core ;
+		lal:listenerType "ShowWindowActionListener" ] .
+:exitProgramActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean lal:Core ;
+		lal:listenerType "ExitListener" ] .
+
+
+## Remote Control Actions
+
+:pauseActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :viperRemote ;
+		lal:listenerType "PauseActionListener" ] .
+:previousFrameActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :viperRemote ;
+		lal:listenerType "PreviousFrameActionListener" ] .
+:nextFrameActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :viperRemote ;
+		lal:listenerType "NextFrameActionListener" ] .
+:accelerateActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :viperRemote ;
+		lal:listenerType "AccelerateActionListener" ] .
+:decelerateActionate
+	a lal:Action ;
+	lal:sendsTo [
+		lal:listenerBean :viperRemote ;
+		lal:listenerType "DecelerateActionListener" ] .
+
+
+#########
+# Menus #
+#########
+:filemenu
+	a menu:Menu ;
+	rdfs:label "File" ;
+	menu:mnemonic "F" ;
+	menu:attachment lal:Core ;
+	rdfs:comment "File menu, for manipulating files" ;
+	menu:priority "0" .
+:saveMetadata
+	a menu:Item ;
+	menu:attachment :filemenu ;
+	rdfs:label "Save Metadata" ;
+	rdfs:comment "Save over the old file." ;
+	menu:generates :saveMetadataActionate ;
+	menu:mnemonic "S" ;
+	menu:priority "5" .
+:saveAsMetadata
+	a menu:Item ;
+	menu:attachment :filemenu ;
+	rdfs:label "Save As..." ;
+	rdfs:comment "Save as a different file." ;
+	menu:generates :saveAsMetadataActionate ;
+	menu:mnemonic "A" ;
+	menu:priority "6" .
+
+
+:editmenu
+	a menu:Menu ;
+	rdfs:label "Edit" ;
+	menu:mnemonic "E" ;
+	menu:attachment lal:Core ;
+	rdfs:comment "Edit menu, for copying, pasting, and managing the history" ;
+	menu:priority "1" .
+:undo
+	a menu:Item ;
+	menu:attachment :editmenu ;
+	rdfs:label "Undo" ;
+	rdfs:comment "Undo the last edit" ;
+	menu:generates :undoActionate ;
+	menu:mnemonic "U" ;
+	menu:priority "1" .
+:redo
+	a menu:Item ;
+	menu:attachment :editmenu ;
+	rdfs:label "Redo" ;
+	rdfs:comment "Redo an undone action" ;
+	menu:generates :redoActionate ;
+	menu:mnemonic "R" ;
+	menu:priority "2" .
+
+:viewmenu
+	a menu:Menu ;
+	rdfs:label "View" ;
+	menu:mnemonic "V" ;
+ 		menu:attachment lal:Core ;
+	rdfs:comment "View menu, for controlling the user's perspective" ;
+	menu:priority "3" .
+
+:windowmenu
+	a menu:Menu ;
+	rdfs:label "Window" ;
+	menu:mnemonic "W" ;
+	menu:attachment lal:Core ;
+	rdfs:comment "Display, or bring to foreground, different windows." ;
+	menu:priority "-2" .
+:undoWindow
+	a menu:Item ;
+	menu:attachment :windowmenu ;
+	rdfs:label "Show Undo History" ;
+	rdfs:comment "Displays the undo history in a seperate window." ;
+	menu:generates :showUndoHistoryActionate ;
+	menu:mnemonic "U" ;
+	menu:priority "1" .
+:sourcefileWindow
+	a menu:Item ;
+	menu:attachment :windowmenu ;
+	rdfs:label "Show Media Files" ;
+	rdfs:comment "Displays the list of media files the current metadata describes." ;
+	menu:generates :showSourcefileSelectorActionate ;
+	menu:mnemonic "F" ;
+	menu:priority "2" .
+:remoteWindow
+	a menu:Item ;
+	menu:attachment :windowmenu ;
+	rdfs:label "Show Remote Control" ;
+	rdfs:comment "Displays the remote window and jog dial." ;
+	menu:generates :showRemoteControlActionate ;
+	menu:mnemonic "R" ;
+	menu:priority "3" .
+
+:newMetadata
+	a menu:Item ;
+	menu:attachment :filemenu ;
+	rdfs:label "New Metadata..." ;
+	rdfs:comment "Create a new metadata file from a template." ;
+	menu:generates :newMetadataActionate ;
+	menu:mnemonic "N" ;
+	menu:priority "0" .
+
+#:mrus
+#	a menu:Group ;
+#	menu:attachment :filemenu ;
+#	rdfs:label "Recently Used"@en ;
+#	rdfs:comment "Open one of a selection of recently used files"@en ;
+#	menu:mnemonic "1" ;
+#	menu:priority "-100" .
+## perhaps this is incorrect; really want a user 
+## history, and have mrus be generated from that.
+## since we don't have rules, will need to load
+## an mruHandler, which records the history to
+## user config and writes the menu to temporary
+#[	an mru:HistoryItem ;
+#	an mru:FileOpenAction ;
+#	mru:concerning :file ;
+#	mru:timestamp ""^^xsd:datetime ] .
+## but that is too much like the mozilla view of 
+## describing 'history actions' instead of files
+## themselves and the user's relation to them
+
+:openMetadata
+	a menu:Item ;
+	menu:attachment :filemenu ;
+	rdfs:label "Open Existing Metadata..." ;
+	rdfs:comment "Open a metadata file that has already been created." ;
+	menu:generates :openMetadataActionate ;
+	menu:mnemonic "O" ;
+	menu:priority "4" .
+
+:exitGt
+	a menu:Item ;
+	menu:attachment :filemenu ;
+	rdfs:label "Exit" ;
+	rdfs:comment "Close ViPER-GT." ;
+	menu:generates :exitProgramActionate ;
+	menu:mnemonic "X" ;
+	menu:priority "-1" .
+	
+#####################
+# Undo l10n && i18n #
+#####################
+
+[	a undo:Describer ; # an undo describer localizes an undo message
+	undo:forEdit viper-impl:AddSourcefile ;
+	rdfs:label "Add New Media Source" ] .
+[	a undo:Describer ; 
+	undo:forEdit viper-impl:SetSourcefile ;
+	rdfs:label "Change a Media Source" ] .
+[	a undo:Describer ; 
+	undo:forEdit viper-impl:RemoveSourcefile ;
+	rdfs:label "Remove a Media Source" ] .
+
+[	a undo:Describer ; # an undo describer localizes an undo message
+	undo:forEdit viper-impl:AddDescriptor ;
+	rdfs:label "Add New Descriptor" ] .
+[	a undo:Describer ; 
+	undo:forEdit viper-impl:SetDescriptor ;
+	rdfs:label "Change a Descriptor" ] .
+[	a undo:Describer ; 
+	undo:forEdit viper-impl:RemoveDescriptor ;
+	rdfs:label "Remove a Descriptor" ] .
+
+[	a undo:Describer ; # an undo describer localizes an undo message
+	undo:forEdit viper-impl:AddConfig ;
+	rdfs:label "Add New Descriptor Type" ] .
+[	a undo:Describer ; 
+	undo:forEdit viper-impl:SetConfig ;
+	rdfs:label "Change a Descriptor Type" ] .
+[	a undo:Describer ; 
+	undo:forEdit viper-impl:RemoveConfig ;
+	rdfs:label "Remove a Descriptor Type" ] .
+
+[	a undo:Describer ;
+	undo:forEdit viper-impl:AddAttrConfig ;
+	rdfs:label "Add New Attribute Field" ] .
+[	a undo:Describer ;
+	undo:forEdit viper-impl:RemoveAttrConfig ;
+	rdfs:label "Remove Attribute Field" ] .
+[	a undo:Describer ;
+	undo:forEdit viper-impl:SetAttrConfig ;
+	rdfs:label "Change an Attribute Field" ] .
+
+[	a undo:Describer ;
+	undo:forEdit viper-impl:AttrTypeChange ;
+	rdfs:label "Change Attribute Data Type" ;
+	undo:text [
+		undo:value
+			("Change attribute data type from "
+			 [lal:propertyName "oldTypeLocal" ; lal:valueOf lal:Parent ] 
+			 " to " [lal:propertyName "newTypeLocal" ; lal:valueOf lal:Parent ] ) ] ] .
+[	a undo:Describer ; 
+	rdfs:label "Change Attribute Default Value" ;
+	undo:forEdit viper-impl:AttrDefaultValueChange ;
+	undo:text [
+		lal:lang "en"^^xsd:language ;
+		undo:value
+			("Change attribute default from "
+			 [lal:propertyName "oldDefaultValue" ; lal:valueOf lal:Parent ] 
+			 " to " [lal:propertyName "newDefaultValue" ; lal:valueOf lal:Parent ] ) ] ] .
+[	a undo:Describer ; 
+	rdfs:label "Change Attribute Name" ;
+	undo:forEdit viper-impl:AttrNameChange ;
+	undo:text [
+		lal:lang "en"^^xsd:language ;
+		undo:value
+			("Change attribute name from "
+			 [lal:propertyName "oldName" ; lal:valueOf lal:Parent ] 
+			 " to " [lal:propertyName "newName" ; lal:valueOf lal:Parent ] ) ] ] .
+[	a undo:Describer ; 
+	rdfs:label "Toggle Attribute Dynamic/Static" ;
+	undo:forEdit viper-impl:AttrIsDynamicChange ;
+	undo:text [
+		lal:lang "en"^^xsd:language ;
+		undo:value
+			("Set attribute dynamism to "
+			 [lal:propertyName "newIsDynamic" ; lal:valueOf lal:Parent ] ) ] ] .
+
+
+[	a undo:Describer ; 
+	rdfs:label "Change Descriptor Name" ;
+	undo:forEdit viper-impl:DescNameChange ;
+	undo:text [
+		lal:lang "en"^^xsd:language ;
+		undo:value
+			("Change Descriptor Name from "
+			 [lal:propertyName "oldName" ; lal:valueOf lal:Parent ] 
+			 " to " [lal:propertyName "newName" ; lal:valueOf lal:Parent ] ) ] ] .
+[	a undo:Describer ; 
+	rdfs:label "Change Descriptor Type" ;
+	undo:forEdit viper-impl:DescTypeChange ;
+	undo:text [
+		lal:lang "en"^^xsd:language ;
+		undo:value
+			("Change descriptor type from "
+			 [lal:propertyName "oldType" ; lal:valueOf lal:Parent ] 
+			 " to " [lal:propertyName "newType" ; lal:valueOf lal:Parent ] ) ] ] .
+
+# Remaining Questions:
+#  menu groups or menu seperators - I'd recommend doing groups
+#  Tab order - would like to be able to tab from chronicle to canvas,
+#              how to allow this?
+#  other keystrokes
+#  first focus - it might be good to have focus always 
+#                start on another bean instead of the app window?

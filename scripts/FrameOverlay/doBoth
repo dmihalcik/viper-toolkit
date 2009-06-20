@@ -1,0 +1,15 @@
+#! /usr/imports/bin/tcsh -f
+
+#rm -f debug
+set file = $1
+
+foreach file(`ls $GTFFACEPATH/*.gtf`)
+    echo " "
+    echo "######################################"
+    echo "Processing: $file:t:r"
+    #echo "Laying Down Face Boxes"
+    #doOverlay.face $file:t:r
+    echo "Laying Down Text Boxes"
+    doOverlay.text $file:t:r
+end
+

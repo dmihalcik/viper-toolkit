@@ -1,0 +1,172 @@
+Here is the idea.  We have a file of ground truth data, which has a
+set of target objects, and a file of results data, which has a set of
+candidate objects, that get compared by David M "gtfC" program and end
+up producing a "raw file" (file.raw) which is the output of the
+comparision.  It is our job then to make graphs which depict the
+results and also to provide other visual capabilities.  Perl is the
+easiest way to handle this, so we tried it that way first.
+
+
+There is a sample results file at the end of this message.
+
+CONFIGURATION
+
+The first difficult thing to address is that we may have multiple .raw
+files that go into making a single experiment which we want to
+present.  We may want to show multiple experiments on one set of
+graphs as well. So the first thing is to consider a config file for
+the processing. 
+
+The file can look like this:
+	Line 0: <N: # of experiments> <output_basefile>
+	Line 1: A list of all the files which are from one experiment
+	Line 2: A list of all the files which are from another  experiment
+	Line 3: ...
+
+	Line N+1: titles for each run (next N lines)
+
+	Line 2N: subttitles for graphs.  @date prints the current date
+
+
+We will have assumed extentions for now (Results-.rdf,
+GroundTruth-.gtf and Raw-.raw).  The rest of the config file will be
+left for other parameters.
+
+RAW FILES
+
+  At this moment we have two type of raw files: the pixel raw file and
+the other.  The Pixel Raw File will contain the pharse #BEGIN_PIXEL_RESULTS
+and #END_PIXEL_RESULTS.
+  Each type of raw file produce different type of graphics.
+
+  Beside containing Pixel Result, Pixel Raw File  also has GTF Information
+and Number of Frame.  MakeGraph will look for the pharse #BEGIN_GTF_INFORMATION
+and SOURCEFILES = and NUMFRAMES = to get that information.
+  The other raw file type will has the attribute name inside the graph
+of BEGIN_METRICS and END_METRICS.  For results, makeGraph will look
+at BEGIN_RESULTS and END_RESULTS.
+
+  For sumary, the following pharses are important to complete a makeGraph run
+   - For Pixel Raw File:
+      #BEGIN_GTF_INFORMATION
+      #END_GTF_INFORMATION
+      #BEGIN_METRICS
+      #END_METRICS
+      #BEGIN_PIXEL_RESULTS
+      #END_PIXEL_RESULTS
+   - For other Raw File type:
+     #BEGIN_METRICS
+     #END_METRICS
+     #BEGIN_RESULTS
+     #END_RESULTS
+
+  Structure of Result Line
+ - For Pixel Raw File:
+    Frame_id #detected #missed #false
+    10 12 0 23
+ - For other Raw File:
+    
+        TARGET_NAME TARGET_NUMBER STATUS LEVEL OVERALL_TEMPORAL_DISTANCE
+            NUMBER_OF_CANDIDATES *
+                [CANDIDATE_NUMBER TEMPORAL_DISTANCE ATTRIBUTE_DISTANCE(s)]
+This is all on one line.  There may be multiple attribute distances
+depending on the number of attributes evaluated on (see METRICS section)
+
+The TARGET_NAME and NUMBER index into the GT file.  The STATUS is
+either MISSED (only found in GT) , FALSE (found in RESULTS but not
+really there) or DETECT (good match) for obvious reasons.  The OVERALL
+TEMPORAL DISTANCE is a measure of the general match.
+
+For each matching region in the candidate list, there is a temporal
+distance (ie the metric on how the range of frames match) and a set of
+attribute distances (one for each attribute evaluated on).
+ For Example:
+
+    TextBlock [23, 24, 45] 2 0.33720 2 [22 .3372 .226 .2362]
+     TextBlock 96 DETECT 2 0.33720 2 [[22, 34, 56] .3372 .226 .2362]
+
+	
+  
+GRAPHS
+
+ Pixel Raw File produces PIXEL COUNT EVALUATION, PIXEL PERCENT, FRAME MEASURE graphs.
+ The other Raw File Type produces ERROR/DETECTION COUNTS, ERROR/DETECTION PERCENTAGE, PRECISION-RECALL-F1, ATTRIBUTE DISTANCE for each attribute and DISTANCE OVERALL graphs. 
+
+ * ERROR/DETECTION COUNTS  & PIXEL COUNT EVALUATION Graphs
+Those are  simple histogram showing the number of MISSED,
+FALSE and DETECT.  Remember, however, that this is integrated across
+all of the files in the config file.
+  
+  *  PIXEL PERCENT & ERROR/DETECTION PERCENTAGE Graphs 
+Those Graphs are just the histogram showing the percent of the above graphs.
+
+  * PRECISION-RECALL-F1 Graph
+This graph  is the a precision recall  and F1 graph.  
+Precision is computed as: DETECTS/(DETECTS+FALSE)
+Recall is computed as: DETECTS/(DETECTS+MISSED)
+F1 is computed as: 2 * Precision * Recall/(Precision + Recall)
+
+  * DISTANCE OVERALL  & ATTRIBUTE DISTANCE Graphs
+The third graph is a bit more complex.  What we do here is for each
+DETECTED target, we associate a distance.  Either the
+OVERALL_TEMPORAL_DISTANCE (one for each target) or the
+TEMPORAL_DISTNACE (one for each target/candidate pair) or
+ATTRIBUTE_DISTANCE (one for each each target/candidate
+pair/attribute).  We would then sort these by distance independently,
+and plot a distance vs object graph.
+
+So for example if we have the 100 DETECTED targets, each with only one
+candidate and 2 attributes being evaluated (position and string), we
+would have a one graph entitled OVERALL TEMPORAL DISTANCE, with 100
+points, 1 entitled TEMPORAL DISTANCES with 100 points,, one entitled
+POSITION, and one entitles STRING.
+
+ * FRAME MEASURE graph
+This graph is a simple histogram showing the number detected, ignored,
+missed, and falsed of Frames.  
+We can have a frame measure as an extra graph on the pixel measures as
+follows:
+	Frame Detected if 
+  			Detect!=0 or
+			Missed!=0 && Falsed!=0 && Detect==0
+	Frame Missed if 
+			Detect==0 && Missed==0
+	Frame Falsed if
+			Detect==0 && False==0
+
+    
+Legend
+
+The legend for each run comes from the config file below, so the
+legend UMD would correspond to the concatination of run1a, run1b and
+run1c, and so on.
+
+SUBTITLE
+The last line of Config File contains the SubTitle of Graphs;
+if you want to include the time the Program is executed then
+add string "@date" to the Subtitle
+
+EXAMPLE CONFIG FILE:
+
+3 Output
+run1a,run1b,run1c
+run2a,run2b,run2c
+run3a,run3b,run3c
+UMD
+PENNSTATE
+NSA
+Subtitle @date
+
+
+
+MAKE GRAPH
+
+To generate graphics in your current directory, you need to 
+have a Graphics.cfg in your directory.
+This File has to follow the above guide lines. Make sure
+that you have the run Files in your directory, or the Graphics.cfg
+file contains the exact path of all the run Files.
+
+When everything is ready, type
+/fs/dubb2/LAMP/devel/gtfC-graphics/bin/makeGraph Graphics.cfg
+

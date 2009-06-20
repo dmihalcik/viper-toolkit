@@ -1,0 +1,61 @@
+#!/bin/csh
+
+# Usage: update <from_directory> <to_direcetory> <type>
+#
+# this script update all  gtfs in a dir to new version
+#
+        
+if ($2x == x) then
+        echo "Usage: update <from_directory> <to_directory> <type>"
+        exit
+endif
+
+set ind = $1
+set outd = $2
+set type = $3
+
+if (!(-e $outd)) then
+        echo "Creating data directory: $outd"
+        mkdir $outd
+else
+        echo " "  
+        echo "$outd already exists...."
+        echo "GTF files will be overwritten..."
+        echo "Continue? (Y/N) ";
+        set ans = ($<)
+        if ($ans != "y") then
+         echo "Exiting..."
+          exit
+        endif
+        else if ($ans != "Y") then
+         echo "Exiting..."
+          exit
+        endif
+
+endif
+
+#   
+# Converting Files
+#
+set count = 0;
+echo "converting"
+foreach oldfile ($ind/*.gtf)
+        @ count += 1;
+        set tailfile1 = $oldfile:t
+        #set basefile = $tailfile1:r
+        set newfile = $outd/$tailfile1
+        #echo $infofile
+        echo -n ".";
+	if ($type == "1") then
+        UPDATE  $oldfile $newfile ./plugin/calArea LOCATION AREA
+	endif
+	else if ($type == "2")
+	 UPDATE  $oldfile $newfile ./plugin/countChar CONTENTS NCHARS
+	endif
+	else echo "wrong type number";
+	     exit;
+end
+
+
+echo " "
+echo "Updating Complete"  

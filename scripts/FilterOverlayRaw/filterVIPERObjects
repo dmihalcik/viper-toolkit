@@ -1,0 +1,123 @@
+#! /usr/bin/perl
+
+###############################################################################
+# usage : filterVIPERObjects <in file> <out file>  <file of ids>
+#
+# We assume the file of ids is a file with one line, the list of ids
+#
+###############################################################################
+
+if (("x".$ARGV[2]) eq "x") {
+  die "USAGE: filterVIPER <in file> <out file> <file_of_ids>";
+}
+
+$ostatus = 1;
+$status = 0;
+$Line = "";
+$Line1 = "";
+@field = ();
+$result = "";
+$srcdir = "";
+@srcfile = ();
+
+($gtfFile, $outFile, $idFile) = @ARGV;
+@callParam = ();
+$ready = 0;
+$index = 0;
+
+#
+#output the GTF/RDF input file
+#
+open(GTFFILE, $gtfFile) || die "CAN'T OPEN $gtfFile $!";
+open(OUTFILE, ">$outFile") || die "CAN'T OPEN $outFile $!";
+open(IDFILE, "<$idFile") || die "CAN'T OPEN $idFile $!";
+
+#
+# Read ID List
+#
+
+@idlist = split(/\s+/,<IDFILE>);
+print "IDLIST @idlist";
+
+#
+# Look for the Data Section
+#
+while (<GTFFILE>) {
+    $Line = $_;
+    #print "$Line";	
+    getValue();
+    checkStatusChange();
+    if($status == 0) {
+	print OUTFILE "$Line1";
+    }
+    elsif ($status == 1){
+
+	if ($field[0] eq "OBJECT")  {
+#	    print "OBJECT: @field\n";
+	    $ostatus = 0;
+	    foreach $id (@idlist) { 
+#		print "$id, $field[2]\n";
+		if ($field[2] eq $id) {
+		    $ostatus = 1;
+		    print OUTFILE "$Line1";
+#		    print "RESULT: $Line1";
+		    break;
+		}
+	    }
+	}
+	else {
+	    if ($ostatus == 1) {
+		print OUTFILE "$Line1";
+	    }
+	}
+    }	
+    else {
+	print " \n> Filtering Complete \n";
+	print OUTFILE "$Line1";
+	close GTFFILE;
+	close OUTFILE;
+	system "rm -Rf TEMPFILE";
+	exit(1);
+    }
+}
+
+
+
+sub getValue {
+        $Line1 = $Line;
+	chomp($Line);
+	$Line =~ s/^\s+//;
+	@field = split(/\s+/,$Line); 
+    }
+
+
+sub inSet {
+    my $found = 0;
+    if ($field[0] eq OBJECT)  {
+	$noQuato = $Line;
+	$noQuato =~ s/"//;    $noQuato =~ s/"//;
+	$callParam[$index] = "\"$noQuato\" ";
+	$index ++;
+	$found = 1;
+	last;
+    }
+    if ($found == 0)
+    {
+	print OUTFILE $Line1;
+    }
+}
+
+sub checkStatusChange {
+    if($field[0] eq "#BEGIN_CONFIG") {
+	$status=0;
+    }
+    elsif($field[0] eq "#BEGIN_DATA") {
+	$status=1;
+    }
+    elsif($field[0] eq "#END_DATA") {
+	$status=2;
+    }
+}
+
+
+

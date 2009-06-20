@@ -1,0 +1,72 @@
+#! /usr/bin/perl
+
+###############################################################################
+# usage : getFileInfo <in file> <out file>
+#
+# Composed by Alphonso Desselle
+###############################################################################
+
+if (("x".$ARGV[1]) eq "x") {
+  die "USAGE: processViper <file1> <file2>";
+}
+
+print "Arg0 is $ARGV[0]\n";
+$status = 0;
+$Line = "";
+@field = ();
+$sourceFilesFlag=0;
+$sourceDirFlag=0;
+open(GTFFILE, $ARGV[0]) || die "CAN'T OPEN $ARGV[0] for Input $!";
+
+# Remove Quotes from ARV[1]
+$ARGV[1] =~ s/"//;  $ARGV[1] =~ s/"//;
+
+while (<GTFFILE>) {
+    # Remove Newline character from end of input line
+    chomp($_);
+
+    # Remove data from the front and back of the input line 
+    $_ =~ s/^\s+//;
+    $_ =~ s/\s+$//;
+
+    # Split the line into fields and remove quotes 
+    @field = split(/:/,$_); 
+    $field[1] =~ s/"//; $field[1] =~ s/"//;
+
+    checkStatusChange();
+    if ($status == 1){
+	print "$field[0]\n";
+	$field[0] =~ s/^\s+//;	
+	$field[0] =~ s/\s+$//;
+	if($field[0] eq "SOURCEFILES") {
+	    print "Found \"SOURCEFILES\" field in $ARGV[0]\n";
+	    # Append sourceFile data to output file
+	    system "echo SOURCE_FILES : $field[1] >> $ARGV[1]";
+	    $sourceFilesFlag=1;
+	}
+	elsif($field[0] eq "SOURCEDIR") {
+	    print "Found \"SOURCEDIR\" field in $ARGV[0]\n";
+	    # Append sourceDir data to output file
+	    system "echo SOURCE_DIR : $field[1] >> $ARGV[1]";
+	    $sourceDirFlag=1;
+	}
+	elsif($sourceFilesFlag==1 && $sourceDirFlag==1) {
+	    exit;
+	}
+    }	
+}
+
+sub checkStatusChange {
+    if($field[0] eq "#BEGIN_CONFIG") {
+	$status=0;
+    }
+    elsif($field[0] eq "#BEGIN_DATA") {
+	$status=1;
+    }
+    elsif($field[0] eq "#END_DATA") {
+	$status=2;
+    }
+}
+
+
+

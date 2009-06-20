@@ -1,0 +1,28 @@
+#!/bin/csh
+
+# Usage: SetupDataWithDump <dumpdir>
+# Script #2 to be run in evaluation
+# Must run this Script inside /fs/orion4/LAMP/TextDetectionDUMP/
+# This script simply sets up the dump directory as the new data directory
+# for the 2nd run of Viper in the evaluation process.
+# 
+
+if ($1x == x) then
+	echo "Usage:  SetupDataWithDump <dumpDir> "
+        exit
+endif
+
+# Variables
+set data = $1
+
+# Convert PPM to JPG
+source /fs/dubb2/LAMP/devel/ViPER3.0/scripts/ConvertDump $data $data:t_dump
+
+# Move previously dumped to new data
+mkdir /fs/orion4/LAMP/FaceDetectionJPEG/$data:t_dump/
+cp /fs/orion4/LAMP/FaceDetectionDUMP/$data:t_dump/* /fs/orion4/LAMP/FaceDetectionJPEG/$data:t_dump/
+
+# Create Info File
+cd /fs/orion4/LAMP/FaceDetectionJPEG/$data:t_dump 
+source /fs/orion4/LAMP/Scripts/CreateInfoFile .
+

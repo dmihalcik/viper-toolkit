@@ -1,0 +1,8 @@
+SOURCE_FILES :
+SOURCE_DIR : /fs/lamp/Projects/VACE/Evaluations/DryRun/DATA  
+OUTPUT_FORMAT : jpg
+DEST_DIR : /tmp/dice-all
+DATAFILES : dice-all.missed dice-all.detectgtf 
+COLORS : red green 
+ATTRIBUTES : LOCATION LOCATION 
+ATTRIBTYPE : OBOX OBOX

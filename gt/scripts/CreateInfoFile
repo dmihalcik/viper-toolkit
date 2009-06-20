@@ -1,0 +1,10 @@
+#!/bin/csh
+
+
+   set curinfo = $cwd:t.info 
+
+   echo >! $curinfo
+   echo "#VIPER_VERSION_3.0" >> $curinfo
+   echo "1" >> $curinfo
+
+   \ls *.jpg >> $curinfo

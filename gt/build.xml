@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="viper-api" basedir="." default="all">
+	<description>Builds the ViPER ground truth editing application.</description>
+	
+	<!-- to invoke this recursively, overload gtroot, libdir, and cp.alljars (or apihome-->
+	
+	<property name="gtroot" location="." />
+	<property name="projectroot" location="../" />
+	<property name="libdir" location="../common/lib" />
+	<property name="apihome" location="../api/bin" />
+	<property name="jmpeghome" location="../jmpeg/bin" />
+	<property name="apploaderhome" location="../apploader/bin" />
+	<property name="chroniclehome" location="../chronicle/bin" />
+	
+	<property name="gt.src" location="${gtroot}/src" />
+	<property name="gt.classes" location="${gtroot}/classes" />
+	<property name="gt.bin" location="${gtroot}/bin" />
+	<property name="gt.doc" location="${gtroot}/doc" />
+	
+	<path id="viper.cp.base">
+		<pathelement path="${libdir}/dom.jar"/>
+		<pathelement path="${libdir}/junit.jar"/>
+		<pathelement path="${libdir}/xerces.jar"/>
+		<pathelement path="${libdir}/concurrent-1.3.0.jar"/>
+		<pathelement path="${libdir}/commons-collections-3.1.jar"/>
+		<pathelement path="${libdir}/db3-3-11.jar"/>
+		<pathelement path="${libdir}/icu4j.jar"/>
+		<pathelement path="${libdir}/jakarta-oro-2.0.5.jar"/>
+		<pathelement path="${libdir}/log4j-1.2.7.jar"/>
+		<pathelement path="${libdir}/xercesImpl.jar"/>
+		<pathelement path="${libdir}/xmlParserAPIs.jar"/>
+		<pathelement path="${libdir}/concurrent.jar"/>
+		<pathelement path="${libdir}/junitperf.jar"/>
+		<pathelement path="${libdir}/antlr.jar"/>
+		<pathelement path="${libdir}/jena.jar"/>
+		<pathelement path="${libdir}/rdf-api-2001-01-19.jar"/>
+		<pathelement path="${libdir}/sesame-client.jar"/>
+		<pathelement path="${libdir}/QTJava.zip"/>
+		<pathelement path="${libdir}/jai_codec.jar"/>
+		<pathelement path="${libdir}/jai_core.jar"/>
+		<pathelement path="${libdir}/jmf.jar"/>
+		<pathelement path="${libdir}/lizard_113.zip"/>
+		<pathelement path="${libdir}/mlibwrapper_jai.jar"/>
+		<pathelement path="${libdir}/groovy-all-1.0-beta-9.jar"/>
+		<pathelement path="${libdir}/piccolo.jar"/>
+		<pathelement path="${libdir}/piccolox.jar"/>
+		<pathelement path="${libdir}/VirtualDub4Java.jar"/>
+		<pathelement path="${apihome}/viper-api.jar"/>
+		<pathelement path="${pehome}/viper-pe.jar"/>
+		<pathelement path="${jmpeghome}/viper-jmpeg.jar"/>
+		<pathelement path="${apploaderhome}/viper-apploader.jar"/>
+		<pathelement path="${chroniclehome}/viper-chronicle.jar"/>
+	</path>
+
+	<property name="cp.alljars" refid="viper.cp.base" />
+	
+	
+	<target name="all" depends="jar" />
+	
+	<target name="jar" depends="compile">
+		<mkdir dir="${gt.bin}" />
+		<pathconvert pathsep=" " property="javafiles" refid="viper.cp.base" targetos="unix">
+			<map from="${projectroot}" to="../../"/>
+		</pathconvert>
+		<jar destfile="${gt.bin}/viper-gt.jar" basedir="${gt.classes}">
+			<fileset dir="CONFIG"/>
+			<fileset dir="${gt.classes}"/>
+			<manifest>
+				<attribute name="Manifest-Version" value="1.0"/>
+				<attribute name="Main-Class" value="edu.umd.cfar.lamp.viper.gui.core.RunGT"/>
+				<attribute name="Class-Path" value="./ ${javafiles}"/>
+			</manifest>
+		</jar>
+	</target>
+	<target name="compile" depends="init">
+		<mkdir dir="${gt.classes}" />
+		<javac srcdir="${gt.src}" destdir="${gt.classes}" source="1.4" classpath="${cp.alljars}" />
+	</target>
+	<target name="javadocs" depends="init">
+		<mkdir dir="${gt.doc}" />
+		<javadoc sourcepath="${gt.src}" destdir="${gt.doc}" />
+	</target>
+	<target name="clean">
+		<delete dir="${gt.classes}" />
+		<delete>
+			<fileset dir="${gt.bin}" includes="*.jar"/>
+		</delete>
+	</target>
+
+	<target name="init">
+		<tstamp />
+	</target>
+</project>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="viper-api" basedir="." default="all">
+	<description>Builds the ViPER api for Java.</description>
+	
+	<!-- to invoke this recursively, overload apploaderroot, libdir, cp.alljars -->
+	
+	<property name="apploaderroot" location="." />
+	<property name="libdir" location="../common/lib" />
+	<property name="apihome" location="../api/bin" />
+	
+	<property name="apploader.src" location="${apploaderroot}/src" />
+	<property name="apploader.classes" location="${apploaderroot}/classes" />
+	<property name="apploader.bin" location="${apploaderroot}/bin" />
+	<property name="apploader.doc" location="${apploaderroot}/doc" />
+	
+	<path id="viper.cp.base">
+		<pathelement path="${libdir}/dom.jar"/>
+		<pathelement path="${libdir}/junit.jar"/>
+		<pathelement path="${libdir}/xerces.jar"/>
+		<pathelement path="${libdir}/concurrent-1.3.0.jar"/>
+		<pathelement path="${libdir}/db3-3-11.jar"/>
+		<pathelement path="${libdir}/icu4j.jar"/>
+		<pathelement path="${libdir}/jakarta-oro-2.0.5.jar"/>
+		<pathelement path="${libdir}/log4j-1.2.7.jar"/>
+		<pathelement path="${libdir}/xercesImpl.jar"/>
+		<pathelement path="${libdir}/xmlParserAPIs.jar"/>
+		<pathelement path="${libdir}/concurrent.jar"/>
+		<pathelement path="${libdir}/junitperf.jar"/>
+		<pathelement path="${libdir}/antlr.jar"/>
+		<pathelement path="${libdir}/jena.jar"/>
+		<pathelement path="${libdir}/rdf-api-2001-01-19.jar"/>
+		<pathelement path="${libdir}/sesame-client.jar"/>
+		<pathelement path="${libdir}/MRJAdapter.jar"/>
+		<pathelement path="${apihome}/viper-api.jar"/>
+	</path>
+
+	<property name="cp.alljars" refid="viper.cp.base" />
+	
+	
+	<target name="all" depends="jar" />
+	
+	<target name="jar" depends="compile">
+		<mkdir dir="${apploader.bin}" />
+		<jar destfile="${apploader.bin}/viper-apploader.jar" basedir="${apploader.classes}"/>
+	</target>
+	<target name="compile" depends="init">
+		<mkdir dir="${apploader.classes}" />
+		<javac srcdir="${apploader.src}" destdir="${apploader.classes}" source="1.4" classpath="${cp.alljars}" />
+	</target>
+	<target name="javadocs" depends="init">
+		<mkdir dir="${apploader.doc}" />
+		<javadoc sourcepath="${apploader.src}" destdir="${apploader.doc}" />
+	</target>
+	<target name="clean">
+		<delete dir="${apploader.classes}" />
+		<delete>
+			<fileset dir="${apploader.bin}" includes="*.jar"/>
+		</delete>
+	</target>
+
+	<target name="init">
+		<tstamp />
+	</target>
+</project>

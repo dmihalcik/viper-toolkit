@@ -1,0 +1,1397 @@
+\documentstyle[psfig-utils,Lamp]{article}
+
+%       LaTeX macros for technical reports and papers
+%
+%       LaTeX page size parameters
+%               Note -  There is an automatic 1in added to topmargin
+%                       and 1.1in added to the margin.
+\topmargin=-.32in               %  .68 (true) inches above header
+\headsep=.4in                   %  head to text sep (text is 1.25 from top)
+\textheight=8.5in               %  height of text
+\textwidth=6in                  %  width of text
+\oddsidemargin=.15in            %  left margin 1.25 (true) inches
+\evensidemargin=.25in
+\def\baselinestretch{1.0}       %  1 1/2 line spacing
+%
+\newcommand{\datetrailer}[0]{\vfill \protect\timestring \hspace{.1in} \today} 
+
+%\psfigoff
+%\psdraft
+\begin{document}
+\renewcommand{\lampheader}[1]{\lampheadertemplate{#1}{\mbox{}}{email:
+viper-bugs@cfar.umd.edu}{\mbox{}}}
+
+\lampheader{ViPER: Video Processing Evaluation Resource\\(Part 2:
+Performance Evaluation)}
+
+
+\tableofcontents
+\newpage
+
+\centerline{\large \bf ViPER: Video Processing Evaluation Resource}
+\emptyline
+
+\section{Introduction}
+This document provides a description of the capabilities of the
+PERFORMANCE EVALUATION modules of Version 3.X the Video Processing
+Evaluation Resource (ViPER) project. We have divided the system into
+three main components - ViPER-GT, ViPER-PE, and ViPER-Viz.  Part I:
+ViPER-GT provides a walk-through of the design and implementation of
+the ground truthing capabilities of the system currently being
+developed. This document, Part II: Performance Evaluation, focuses on
+the ability to take the ground truth data and the output of an
+automated analysis tool and provide a meaningful summary of how well
+the analysis was performed.
+
+%\subsection{Background}
+%\subsection{Previous Work}
+\subsection{Road Map}
+Once the ground truth data is produced as a collection of descriptions
+stored as records, it can be used to compare the performance of
+automated systems that output results in the GT format.  We have
+previously defined a record format which is used to describe either an
+object or event, such as the existence of a block of text or face over
+a range of frames (an OBJECT descriptor), or a static feature of a
+range of frames such as whether a scene is indoor or outdoor (a CONTENT
+descriptor).  Each object/event or content record has an associated
+range and set of attributes as follows:
+
+\begin{verbatim}
+        descriptor-type descriptor-name descriptor-id start-frame:end-frame
+                attribute1 : attribute-value
+                attribute2 : attribute-value
+                    ...
+                attributeN : attribute-value
+\end{verbatim}
+
+From a set of ground truth records and a set of results records, our
+goal is to provide an evaluation which allows users to track progress
+a given analysis system, compare the performance of multiple systems
+and evaluate the state of the art.
+
+Essential components of an evaluation system include 1) a way to
+represent the analysis results, 2) a way of telling the system how to
+evaluate results, 3) a set of performance metrics and 4) a meaningful
+way to present results.  Requirement 1 is discussed in detail as part
+of the ViPER-GT system described a previous paper.  Requirement 2
+will be handled by a set of configuration files provided to the
+software.  It will allow the evaluator to decide which data to
+evaluate as well as tolerances on the evaluation process.
+Requirements 3 and 4 will be discussed briefly in Section
+\ref{s:eval-detect} and \ref{s:eval-contrain} and the implementation
+of the entire system is described in Section \ref{s:vipergtfc}.
+
+\section{Evaluation Metrics: Detection and  Localization}
+\label{s:eval}
+
+The problem of performance evaluation of video is a difficult and
+often subjective task.  Since we are not necessarily dealing with a
+strict classification problem, we need to consider whether two
+descriptions are ``close enough" to satisfy a particular set of
+constraints.  This may include, for example, constraints on the
+temporal range over which the description is valid, on the spatial
+location of objects detected in scene or on other properties of the
+scene or objects extracted by the system.
+
+
+As previously stated, in our approach, the result of analysis is a set
+of descriptive records, each with an associated set of attributes.  In
+continuing with our record-based philosophy, we provide a mechanism
+through which we can match {\em candidate} records from the results
+with {\em target} records from the ground truth. Targets and
+candidates are defined as follows:
+
+\begin{description} 
+
+\item [Target:] An object or content record delineated temporally in
+the Ground Truth along with a set of attributes (possibly spatial).
+
+\item [Candidate:] An object or content record delineated temporally
+in the Results along with a set of attributes (possibly spatial).
+\end{description}
+
+A pair of {\em corresponding} records are two records, one target and
+one candidate, which have the same descriptor-name.
+
+The evaluation is split into two interdependent concepts: detection
+and localization.  Ultimately, constraints on the localization will
+form a basis for ``correct'' detection.
+
+\begin{description} 
+
+\item [Detection:] a decision as to whether a particular object or
+content descriptor is adequately identified, either temporally,
+spatially or both.
+
+The detection criteria may be as simple as a single frame
+correspondence in the range of frames where a candidate and target
+descriptors are valid, or as complex as a set of constraints on the
+frame by frame correspondences between attributes of the descriptors.
+For tasks where the simple existence of a descriptor is important, a
+temporal range metric may be sufficient, but if we are interested in
+properties of the descriptor attributes (such as location) attribute
+metrics may be required.
+
+\item [Localization:] a measure of how well a given target is identified.  
+
+On a frame by frame basis, {\em attribute localization} can be defined by a
+distance (or dis-similarity) measure as a function of the instances of
+attributes of two descriptors.  Likewise, a {\em temporal localization}
+measure can be defined on the range of frames over which the
+descriptors are valid.
+
+Ultimately, a tolerances on the localization will be a factor in
+defining correct detection.  When localization parameters meet given
+constraints, we say that a target is correctly detected.
+
+\end{description}
+
+In order to provide useful evaluation metrics, we must consider a
+number of aspects of the problem including 1) how to combine the
+measures from multiple attributes of a given descriptor and 2) how to
+combine measures across a range of frames.  Furthermore, we must also
+consider how to evaluate a detection if and when multiple candidates
+match a single target, and visa versa.
+
+\subsection{Input}
+To begin, we will assume that we have an arbitrary set of candidate
+records from a results set and a second set of target records from the
+ground truth and consider pairs of corresponding records taken from
+the sets. We will first consider detection based on the range of
+frames over which a pair of records is valid, then use localization
+constraints on both the range and attributes to judge the correctness
+of detection.
+
+
+\subsection{Detection}
+\label{s:eval-detect} 
+A target record is said to be detected if there exists at least one
+``matching'' record in the candidate set.  At the lowest level, we can
+ignore any localization constraints and say that a candidate minimally
+``matches" a target if
+\begin{itemize}
+\item the temporal range of the candidate and  the temporal range
+of the target correspond on at least one frame.  
+\end{itemize}
+
+\noindent The correspondence criteria can then may be qualified to constrain
+the definition of match by requiring, for example, that
+
+\begin{itemize}
+
+\item the temporal correspondence meets a certain tolerance with respect to
+the number or percentage of frames in common.
+
+\end{itemize}
+
+\noindent or we can introduce frame level localization constraints by requiring
+that 
+\begin{itemize}
+\item the difference between the attributes of corresponding frames be within a given tolerance in a data-type specific parameter space on a frame by frame
+basis.  
+\end{itemize}
+
+\noindent or we can even introduce attribute localization constraints by requiring
+that 
+
+\begin{itemize}
+\item the overall deviation of a candidates attribute from the target is within
+some tolerance.  
+\end{itemize}
+
+For example, we may require that bounding boxes correspond at least
+20\% in area or that an age is within 2 years to be considered correct.
+\footnote{Each data-type will have its own ``distance" criteria
+which takes two values and returns a ``distance" between them, as well
+as a ``is\_a\_detection" criteria, which two attributes and a
+threshold and returns TRUE if the distance is less then the
+threshold. }
+
+
+Detections will be reported in two ways. First detections will be
+reported as an itemize list of matches and second as a summary of
+statistics on those matches.  The itemized list will report false,
+missed and correct detections, and for each correctly detected target,
+will list the candidates which match it.  The summary report will
+provide the absolute detection scores as the number or percentage of
+correct, missed and false detections, as well as an overall summary of
+precision and recall, where precision is defined as the number of
+correct detection divided by the number of related candidates and the
+recall is the number of correct detections divided by the number of
+targets.
+
+\subsection {Localization}
+As part of the detection process, each target can initially be
+associated with it a set of possible candidate matches. For a given
+descriptor, we consider all candidates which correspond temporally for
+at least one frame, without respect to the value of ANY of their
+attributes.  This gives us the maximal set of possible matches, which
+we can then constrain.  In general there are two ways we can constrain
+the initial set, with temporal localization on the range or with
+attribute localization - constraints on the individual attributes.
+
+
+\subsubsection {Temporal Localization}
+
+When matching objects temporally, we consider only metrics on the
+range of frames over which the target is valid. Although we can have a
+match mode as one-to-one, many-to-one, one-to-many, many-to-many
+between targets and candidates, it suffices to consider only the
+one-to-one case for now.
+
+For a given pair of ranges (one from the target and one from the
+candidate), we will define four range metrics:
+
+\begin {description}
+\item [OVERLAP\_COEF -] the percentage of frames in the target range which are also in the candidate range. 
+\begin{eqnarray}
+        OC  & = & \frac{|Range_{target} \cap Range_{candidate}|}
+                        {|Range_{target}|} \times 100%
+\end{eqnarray}
+Note this measure is not symmetric and does not in any way penalize
+for excessively large candidate.  Nevertheless, if your only goal is
+to make sure the target is detected, it is a simple and effective
+metric.  Figure \ref{f:metrics} shows an example where only the number
+of frames in the target is considered in the metric.
+
+
+\item [DICE\_COEF -] a normalized measure of  the number of frames in common, providing a similarity measure between [0,1]:
+
+\begin{eqnarray}
+        DC  & = & \frac{2 * |Range_{target} \cap Range_{candidate}|}
+                        {|Range_{target}| + |Range_{candidate}|}
+\end{eqnarray}
+
+This coefficient rewards ranges which not only have a large number of
+frames in common, but also have minimal extra frames which are not in
+common.  It is computed as twice the intersection divided by the sum of the candidate and target ranges.
+
+
+\item [EXTENT\_COEF -] the difference in start and end point
+correspondence between the target range and the candidate range.
+
+\begin{eqnarray}
+      \alpha & = &  {|End_{target} - Start_{target}|} +{|End_{candidate} - Start_{candidate}|} \\
+      EC  & = &  1 - e^{-\alpha}
+\end{eqnarray}
+
+This measure is useful for example, when it is necessary to precisely
+specify the start and end of a descriptor as it considers only the
+deviation of the endpoints and not how much of the candidate or target
+where correctly detected.  It is simply the difference in end range positions 
+
+\item [MAX\_DEV -] the maximum unmatched candidate or target range.
+
+\begin{eqnarray}
+        MD  & = & \max \left\{ \begin{array}{c}
+{|Range_{target}| ~-~ |Range_{target}\cap Range_{candidate}|},\\
+{|Range_{candidate}| ~-~ |Range_{target}\cap Range_{candidate}|}
+\end{array} \right\} 
+\end{eqnarray}
+
+This type of matrix is useful when we are entered in the deviations of
+the GT from the results.
+
+\end{description}
+
+The first two coefficients are similarity metrics, which can be
+converted to distance metrics by subtracting from 1.  It is easy to
+see that we can extend these metrics from ranges in one dimension to
+regions in any dimensional space.
+
+
+Given a target/candidate pair whose ranges overlap (we define ranges
+which do not overlap as having distance 1 for all coefficients), we
+can define a ``correct'' detection based only on the temporal range as
+one whose range metric meets a given tolerance.  All correct
+detections, again, will be reported as a single or set of matched
+candidates.  Figure \ref{f:metrics} shows  pair of target/candidate descriptors together with the frames counted to compute the Overlap, Dice and Extent Coefficients.
+
+
+\begin{putfig}{ViPERPEFigs/Coef.eps}
+\caption{Examples of Metric Computation: OVERLAP, DICE and EXTENT for temporal ranges}
+\label{f:metrics}
+\end{putfig}
+
+\subsubsection{Attribute Localization}
+
+Attribute localization, like temporal localization, may be computed by
+considering one-to-one, many-to-one, one-to-many or many-to-many
+correspondences.  Each data-type will have associated with it a
+distance measure or set of distance measures which can be applied
+between corresponding attributes of a descriptor.
+
+A tolerance can be set on this distance to define a ``close enough''
+attribute localization and subsequent correct detection.  For 2D
+spatial attributes including bounding boxes (bboxes), oriented boxes
+(oboxes) and circles, the OVERLAP and DICE coefficients are extended
+from the definitions above by simply considering the overlap in the 2D
+plane.  For other attribute types, standard distance measures are
+defined as follows:
+
+\begin{center}
+\begin{tabular}{c|l|c}
+Data type &\multicolumn{1}{c}{Measure} & Range\\ \hline
+ bvalue & boolean equality & [0,1]  \\
+ dvalue & numeric difference & [0-$\infty$]\\
+ fvalue & numeric difference & [0-$\infty$]\\
+ svalue & Levenstein & [0-$\infty$]\\
+        & equality & [0,1]\\
+ point & Euclidean distance & [0-$\infty$] \\
+ lvalue & set equality & [0,1]\\
+ & & \\
+bbox, point & OVERLAP & [0-1]\\
+            & DICE & [0-1]\\
+	   & EXTENT & [0-1] \\
+	   & MAXDEV & [0-1] \\
+\end{tabular}
+\end{center}
+
+\subsection{Localization Constraints}
+
+A static attribute has only one value per descriptor so the metric is
+simply the result of a single distance computation which can be used
+directly to decide if the match is correct, based on a tolerance.  
+
+For a dynamic attribute, however, we will have one value for each pair
+of corresponding frames, so the distance computation must first be
+performed on the corresponding frame pairs, and then the pairwise
+decisions used to constrain the detection decision.  
+
+One way to use the pairwise frame distances is to constrain which
+frames used to compute the temporal match.  If a pair of frames does
+not meet the required tolerance it is not used in the computation of
+the temporal match.  A second way is to place a constraint on the
+average or maximum for that attribute.  For example, if we are
+tracking faces, we can require that the average deviation is not less then
+0.5 (50\%) or that  each face in each individual frame is has a difference of not not greater then 0.75 (75\%).
+
+In the next section, we describe the levels at which we can combine
+range and attribute metrics.
+
+
+\subsection{Combining Metrics}
+
+When evaluating performance, we must be able to subject the
+measures defined above to various constraints.  For each descriptor,
+we will allow the specification of a tolerance both on the range
+metric and on individual attribute metrics. Where appropriate, a
+distance measure used to compute the distance between individual
+attributes can also be specified.  Furthermore, we will provide a
+number of fundamental ``levels'' of matching between a candidate and a
+target.  Each target which is matched with an appropriate tolerance
+is said to be correctly detected.
+
+We note that each of these levels is subsequently more restrictive,
+not in magnitude but in the types of features and metrics it
+considers.  Our software will explicitly implement each of these
+levels.
+
+\begin{description}
+
+\item [Level 0: Temporal Correspondence]
+
+At this level, any candidate/target combination which has at least one
+frame in common will meet the level 0 constraint.  The results of this
+level will be considered the maximal set of matches between a given
+target and the candidate space.
+
+For example, if we have an automobile identified in frames 1 through
+10 in the ground truth, and in frames 7 through 12 in the results, it
+would pass the level 0 temporal correspondence metric (Figure \ref{f:auto}).
+
+\begin{putfig}{ViPERPEFigs/Auto.eps}
+\caption{Simple single correspondence example}
+\label{f:auto}
+\end{putfig}
+
+
+\item [Level 1: Temporal Match] \emptyline 
+Any candidate/target combination for which the number and
+distribution of {\bf corresponding} frames meets a specified tolerance
+is a level 1 {\em temporal match}. The temporal tolerance  and metric (defined above) used to compute the match is specified
+on a per descriptor basis.
+Level 1 extends level 0 by providing a tolerance on the temporal
+correspondence.  
+
+For the example in Figure \ref{f:auto}, the OVERLAP tolerance would have to be set to
+at least 0.666 to pass level since only one half of the target frames
+correspond.  If a DICE tolerance is chosen, the tolerance must be
+at least (2*4/(10+6)) = 0.5  to pass.
+
+\item [Level 2: Frame Constrained Temporal Match] \emptyline 
+Any candidate/target combination for which the number and distribution of
+{\bf valid corresponding} frames meet a given tolerance is a level 2 {\em
+frame-constrained temporal match}.  A pair of corresponding frames in a
+temporal match is valid if all instances of attributes at that frame
+meet their respective tolerances.  Level 2 extends level 1 by
+considering the effect of frame by frame tolerances of the attributes
+on the temporal or range tolerance.
+
+In the example above, if the location of the car varies from frame to
+frame, only the frame pairs where the difference is less then the
+position tolerance are used to calculate and subsequently constrain
+the temporal match.
+        
+\item [Level 3: Attribute Constrained Temporal Match] \emptyline 
+Any candidate/target combination for which all attributes are valid is
+considered {\em attribute-constrained temporal match}.  An attribute
+is considered valid iff either the 1) average, 2) minimum or 3) median
+computed over all pairs of corresponding frames in a temporal match
+meets a given tolerance.  The type of metric (average, minimum or median) as well as the tolerance is specified by the user.
+
+In the previous example, the average maximum deviation of the position could be the deciding factor when considering if a match occurs.
+
+\end{description}
+\subsection{Contraining Matches}
+\label{s:eval-contrain}
+
+We have recently implemented the ``best'' match, algorithm which
+considers the best candidate/target combination even if it invalues
+multiple targets and/or candidates.  The concept of partitioning the
+set of candidates so that a given candidate can match one and only one
+target has been implemented by identifying cliques and searching brute
+force in that set.  The more general case where any number of
+candidates can match to any number of targets has been implemented but
+may be very computationally intensive.
+
+\subsection{Pixel Metrics}  
+
+An alternative way to consider measuring performance is to count the
+number of pixels detected, missed and falsely detected on a per frame
+basis.  A special component has been added to gtfC1.1 to allow the
+output of a pixal measure to output results which are then interpreted
+by gtfc-graphic.
+
+\subsection{Presenting Results}  
+
+The metrics defined above provide a measure for corresponding target
+and candidate records with respect to both individual attributes and
+with respect to the temporal range over which they are valid. For a
+given set of targets and a given set of tolerances we can then provide
+summary matrices on the number of FALSE, MISSED and CORRECT
+detections, and a system performance value which describes the RECALL
+and PRECISION metrics on a given dataset.
+
+
+Although our approach of providing tolerances is meaningful for
+specific applications, it is much more informative if we can find a
+way to present cumulative scores for detection and localization.  The
+overall philosophy we suggest is to provide, for a given target, the
+best matching candidate or set of candidates in both time and
+attribute space.  Once we do this, can consider more meaningful ways to
+present the results.
+
+\subsubsection{Plots}
+The first type of result will be a graphical plot of match distance
+for a given target the best matching candidate or set of candidates.
+This type of graph can be used to show the relative accuracy for a
+given dataset.  The distance can be any of the distances that was
+originally used to make a ``correct detection'' decision, including
+the temporal range distance, or statistics on any of the attribute
+distances (mean, median or maximum).  We can plot the distance on the
+y axis and the records (sorted by distance) on the x axis.  For a
+given tolerance, we can then immediately see the number of targets
+being correctly detected.
+
+In addition, a histogram of the precision/recall and
+missed/false/correct detections can be provided
+
+
+\subsubsection{StarDOM}
+
+StarDOM is a multidimensional visualization package developed at the
+University of Maryland.  In future releases of our software, we will
+provide filters to translate the row format described below to STARDOM
+format.
+
+\newpage
+
+%\subsection{Partitioning}
+
+%The concept of partitioning is required to provide many to one and one
+%to many matches where appropriate, and it general determine the best
+%correspondence between candidates and targets.  Although this is not
+%implemented in the current version of the performance evaluation
+%software, it is useful to outline the concepts.
+
+
+
+%Choose the set of candidates which optimizes the defined temporal match 
+%     according to 
+%          Least Mean Square
+
+%Approach
+%     Group targets which have candidates in common.  Any partitioning of 
+%     candidates will be limited to these sets.
+
+%	Loop through all combinations of assignments within each group
+%        and choose the one with:
+%		minimum total attribute distance (frame by frame)
+%		minimum average attribute distance (frame by frame)
+
+%		minimum average temporal distance (target by target)
+%		minimum absolute temporal distance (target by target)
+		
+		
+
+        
+
+\section{ViPER-PE Analysis Tool: gtfC1.1}
+\label{s:vipergtfc}
+We have implemented the metrics described above in a set of Java
+programs which take a ground truth file, a results data file, an
+evaluation parameters file and a properties file.  In this section we
+first describe the inputs to the software, then provide several
+examples of its use.
+
+The output of the system being tested must be in a results data
+format, similar to the GT data format, or converted to this format
+before evaluation.  The tester can, however, specify a configuration
+file to tell the evaluation software which fields to restrict its
+evaluations to, and to set up equivalences between terms used in the
+GT and terms used in the analysis results.  These are set forth in the
+Evaluation Parameter Format (EPF) file.
+
+\subsection{Evaluation Parameter File}
+
+The EPF file will contain up to four main sections, each of which is
+opened with a \#BEGIN directive, and closed with a \#END directive.
+Each will be outlined in one of the next three subsections.  They
+include EQUIVALENCE, EVALUATION, GROUND\_FILTER and RESULTS\_FILTER.
+Throughout the EPF, any line which starts with a \verb+ ``\\'' + is a
+comment.
+
+\subsubsection{Equivalences Specification}
+
+The EPF file may contain equivalences
+between attributes used in the ground truth file and attributes used
+in the user's results. This is necessary, for example, if the ground
+truth distinguishes between `fades' and `dissolves', but the analysis
+results only identify `transitions'. The system can be directed to map
+(or match) all transitions in the results to either `fades' or
+`dissolves' in the ground truth. The mappings can be of two types ---
+many-to-one mappings and one-to-one mappings. They appear in the
+parameter file as follows:
+
+\begin{verbatim}
+       #BEGIN_EQUIVALENCE
+
+          \\ CASE 1: Many-to-one mapping
+             ZOOM-IN : ZOOM
+             ZOOM-OUT : ZOOM
+
+          \\ CASE 2: One-to-many mapping
+             TRANSLATE : VERT_TRANS HORZ_TRANS
+
+          \\ CASE 3: One-to-one mapping
+             CUT : BREAK
+
+       #END_EQUIVALENCE
+\end{verbatim}
+
+The left-hand side contains the descriptors of the ground truth and
+the right-hand side contains the descriptors of the analysis
+results. The first example is a many-to-one mapping from ground truth
+to the results. This implies that all instances of {\tt ZOOM-IN} and
+{\tt ZOOM-OUT} in the Ground Truth file will match instances of {\tt
+ZOOM} in the results file. The second example is a many-to-one mapping
+from the ground truth file to the results file.  The results file
+contains two types of {\em translate} shot changes --- {\tt
+VERT\_TRANS} and {\tt HORZ\_TRANS} and they will match all instances
+of {\tt TRANSLATE} in the ground truth.  The last example is a simple
+one-to-one mapping between the ground truth and results descriptors.
+
+Within the EPF file the equivalences should be contained within {\em
+EQUIVALENCE} identifiers as follows:
+\begin{verbatim}
+        #BEGIN_EQUIVALENCE
+                .       
+                .
+                .
+        #END_EQUIVALENCE
+\end{verbatim}
+
+
+\subsubsection{Evaluation Specification}
+The EPF file is also used to indicate which descriptors and items the
+evaluator is interested in having evaluated.  
+ This list of
+descriptors will appear in the same format as the configuration file
+format described above and be embedded within {\em EVALUATION}
+identifiers:
+
+\begin{verbatim}
+        #BEGIN_EVALUATION
+                .
+                .
+                .
+        #END_EVALUATION
+\end{verbatim}
+
+
+The format of each record is similar to that of the configuration
+format, except that we do not list the types of attributes, but only
+the attributes themselves.  the attribute types are inherited from the
+configuration sections of the results and/or ground truth files.
+
+
+\begin{verbatim}
+         descriptor-type descriptor-name   [METRIC TOLERANCE]
+                attribute1 : [METRIC TOLERANCE]
+                attribute2 : [METRIC TOLERANCE]
+                ...
+                attributeN : [METRIC TOLERANCE]
+\end{verbatim}
+
+For example, suppose you only want the
+results for Shot-Changes evaluated and your configuration contains
+Shot-Changes and many other descriptors.  To evaluate only how well
+Shot-Changes are detected supply the configuration line
+
+\begin{verbatim}
+        CONTENT Shot-Change
+\end{verbatim}
+
+in the Evaluation list. To evaluate  both Shot-Changes and Person descriptors,
+use these lines in the evaluation list:
+
+\begin{verbatim}
+        CONTENT Shot-Change
+        OBJECT Person
+\end{verbatim}
+
+When no attributes are supplied, ALL of the underlying attributes will
+be evaluated. To evaluate the performance at the descriptor level (ie
+just the temporal range of the description) and to disregard all
+attributes, place NONE after the descriptor, for example:
+
+\begin{verbatim}
+        OBJECT Text
+                NONE
+\end{verbatim}
+
+This evaluation is based only on matching the descriptor {\em TEXT}
+and the range of frames it covers (ie level 1).  To limit evaluation to specific
+attributes, we can place the attribute names on separate lines after
+the descriptor.  For example, if we are interested in Text {\em
+Positions} only then the entry would look like:
+
+\begin{verbatim}
+        OBJECT Text
+                POSITION
+\end{verbatim}
+
+Or if interested in Position and Motion attributes we would put:
+
+\begin{verbatim}
+        OBJECT Text
+                POSITION
+                MOTION
+\end{verbatim}
+
+We can further specify the specific attributes from a LIST type which
+are to be evaluated.  For example:
+
+
+\begin{verbatim}
+        CONTENT Shot-Change 
+                TYPE : CUT DISSOLVE
+\end{verbatim}
+
+This will evaluate CUT and DISSOLVE shot changes, but ignore all other
+Shot-Change attributes and all other TYPEs of Shot-Change.
+
+\subsubsubsection{Metric and Tolerance Specification}
+To specify a metric to be used in evaluating a particular descriptor
+or attribute, the metric and tolerance can be specified in brackets
+after name
+\begin{verbatim}
+        CONTENT Shot-Change [DICE 95]
+                TYPE : CUT DISSOLVE [EXTENT 2]
+\end{verbatim}
+
+Note that at the descriptor level, the metric applies to the temporal
+localization and that each data-type has a specific set of valid
+metrics.  The default metric or tolerance (typically 0) will be used
+if either not specified or explicitly specified with a '-'.
+
+\begin{verbatim}
+        CONTENT Shot-Change [- 95]    
+                TYPE : CUT DISSOLVE [EXTENT -]
+\end{verbatim}
+
+One additional feature is that evaluators may want to see the effect
+of a threshold on performance.  To do this, we allow the evaluator to
+specify a ``*'' for one tolerance, and the results are output for each
+possible tolerance.
+
+
+\begin{verbatim}
+        OBJECT Text
+                POSITION : [- *]
+\end{verbatim}
+
+ Variable attribute results are highlighted more fully below.
+
+\subsubsection{Ground Truth and Results Filters}
+
+Although specifying a set of descriptors on which to evaluate gives
+some control to the evaluator, in many cases, it is essential to be
+able to provide a much more specific evaluation.  For this reason, we
+provide a mechanism through which users can specify ranges of features
+on which to evaluate.  For example, when evaluating text, we can
+specify that the next be larger than 10 point and smaller than 12.
+Then all of the results will be reported only on ground truth data
+whose size is in that range.
+
+
+The specification of a filter for either Ground Truth or Results is
+indicated in the EPF file with \#BEGIN\_GROUND\_FILTER or
+\#BEGIN\_RESULTS\_FILTER respectively.
+\begin{verbatim}
+  Syntax:
+        descriptor-type descriptor-name 
+                attribute1 : FILTER
+
+  Example:
+       #BEGIN_GROUND_FILTER
+               OBJECT Text
+                       SIZE:  < 12 && > 10
+       #END_GROUND_FILTER
+\end{verbatim}
+
+The grammar for the filters is 
+       
+\begin{verbatim}
+       FILTER : = REOP VALUE  | FILTER CONJ FILTER | NULL 
+        RELOP := '<' | '>' | '==' | !RELOP
+         CONJ := '&&' | '||' 
+\end{verbatim}
+
+** for lvalues, equivalences is assumed a simple list of terms is required
+
+\begin{verbatim}
+       FILTER := TERM | TERM FILTER
+\end{verbatim}
+
+
+An example evaluation parameters file is shown in Appendix \ref{a:epf}.
+
+\subsection{Properties Files}
+The set of tolerances and metrics used for evaluation of specific
+data-types is provides in a properties files.  In addition it allows the
+specification of the level at which to evaluate and various output
+configuration parameters.  Many of these same options can also be
+specified from the command line.
+
+\begin{table}
+\caption{Properties for GtfC}
+
+\begin{center}
+\begin{tabular}{|r|c|l|} \hline
+Class & Property Name& Description\\ \hline
+Files &config\_file & Configuration File Name \\ 
+&gt\_file & Ground Truth File Name\\ 
+&results\_file & Results File Name\\
+&epf\_file & Evaluation Parameter File Name\\  
+&log\_file & Log File Name\\ 
+&output\_file & Output File Name\\ 
+&base\_file & Base File Name (used with default extensions)\\ \hline
+Levels &level & Level at which to evaluate\\ \hline
+Metrics & range\_metric & Metric used for range coefficient computation\\ 
+&string\_metric & Metric used for string coefficient computation\\ 
+&level3\_metric & Type of Tolerance for level 3 (avg or max)\\ \hline
+Tolerances &range\_tol & Tolerance on the range metric\\ 
+&bvalue\_tol & Tolerance for boleans\\ 
+&dvalue\_tol & Tolerance for integers\\ 
+&fvalue\_tol & Tolerance for floats\\ 
+&svalue\_tol & Tolerance for strings\\ 
+&point\_tol & Tolerance for points\\ 
+&circle\_tol & Tolerance for circles\\
+&bbox\_tol & Tolerance for boxes\\ 
+&obox\_tol & Tolerance for oriented boxes\\ 
+&lvalue\_tol &  Tolerance for lvalues \\ 
+&infinity\_tolerance & Automatically set all tolerances to infinity\\ \hline
+Presentation & verbose & Provide details\\ 
+&attrib\_width & number of characters of attribute to print.\\ 
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+An example properties file is shown in Appendix \ref{a:prop}.
+
+\subsection{Reporting Results}
+We have implemented metrics for evaluating the performance of analysis
+algorithms.  The basic metric establishes matches based on the frame
+ranges and attributes of various descriptors.  The system will use all
+of the attributes specified in the evaluation parameters file to
+determine a match.
+
+Initially, the software dumps input parameters including files, filters, metrics and tolerances (Figure \ref{f:info})
+
+\begin{putfig}{ViPERPEFigs/Info.epsi}
+\caption{Example input parameters including files, filters, metrics and tolerances}
+\label{f:info}
+\end{putfig}
+
+\subsubsection{False, Missed and Correct Detections}
+The primary approach for reporting detections will be to first consider all possible matches
+for a given target record, based for example on some amount of
+temporal overlap (Level 0).  This filters the initial list and
+identifies a list False and Missed detections.  Taking into
+consideration the temporal tolerances (Level 1), we can then further
+filter the detection list.  The levels are evaluated in order, and the   
+missed and false detections identified at each level are listed.
+
+For each target, all of its attributes are listed, followed by a
+series of candidates which match it.  For each candidate attribute,
+additional details including the frame-wise distances from the target
+attribute ($>=$ level 2) and the average distance for dynamic
+attributes ($>=$ level 3) are also printed.  For each candidate, the
+temporal distance between that candidate and the target, subject to
+any constraints, is also printed.
+
+Figure \ref{f:results} shows selected target results from a Level 3 run.
+
+\begin{putfig}{ViPERPEFigs/Levels.epsi}
+\caption{Example False, Missed and Correct Detections}
+\label{f:results}
+\end{putfig}
+
+
+\subsubsection{Variable Tolerances}
+As stated above, variable tolerances are available for attributes to
+allow the evaluator to consider all possible points at which the
+tolerance could be set.  The output consists of a sorted list of the
+values the metric used for that attribute takes on, along with the
+corresponding precision and recall (Figure \ref{f:var_results}).
+
+
+
+\begin{putfig}{ViPERPEFigs/Variable.epsi}
+\caption{Variable Results Output}
+\label{f:var_results}
+\end{putfig}
+
+
+
+\subsubsection{System Performance}
+
+The system performance can be reported in a number of ways, but we
+rely primarily on the use of precision and recall, defined for a given
+descriptor or attribute as follows
+
+\begin{eqnarray}
+        Recall & = & \frac{\rm Number Of Correct Detections}
+                          {\rm Number Of Targets In Ground Truth}\\ 
+        Precision & = & \frac{\rm Number Of Correct Detections}{\rm Number Of Detections}
+\end{eqnarray}
+
+The recall is therefore the percentage of the total number of ground
+truth records that were correctly detected, and the precision is the
+percentage of the total number of detections that were correct.
+
+We report precision and recall under a number of different scenarios,
+at both the descriptor and at the attribute level (Figure \ref{f:sumresults})
+.
+
+
+\begin{putfig}{ViPERPEFigs/Results.epsi}
+\caption{Summary Results Output}
+\label{f:sumresults}
+\end{putfig}
+
+
+
+\subsubsection{Raw Format}
+
+A raw format which can be easily processed by other programs such as
+graphing packages in currently being introduced.  An example of the
+raw format is shown in Figure \ref{f:sample_raw}.
+
+\begin{putfig}{ViPERPEFigs/Raw.epsi}
+\caption{Sample Raw Output}
+\label{f:sample_raw}
+\end{putfig}
+
+\subsection{Implementation}
+
+The software which has been implemented to perform the evaluation is
+called {\em gtfC}.  The options for gtfC can be set up in one of two
+ways, either by specifying a parameters file or by specifying command
+line options as follows:
+
+\noindent {\tt gtfC <OPTIONS>}
+
+\begin{description}
+
+\item[-b base\_filename:] sets a base filename which uses default extensions (.gtf, rdf, .out, and .log)  to set the path for necessary files.
+ 
+
+\item [-g ground\_truth\_file]
+
+\item [-r results\_file]  input\_file\_name is the name of the file that
+                    contains your results data. If this option is
+                    not specified then gtfC will wait for
+                    the results data to come from Standard Input.
+
+\item [ -o output\_file : ] output\_file\_name is the name of the file that
+                    you would like your output to be written to.
+                    If this option is not specified then gtfC will
+                    output the results of your comparison to 
+                    Standard Output. 
+
+\item [ -epf evaluation\_parameters\_file : ] by including this option followed by the evaluation parameter file you do not have to include it
+                    as the first line of your results file.     
+
+\item [ -l log\_file : ] log\_file\_name is the name of the file that you
+                    would like your warning messages written to.
+                    If this option is not specified then gtfC will
+                    output all the warning messages to the Standard
+                    Output.
+
+\item [-gc gt\_conf\_file:]n ame of the file which holds the
+            ground truth configuration information
+\item [-rc   results\_conf\_file:] name of the file which holds the
+            result file configuration information
+  
+\item [-pr   properties\_file:] (default = GtfC.properties)
+\item [-L   level:] Level at which to evaluate
+              (0=None, 1=Temporal Match, 2=Frame Constrained,
+               3=Attribute Constrained)
+\end{description}
+
+In order to use the graphing packages in the next section, you must
+output the raw format.
+
+\subsection{Results Visualization: gtfC-graphics}
+
+The results can be presented in several ways in addition to the normal
+textual output by running graphs on the raw output.  The graphing
+software is designed so that a single graph can be constructed from
+the concatination of experiments by the same algorithm, and so that
+several graphs can be combined on the same plot from runs of different
+algorithms (Figures \ref{f:graph1} - \ref{f:graph3}).
+
+
+\begin{description}
+\item [ERROR COUNTS CHART] - a bar chart showing Correct, False, and Missed
+Detections for a given set of parameters. (Figure \ref{f:graph1}A).
+
+\item [ERROR PERCENT CHART] - a bar chart showing percentage of Targets
+correctly detected and missed for a given set of
+parameters. (Figure \ref{f:graph1}B).
+
+\item [SUMMARY CHART] - a bar chart showing Precision, Recall and F1
+metrics for a given set of parameters. (Figure \ref{f:graph1}C).
+
+\item [TARGET GRAPH] - for each descriptor evaluated a line graph
+showing the distance, sorted in increasing order, of each target to it
+best matching candidate.  Distances can be temporal or
+spatial. (Figure \ref{f:graph2}).
+
+\item [TEMPORAL GRAPH] - A graph showing the temporal how close each target was to the a given candidate
+\end{description}
+
+For the special case where pixel evaluations are run and the raw file
+reflect pixel measures for each frame, there are three types of graphs
+that can be created, in
+
+\begin{description}
+
+\item [PIXEL COUNTS CHART] - a bar chart showing the number of
+Correct, False, and Missed pixels summed over the entire collection
+for a given set of parameters. (Figure \ref{f:graph3}A).
+
+\item [PIXEL PERCENT CHART] - a bar chart showing the percentage of
+Correct, False, and Missed pixels  over the entire collection
+for a given set of parameters. (Figure \ref{f:graph3}B).
+
+\item [FRAME CHART] - a bar chart showing number of target frames
+correctly detected, correctly ignored, missed and false for a given
+set of parameters. (Figure \ref{f:graph3}C).
+\end{description}
+
+
+\begin{put2-1fig}{ViPERPEFigs/news-desk-combined_Error1.eps}
+{ViPERPEFigs/news-desk-combined_Error2.eps}
+{ViPERPEFigs/news-desk-combined_Error2.eps}
+\caption{Examples of Bar Chart for Normal Runs}
+\label{f:graph1}
+\end{put2-1fig}
+\psfigscale{1.0}
+
+\begin{putfig}{ViPERPEFigs/news-desk-combined_Attribute_LOCATION.eps}
+\caption{Example of Distance Graph}
+\label{f:graph2}
+\end{putfig}
+
+
+\begin{put2-1fig}{ViPERPEFigs/news-desk-pixel_Error1.eps}
+{ViPERPEFigs/news-desk-pixel_Error1.eps}
+{ViPERPEFigs/news-desk-pixel_FrameMeasure.eps}
+\caption{Example of Pixel and Frame Graphs}
+\label{f:graph3}
+\end{put2-1fig}
+\psfigscale{1.0}
+
+
+\subsection{Evaluation Scripting: ViPER-Eval}
+
+ViPER-Eval is a scripting lanugage to ease the burdon of generating
+multiple unique EPF files and running them independently.  The scripts
+allow users to set gtf and rdf filenames, subsitutite variables in an
+EPF template, run evaluations, make graphs, combine or append graphs
+and much more.
+
+Appendix \ref{a:viper-eval} is an example of a script that will run
+the same GTF and RDF Files through several different metrics, produce
+individual graphs and combine the graphs to produce a composit graph.
+
+Details about how to run specific software packages are included in
+the each distribution.
+
+\section{ViPER-PE Visualization Tool}
+
+After the performance results are presented to the evaluator, the
+system can output various statistics of the comparisons including
+precision and recall.  We will also provide a GUI summary that shows
+the results of these comparisons in a graphical format (not yet been
+implemented) under the current version.
+
+Such a graphical display will have the following salient features:
+
+\begin{itemize}
+\item It will make use of a single bar graph for each attribute that
+is being evaluated. Color codes will be used to display the ground 
+truth, the results, the overlap, the correct matches, the false 
+matches, and the missed matches.
+
+\item Precision and Recall percentages for each attribute will also be 
+displayed along side each bar graph.
+
+\item The visual resolution of the bar graph can be increased for a 
+more detailed view. 
+
+\item A scroll bar can also be used to scroll the viewing range of the bar 
+graph.
+
+\item If the item being evaluated is range data, color-coded bars
+will be used.
+
+\item If the item being evaluated is event data, color-coded markers
+will be used.
+
+\end{itemize}
+
+An example layout of the ViPER-PE GUI is shown in Figure \ref{f:pefig}.
+\psfigscale{.65}
+\begin{putfig}{ViPERPEFigs/GTViz.ps}
+\caption{Layout of the ViPER-PE GUI.}
+\label{f:pefig}
+\end{putfig}
+
+
+
+We have currently implemented a set of command line recall and precision
+routines which are provided with this report.  
+
+A user will often need to view the overall properties of a video clip in
+a visual summary If a
+standard input format is utilized, any relevant properties presented to the
+visualization software can be converted into a graphical format and can be
+displayed in a GUI.
+
+We propose to develop software that can depict the relevant information
+entered as input using the same format as the ground truth information.
+
+Examples of relevant information include:
+\begin{itemize}
+\item Properties could include range properties such as frames containing
+humans, frames containing outdoor scenery, etc., or 
+single-frame event such as a cut. 
+
+\item Color-coded bars can be used to depict ranges in a bar graph.
+
+\item Markers can be used to show the places where single frame events occur.
+
+\item The bar graphs can be viewed at varying resolutions and can be 
+scrolled.
+\end{itemize}
+
+A figure similar to Figure \ref{f:pefig} can be used for the ViPER-Viz GUI.
+
+% Another format for displaying a summary of a video clip is by creating
+% 3-D image of all the frames of a video layered along one dimension, e.g.
+%he depth. An example image is shown in Figure \ref{f:layer}.  Ultimately, this representation
+%will be linked to the other two interfaces  (Figures \ref{f:pefig} and  \ref{f:gtfig}) for 
+%browsing purposes.
+
+%\begin{figure}[t]
+%\psfig{figure=Inputter.ps,width=6in}
+%\caption{Example of a video representation.}
+%\label{f:layer}
+%\end{figure}
+
+\section{Summary}
+
+The goal of this project is to provide framework for performance evaluation of 
+video analysis algorithms.  The system is still being developed, both in
+terms of the underlying methodology and in terms of the implementation.
+
+One of the biggest challenges is to define the metrics to be used for
+evaluation.  In particular, how does one match records, or match
+objects, and how does one tell if they are correct or not.
+
+\noindent Some of the issues include:
+\begin{description}
+\item [Segmentation:]  When is it acceptable to match multiple ranges 
+from the ground truth to the a single result range? or visa versa?  
+
+\item [Range Definition:] In what cases should we consider the endpoints of
+description record the most important and in what cases is the total range?  Clearly, for cut records, we are interested in exactly where they occur, since they are so compact.
+
+\item [Metrics:] Are there better or more appropriate metrics than precision
+and recall?
+\end{description}
+
+
+
+
+We try to use the following filename conventions for our data:
+
+\begin{tabular}{ll}     
+Configuration Files& .cfg\\
+Ground Truth Data Files& .gtf \\
+Results Data Files & .rdf\\
+Evaluation parameters file & .epf
+\end{tabular}
+
+All software implementation and usage is described in the individual
+packages.  Available upon requests.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Example: Evaluation Parameters File (EPF)}
+\label{a:epf}
+
+\begin{verbatim}
+
+#BEGIN_EVALUATION
+
+        OBJECT Text [- -]
+           POSITION : [overlap -]
+
+        CONTENT CameraMotion [- -]
+
+#END_EVALUATION
+
+
+#BEGIN_EQUIVALENCE
+        POSITION : BBOX
+#END_EQUIVALENCE
+
+
+#BEGIN_GROUND_FILTER
+        OBJECT Text
+                TYPE : == GRAPHIC || == SCENE
+#END_GROUND_FILTER
+
+#BEGIN_GROUND_FILTER
+#END_GROUND_FILTER
+\end{verbatim}
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage 
+\section{Example: Properties File}
+\label{a:prop}
+
+\begin{verbatim}
+########################################################################
+# File Configuration
+# 
+config_file = 
+gt_file = textdetect.gtf
+results_file = textdetect.rdf
+epf_file = textdetect.epf
+log_file = textdetect.log
+output_file = textdetect.out
+  
+#
+# Base File Configuration - uses default extensions with basename.
+#                         - acts as a default, not an override.
+#
+base_file = twoframe
+      
+########################################################################
+#
+# Default Level Metric Configuration
+#
+  # 
+  # Level of analysis
+  #    0 = Temporal Correspondence
+  #    1 = Temporal Match
+  #    2 = Frame Constrained Temporal Match
+  #    3 = Attribute Constrained Temporal Match
+  #
+level = 3
+
+  # How to crop the set of possibles at the end.
+  #    ALL, DEFAULT = No cropping
+  #    SINGLE, SINGLE-GREEDY = Take the first, best Candidate for each Target
+  #    SINGLE-BEST = Only allow one Candidate for each Target and vice-versa
+  #    MULTI-BEST = Allow multiple Candidates to be mapped to a single 
+  #                   Target
+  #    MULTIPLE = Allow multiple candidates to match to multiple targets
+
+target_match = MULTIPLE
+#target_match = SINGLE-BEST
+#target_match = ALL
+#target_match = SINGLE-GREEDY
+#target_match = SINGLE-OPTIMAL
+
+  #
+  # Range Distance Metric
+  #    dice = Dice coefficient (2 & intersection / sum of candidate and target)
+  #    overlap = amount of candidate on target / size of target
+  #    extent = difference in endpoint for temporal range 
+  #    E = equality (either 0 or 1)
+  #
+range_metric = dice
+bbox_metric = dice
+
+  #
+  # String Distance Metric
+  #    L = Levenshtein
+  #    H = Hamming (Strings of different length are counted as failures)
+  #    E = equality (either 0 or 1)
+  #
+svalue_metric = L
+
+  #
+  # Level Specific Metrics
+  #    mean, median, minimum, maximum
+
+level3_metric = mean
+
+########################################################################
+#
+# Default Tolerance Configuration, 1 means no match
+#
+
+  #
+  # Temporal Range - [0 = exact match]
+  #
+range_tol = 0.0
+
+  #
+  # Attributes
+  #
+bvalue_tol = 0.0
+dvalue_tol = 1.0
+fvalue_tol = 1.0
+svalue_tol = 0.0
+point_tol = 0.0
+circle_tol = 0
+bbox_tol = 0.99
+obox_tol = 1.0
+lvalue_tol = 0.0
+
+bbox_metric = dice
+
+  #
+  # Level Specific
+  #	infinity_tolearance: Set all tolerances to infinity
+  # 
+
+infinity_tolerance = FALSE
+level3_tol = 1.0
+
+########################################################################
+#
+# Presentation Parameters
+#
+#	verbose: Prints Distance Coefficients
+#	attrib_width: Maximum width of dynamic attribute fields printed
+#
+verbose = true
+attrib_width = 40
+
+\end{verbatim}
+
+\newpage
+\section{Sample ViPER-Eval Files}
+\label{a:viper-eval}
+\subsection{Data file}
+\begin{verbatim}
+$GTF = conference.gtf
+$RDF = conference.rdf
+$PR = textdetect.pr
+
+$NAME = conference-dice
+* <boxMetric> = dice
+* <boxValue> = .99
+* <filter> = 
+#RUN_EVAL
+#RUN_GRAPH
+#NAME_GRAPH conference
+#INCLUDE_GRAPH
+
+$NAME = conference-overlap
+* <boxMetric> = overlap
+* <boxValue> = .99
+#RUN_EVAL
+#RUN_GRAPH
+#INCLUDE_GRAPH
+
+$NAME = conference-maxdev
+* <boxMetric> = maxdev
+* <boxValue> = .99
+* <filter> = 
+#RUN_EVAL
+#RUN_GRAPH
+#INCLUDE_GRAPH
+
+#RUN_COMBINED_GRAPHS
+conference-combined
+
+#END
+\end{verbatim}
+
+\subsection{Template file}
+
+\begin{verbatim}
+
+#BEGIN_EVALUATION
+
+OBJECT Text [- -]
+   LOCATION : [<boxMetric> <boxValue>]
+
+#END_EVALUATION
+
+#BEGIN_EQUIVALENCE
+   TextBlock : Text
+   BBOX : LOCATION 
+#END_EQUIVALENCE
+
+#BEGIN_GROUND_FILTER
+	Object Text
+		TYPE: == <filter>
+#END_GROUND_FILTER
+\end{verbatim}
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+

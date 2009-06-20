@@ -1,0 +1,32 @@
+#
+# These environment variables are used by doEverything to setup thats for
+#    various files
+#
+
+#
+# GTF Text Files Location
+#
+#setenv GTFTEXTPATH /fs/orion4/LAMP/ViPER-Data/FaceTextDB/GTF-TEXT
+setenv GTFTEXTPATH /fs/orion4/LAMP/ViPER-Scripts/ViPERSplit/SampleRuns/ViPER-Data-1/GTF-TEXT
+
+# GTF Face Input file Location
+#setenv GTFFACEPATH /fs/orion4/LAMP/ViPER-Data/FaceTextDB/GTF-FACE
+setenv GTFFACEPATH /fs/orion4/LAMP/ViPER-Scripts/ViPERSplit
+
+# GTF Face Box file Location
+#setenv GTFFACEBOXPATH /fs/orion4/LAMP/ViPER-Data/FaceTextDB/GTF-FACE-BOX
+setenv GTFFACEBOXPATH /fs/orion4/LAMP/ViPER-Scripts/ViPERSplit/SampleRuns/ViPER-Data-1/GTF-FACE
+
+# Location of the Overlay Output
+#setenv IMGDESTDIR /fs/orion3/LAMP/viper-tmp/GTF-FACE-OVERLAY
+setenv IMGDESTDIR /fs/orion3/LAMP/viper-tmp/GTF-FACE-TEXT-OVERLAY
+
+# Location of FrameOverlay script stuff
+setenv OVERLAYPATH /fs/orion4/LAMP/ViPER-Scripts/FrameOverlay
+
+# ProcessViper Path Location
+# We need this one to create the bbox's 
+setenv PROCESSVIPERPATH /fs/orion4/LAMP/ViPER-Scripts/processViper
+
+# Unify GTF Path (Sorts objects)
+setenv UNIFYPATH /fs/orion4/LAMP/ViPER-Scripts/UnifyGTF

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+test ${VIPER_CFG_PREFS:?"not set; source a prefs file for Config Editor"};
+test ${CLASSPATH:?"not set; source a config file"};
+test ${VIPER_HOME:?"not set; source a config file"};
+
+$JAVA -Dlal.prefs="${VIPER_CFG_PREFS}" -cp ${CLASSPATH}:${VIPER_ROOT}/apploader/bin/apploader.jar:${VIPER_ROOT}/api/bin/api.jar:${VIPER_ROOT}/chronicle/bin/chronicle.jar:${VIPER_HOME}/bin/viper-gt.jar edu.umd.cfar.lamp.apploader.AppLoader $*
+

@@ -1,0 +1,56 @@
+#! /usr/imports/bin/tcsh -f
+
+#
+# Usage: doEverything <rootname>
+#
+#
+
+echo "Processing $1"
+
+
+#######################################
+# make FrameConfig file
+#
+
+setenv FO_CONF $OVERLAYPATH/FrameOverlayConfig
+
+echo "   Creating FrameOverlayConfig in $FO_CONF "
+
+echo "SOURCE_FILES : " > $FO_CONF
+echo "SOURCE_DIR :   " >>  $FO_CONF
+echo "OUTPUT_FORMAT : jpg" >> $FO_CONF
+echo "DEST_DIR : $IMGDESTDIR/$1" >> $FO_CONF
+
+if ($RDFFLAG == 1) then
+   echo "ATTRIBTYPE : OBOX BBOX OBOX BBOX" >> $FO_CONF
+   echo "DATAFILES : $1.missed $1.false $1.detectgtf $1.detectrdf" >> $FO_CONF
+   echo "COLORS : blue yelllow red green" >> $FO_CONF
+   echo "ATTRIBUTES : LOCATION BBOX LOCATION BBOX" >> $FO_CONF
+else
+   echo "ATTRIBTYPE : OBOX" >> $FO_CONF
+   echo "DATAFILES : $GTFPATH/$1.gtf" >> $FO_CONF
+   echo "COLORS : blackwhite" >> $FO_CONF
+   echo "ATTRIBUTES : LOCATION" >> $FO_CONF
+endif
+
+#cat FrameOverlayConfig
+#######################################
+# Create the overlay image files
+#
+echo "   Creating overlay files"
+#$OVERLAYPATH/FrameOverlayColors $FO_CONF
+$OVERLAYPATH/FrameOverlay $FO_CONF
+
+#  Split the Frames
+#$DUMPOVERLAYPATH/DumpThem.csh $1
+
+echo "FINISH"
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="viper-api" basedir="." default="all">
+	<description>Builds Jonathan's pure java MPEG decoder.</description>
+	
+	<!-- to invoke this recursively, overload jmpegroot, libdir, and cp.alljars -->
+	
+	<property name="jmpegroot" location="." />
+	<property name="libdir" location="../common/lib" />
+	
+	<property name="jmpeg.src" location="${jmpegroot}/src" />
+	<property name="jmpeg.classes" location="${jmpegroot}/classes" />
+	<property name="jmpeg.bin" location="${jmpegroot}/bin" />
+	<property name="jmpeg.doc" location="${jmpegroot}/doc" />
+	
+	<path id="viper.cp.base">
+		<pathelement path="${libdir}/dom.jar"/>
+		<pathelement path="${libdir}/junit.jar"/>
+		<pathelement path="${libdir}/xerces.jar"/>
+		<pathelement path="${libdir}/concurrent-1.3.0.jar"/>
+		<pathelement path="${libdir}/db3-3-11.jar"/>
+		<pathelement path="${libdir}/icu4j.jar"/>
+		<pathelement path="${libdir}/jakarta-oro-2.0.5.jar"/>
+		<pathelement path="${libdir}/log4j-1.2.7.jar"/>
+		<pathelement path="${libdir}/xercesImpl.jar"/>
+		<pathelement path="${libdir}/xmlParserAPIs.jar"/>
+		<pathelement path="${libdir}/concurrent.jar"/>
+		<pathelement path="${libdir}/junitperf.jar"/>
+		<pathelement path="${libdir}/antlr.jar"/>
+	</path>
+
+	<property name="cp.alljars" refid="viper.cp.base" />
+	
+	
+	<target name="all" depends="jar" />
+	
+	<target name="jar" depends="compile">
+		<mkdir dir="${jmpeg.bin}" />
+		<jar destfile="${jmpeg.bin}/viper-jmpeg.jar" basedir="${jmpeg.classes}"/>
+	</target>
+	<target name="compile" depends="init">
+		<mkdir dir="${jmpeg.classes}" />
+		<javac srcdir="${jmpeg.src}" destdir="${jmpeg.classes}" source="1.4" classpath="${cp.alljars}" />
+	</target>
+	<target name="javadocs" depends="init">
+		<mkdir dir="${jmpeg.doc}" />
+		<javadoc sourcepath="${jmpeg.src}" destdir="${jmpeg.doc}" />
+	</target>
+	<target name="clean">
+		<delete dir="${jmpeg.classes}" />
+		<delete>
+			<fileset dir="${jmpeg.bin}" includes="*.jar"/>
+		</delete>
+	</target>
+
+	<target name="init">
+		<tstamp />
+	</target>
+</project>

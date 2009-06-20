@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="viper-lite" basedir="." default="all">
+	<description>Puts the viper-light distribution together.</description>
+	
+	<property name="project_home" location=".." />
+	<property name="apiroot" location="${project_home}/api" />
+	<property name="apploaderroot" location="${project_home}/apploader" />
+	<property name="chronicleroot" location="${project_home}/chronicle" />
+	<property name="jmpegroot" location="${project_home}/jmpeg" />
+	<property name="gtroot" location="${project_home}/gt" />
+	<property name="peroot" location="${project_home}/pe" />
+	<property name="commonlib" location="${project_home}/common/lib" />
+
+	<property name="libdir" location="lib" />
+	
+	<property name="osxdir" location="osx" />
+
+	<tstamp>
+		<format property="build.time" pattern="MM/dd/yyyy hh:mm aa" />
+	</tstamp>
+	
+	<fileset id="all-jars" dir="${commonlib}">
+		<include name="*.jar" />
+		<include name="*.zip" />
+	</fileset>
+	<fileset id="dlls" dir="${project_home}">
+		<include name="VirtualDub4Java.dll" />
+		<include name="msvcp71.dll" />
+		<include name="msvcr71.dll" />
+	</fileset>
+	<fileset id="gt-scripts" dir="${project_home}/samples/gt-scripts">
+		<include name="*.groovy" />
+	</fileset>
+	<fileset id="api-jars" dir="${apiroot}/bin">
+		<include name="*.jar" />
+	</fileset>
+	<fileset id="apploader-jars" dir="${apploaderroot}/bin">
+		<include name="*.jar" />
+	</fileset>
+	<fileset id="chronicle-jars" dir="${chronicleroot}/bin">
+		<include name="*.jar" />
+	</fileset>
+	<fileset id="jmpeg-jars" dir="${jmpegroot}/bin">
+		<include name="*.jar" />
+	</fileset>
+	<fileset id="gt-jars" dir="${gtroot}/bin">
+		<include name="*.jar" />
+	</fileset>
+	<fileset id="pe-jars" dir="${peroot}/bin">
+		<include name="*.jar" />
+	</fileset>
+	
+	
+	<property name="all-jars-prop" refid="all-jars" />
+
+	<target name="all" depends="npe.jar, ngt.jar, copyreadme, copyscripts">
+		<move todir="${bindir}/lib">
+			<fileset dir="${libdir}"/>
+		</move>
+		<zip destfile="viper-light-${DSTAMP}.zip">
+			<fileset dir=".">
+				<exclude name="*"/>
+				<exclude name="osx/**"/>
+			</fileset>
+		</zip>
+	</target>
+	
+	<target name="gt.app" description="Builds a Mac OS X .app for ViPER-GT" depends="ngt.jar">
+		<property name="osxgtappdir" location="${osxdir}/viper-gt.app" />
+		<property name="osxresourcedir" location="${osxgtappdir}/Contents/Resources" />
+		<property name="osxlibdir" location="${osxresourcedir}/Java" />
+		<copy todir="${osxresourcedir}" file="${project_home}/common/icons/lamp.icns"/>
+		<copy todir="${osxlibdir}">
+			<fileset refid="all-jars" />
+			<fileset refid="api-jars" />
+			<fileset refid="apploader-jars" />
+			<fileset refid="chronicle-jars" />
+			<fileset refid="jmpeg-jars" />
+			<fileset refid="pe-jars" />
+			<fileset refid="gt-jars" />
+		</copy>
+		<fileset id="longosxjars" dir="${osxlibdir}">
+			<include name="*"/>
+		</fileset>
+		<pathconvert pathsep=":" property="osxclasspath" refid="longosxjars" targetos="unix">
+			<map from="${osxlibdir}" to="$$JAVAROOT"/>
+		</pathconvert>
+		<copy file="${osxdir}/JavaApplicationStub" todir="${osxdir}/viper-gt.app/Contents/MacOS"/>
+		<exec command="chmod 755 ${osxgtappdir}/Contents/MacOS/JavaApplicationStub"/>
+		<copy file="${osxdir}/Info.plist" todir="${osxgtappdir}/Contents"/>
+		<replace file="${osxdir}/viper-gt.app/Contents/Info.plist" token="@osxclasspath@" value="${osxclasspath}"/> 
+		<copy file="${osxdir}/PkgInfo" todir="${osxdir}/viper-gt.app/Contents"/>
+		<exec command="/Developer/Tools/SetFile -a B ${osxgtappdir}"/>
+		<zip destfile="viper-gt-osx-${DSTAMP}.zip">
+			<fileset dir="${osxdir}/">
+				<exclude name="*"/>
+			</fileset>
+		</zip>
+	</target>
+	
+	<target name="npe.jar" description="Builds a copy of viper-pe.jar with the viper-light classpath."
+		depends="copyjars">
+		<jar destfile="${bindir}/viper-pe.jar" basedir="${peroot}/classes">
+			<manifest>
+				<attribute name="Manifest-Version" value="1.0"/>
+				<attribute name="Main-Class" value="viper.comparison.ViperPE"/>
+				<attribute name="Class-Path" value="./ ${javafiles}"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="ngt.jar" description="Builds a copy of viper-gt.jar with the viper-light classpath."
+		depends="copyjars, copyn3, copyicon, copysharedlibs, copyimages, npe.jar">
+		<jar destfile="${bindir}/viper-gt.jar" basedir="${gtroot}/classes">
+			<manifest>
+				<attribute name="Manifest-Version" value="1.0"/>
+				<attribute name="Main-Class" value="edu.umd.cfar.lamp.viper.gui.core.RunGT"/>
+				<attribute name="Class-Path" value="./ ./viper-pe.jar ${javafiles}"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean" depends="init">
+		<delete>
+			<fileset dir="."  > <!-- includeEmptyDirs="true"-->
+				<include name="viper-light-*.zip"/>
+			</fileset>
+			<fileset dir=".">
+				<exclude name="*"/>
+			</fileset>
+		</delete>
+	</target>
+	
+
+	<target name="copysharedlibs" depends="init">
+		<mkdir dir="${bindir}"/>
+		<copy todir="${bindir}">
+			<fileset refid="dlls" />
+		</copy>
+	</target>
+
+	<target name="copyscripts" depends="init">
+		<mkdir dir="${bindir}/scripts"/>
+		<copy todir="${bindir}/scripts">
+			<fileset refid="gt-scripts" />
+		</copy>
+	</target>
+	
+	<target name="copyreadme" depends="init">
+		<mkdir dir="${bindir}"/>
+		<copy todir="${bindir}">
+			<fileset dir=".">
+				<include name="*.txt" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copyn3" depends="init">
+		<mkdir dir="${bindir}"/>
+		<copy todir="${bindir}">
+			<fileset dir="${project_home}/gt/CONFIG">
+				<include name="*.n3" />
+			</fileset>
+		</copy>
+		<replace value="${build.time}" token="@@@when@@@" dir="${bindir}">
+			<include name="**/*.n3" />
+		</replace>
+	</target>
+	
+	<target name="copyimages" depends="init">
+		<mkdir dir="${bindir}/gt/resources/images"/>
+		<copy todir="${bindir}/gt/resources/images">
+			<fileset dir="${project_home}/gt/resources/images">
+				<include name="*.png" />
+				<include name="*.gif" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="copyicon" depends="init">
+		<mkdir dir="${bindir}/common/icons"/>
+		<copy todir="${bindir}/common/icons">
+			<fileset dir="${project_home}/common/icons">
+				<include name="*.png" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copyjars" depends="init" unless="javaafiles">
+		<mkdir dir="${libdir}"/>
+		<copy todir="${libdir}">
+			<fileset refid="all-jars" />
+			<fileset refid="api-jars" />
+			<fileset refid="apploader-jars" />
+			<fileset refid="chronicle-jars" />
+			<fileset refid="jmpeg-jars" />
+		</copy>
+		<fileset id="copiedjars" dir="${libdir}">
+			<include name="*"/>
+		</fileset>
+		<pathconvert pathsep=" " property="javafiles" refid="copiedjars" targetos="unix">
+			<map from="${libdir}" to="./lib"/>
+		</pathconvert>
+	</target>
+	
+	<target name="init">
+		<tstamp />
+		<property name="bindir" location="viper-light-${DSTAMP}" />
+		<mkdir dir="${bindir}" />
+	</target>
+</project>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- I think this can be generated from AppLoader RDF.
+     What is important to realize is that AppLoader should
+     provide a superset of this functionality, although I am
+     not sure about how to handle security. It is something
+     that will be required if it is to be used instead of 
+     jnlp. For now, I'll be generating this by hand. -->
+<jnlp spec="1.0+"
+  codebase="http://viper-toolkit.sourceforge.net/webstart"
+  href="http://viper-toolkit.sourceforge.net/webstart/viper-gt.jnlp">
+  <information> <!-- roughly equiv. to LAL#core -->
+    <title>ViPER-GT</title>
+    <vendor>LAMP Lab at University of Maryland, College Park</vendor>
+    <description>Tool for editing video metadata.</description>
+    <homepage href="http://viper-toolkit.sf.net/"/>
+    <icon href="../stuff/logo-32.png"/>
+    <offline-allowed/>
+  </information>
+  <resources>
+    <j2se version="1.4+"/>
+    <jar href="viper-gt.jar"/>
+    <property name="lal.prefs" value="http://viper-toolkit.sourceforge.net/webstart/gt-config.n3"/>
+  </resources>
+  <application-desc main-class="edu.umd.cfar.lamp.apploader.AppLoader"/>
+  <security>
+    <all-permissions/>
+  </security> 
+</jnlp>

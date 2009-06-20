@@ -1,0 +1,72 @@
+  # 
+  # Level of analysis
+  #
+level = 3
+
+  # How to crop the set of possibles at the end.
+
+target_match = MULTIPLE
+
+  #
+  # Range Distance Metric
+  #    dice = Dice coefficient (2 & intersection / sum of candidate and target)
+  #    overlap = amount of candidate on target / size of target
+  #    extent = difference in endpoint for temporal range 
+  #    E = equality (either 0 or 1)
+  #
+range_metric = dice
+
+  #
+  # String Distance Metric
+  #    L = Levenshtein
+  #    H = Hamming (Strings of different length are counted as failures)
+  #    E = equality (either 0 or 1)
+  #
+string_metric = L
+
+  #
+  # Level Specific Metrics
+  #    mean, median, minimum, maximum
+
+level3_metric = median
+
+########################################################################
+#
+# Default Tolerance Configuration
+#
+
+  #
+  # Temporal Range - [0 = exact match]
+  #
+range_tol = 0.8
+
+  #
+  # Attributes
+  #
+bvalue_tol = 1.0
+dvalue_tol = 1.0
+fvalue_tol = 1.0
+svalue_tol = 1.0
+point_tol = 1.0
+circle_tol = 1.0
+bbox_tol = 0.99
+obox_tol = 1.0
+lvalue_tol = 1.0
+
+  #
+  # Level Specific
+  #	infinity_tolearance: Set all tolerances to infinity
+  # 
+
+infinity_tolerance = TRUE
+level3_tol = 0.99
+
+########################################################################
+#
+# Presentation Parameters
+#
+#	verbose: Prints Distance Coefficients
+#	attrib_width: Maximum width of dynamic attribute fields printed
+#
+verbose = true
+attrib_width = 40

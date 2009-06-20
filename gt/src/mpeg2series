@@ -1,0 +1,43 @@
+#!/bin/csh
+
+#
+# Usage: mpeg2series root_mpeg_name
+#
+unalias rm
+set VIPERHOME = /fs/dubb2/LAMP/devel/ViPER3.0/
+
+
+set MPEGROOT = $1:r
+
+if (-e $MPEGROOT) then
+   echo "Directory $MPEGROOT already exists"
+else
+   echo "Creating Directory $MPEGROOT"
+   mkdir $MPEGROOT
+endif
+
+echo "Moving to Directory $MPEGROOT"
+cd $MPEGROOT
+
+if (-e $MPEGROOT.mpg) then
+   echo "File $MPEGROOT.mpg already present"
+else
+   echo "Copying file ../$MPEGROOT.mpg to ."
+   ln -s ../$MPEGROOT.mpg
+endif
+
+mpeg_play -dither ppm $MPEGROOT.mpg
+
+set NUMFRAME = `ls ${MPEGROOT}_?????.ppm | wc`
+echo "1 $NUMFRAME[1]" >! $MPEGROOT.info
+
+echo "Converting..."
+foreach ppmfile (`ls ${MPEGROOT}_?????.ppm`)
+	if (-e $ppmfile:r.jpg) then
+	   echo "   $ppmfile:r.jpg already exists"
+	else
+	   echo "   $ppmfile -> $ppmfile:r.jpg"
+	   convert $ppmfile $ppmfile:r.jpg
+	   /bin/rm $ppmfile
+	endif
+end

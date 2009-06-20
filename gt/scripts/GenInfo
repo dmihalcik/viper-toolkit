@@ -1,0 +1,18 @@
+#! /bin/csh
+
+set datad = $1
+echo $datad
+echo "----------------------"
+set infofile =  $datad/$datad:t.info
+
+echo $infofile
+
+echo "#VIPER_VERSION_3.0" >! $infofile
+echo "1" >> $infofile
+
+foreach tifile ($datad/*.tif)
+  echo $tifile >> $infofile
+end
+
+echo " "
+echo "Conversion Complete"

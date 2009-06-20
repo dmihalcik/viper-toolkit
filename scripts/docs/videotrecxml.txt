@@ -1,0 +1,206 @@
+Video Trec Viper Output
+using vtrec2gtf.py
+-----------------------
+
+This document assumes a reasonable knowledge of the Viper data model. In
+summary, viper data is divided into a series of 'descriptors,' each
+describing some aspect of video content or metadata. There are three
+types: file descriptors, which describe things true for the whole video;
+content descriptors, which describe things true for sections of video; and
+object descriptors, which describe things that may change over time or
+appear multiple times.
+
+The current layout of the TREC data is as a series of CONTENT descriptors;
+the TREC data includes binary features, such as indoor/outdoor, cityscape,
+and people visible; textual data, from automatic speech recognition and
+text recognition; and keyframes, extracted to jpegs.
+
+While most of the data is stored in MPEG-7, it does not contain links
+to the original media files, the files are divided on the basis of
+originator instead of reference video, and some of the data is not stored
+in MPEG-7. Also, we don't have any good tools for working with MPEG-7,
+while we already have tools for working with viper data in the form of the
+java viper api.
+
+The current descriptor configuration is as follows: one file descriptor
+for each media file, named "Information," which contains basic video
+metadata such as file name, frame rate, and image size; and numerous
+content descriptors for each data type detected in the TREC data. Note
+that while there can be several different submissions for each data type,
+this model only recognizes one of each; therefore, it is necessary to
+generate multiple files or create additional descriptor types for
+different result data files for the same problem.
+
+The current configuration is as follows:
+
+  <config>
+    <descriptor name="Information" type="FILE">
+      <attribute name="SOURCEFILE" type="svalue"/>
+	<!-- File name of the video; either a full path, url, or path
+	  - relative to the xml file.
+	  -->
+
+      <attribute name="TITLE" type="svalue"/>
+	<!-- Video title -->
+
+      <attribute name="FILESIZE" type="dvalue"/>
+	<!-- Size of the file in bytes -->
+
+      <attribute name="MD5" type="svalue"/>
+	<!-- MD5 hash of the video as hexadecimal number -->
+
+      <attribute name="SOURCE" type="svalue"/>
+	<!-- The name of the producer of the video, eg 'IA' for 'Internet
+	  - Archive'. 
+	  -->
+
+      <attribute name="YEAR" type="dvalue"/>
+	<!-- Year the video was recorded originally  -->
+
+      <attribute name="DURATION" type="dvalue"/>
+	<!-- Duration of the video, in seconds.
+	   - (probably should be changed to milliseconds or nanos.
+	  -->
+
+      <attribute name="THUMB" type="svalue"/>
+	<!-- Thumbnail of the whole video.
+	   -  currently just the first shot thumbnail.
+	  -->
+
+      <attribute name="MIMETYPE" type="svalue"/>
+	<!-- Mime type of the file, eg 'video/mpeg'. -->
+
+      <attribute name="FRAMERATE" type="fvalue"/>
+	<!-- Frame rate in terms of frames/second, eg '29.97'. -->
+    </descriptor>
+
+
+
+    <descriptor name="KeyFrame" type="CONTENT">
+      <attribute name="filename" type="svalue"/>
+	<!-- Path to an image file (jpegs) that best fits the timespan. -->
+
+      <attribute name="framenum" type="dvalue"/>
+	<!-- The frame number that the image is from, presumably within
+           - the timespan for the descriptor.
+          -->
+    </descriptor>
+
+    <descriptor name="TextAnnotation" type="CONTENT">
+      <attribute name="confidence" type="fvalue"/>
+	<!-- Confidence in the value of the text. May not be useful. -->
+      <attribute name="value" type="svalue"/>
+	<!-- The text of the annotations in the span. Currently the
+	   - text is plain text; really, just a string of words that
+	   - may or may not make sense. In the future, it would be 
+	   - preferrable to have some sort of rich text data type
+	   - instead of svalue.
+	  -->
+    </descriptor>
+
+
+    <descriptor name="Speech" type="CONTENT">
+	<!-- same as TextAnnotation -->
+      <attribute name="confidence" type="fvalue"/>
+      <attribute name="value" type="svalue"/>
+    </descriptor>
+
+    <descriptor name="IsCityscape" type="CONTENT">
+	<!-- All of the binary features are like this:
+	   - IsCityscape, HasFace, IsIndoors, IsInstrumental, IsLandscape,
+	   - IsMonologue, IsOutdoors, HasPeople, IsSpeech, and
+	   - HasTextOverlay
+	  -->
+      <attribute name="confidence" type="fvalue"/>
+	<!-- likelihood that this result is correct -->
+      <attribute name="relevance" type="fvalue"/>
+	<!-- relevance to the shot. useful for retrieval ordering -->
+    </descriptor>
+  </config>
+
+
+The data itself is contained within the <data> tag, like all viper
+data. It can be accessed directly through a standard XML parser, or on a
+higher level by the viper.api java package. Below is an example of the
+data section.
+
+
+  <data>
+    <sourcefile filename="05538.mpg">
+      <file name="Information">
+        <attribute name="SOURCEFILE">
+          <data:svalue value="05538.mpg"/>
+        </attribute>
+        <attribute name="TITLE">
+          <data:svalue value="17 Days: The Story of Newspaper History in the Making  1945"/>
+        </attribute>
+        <attribute name="FILESIZE">
+          <data:dvalue value="172921808"/>
+        </attribute>
+        <attribute name="MD5">
+          <data:svalue value="829565854dc8943f15633fee2b6fe48a"/>
+        </attribute>
+        <attribute name="SOURCE">
+          <data:svalue value="IA"/>
+        </attribute>
+        <attribute name="YEAR">
+          <data:dvalue value="1945"/>
+        </attribute>
+        <attribute name="DURATION">
+          <data:dvalue value="993"/>
+        </attribute>
+        <attribute name="MIMETYPE">
+          <data:svalue value="video/mpeg"/>
+        </attribute>
+        <attribute name="FRAMERATE">
+          <data:fvalue value="29.97"/>
+        </attribute>
+      </file>
+
+      <content name="KeyFrame" timespan="0:3737">
+ 	<!-- Note that time is given in milliseconds -->
+        <attribute name="filename">
+          <data:svalue value="/fs/lamp/Databases/video/TREC2002/keyframes/1/l/75.jpg"/>
+        </attribute>
+        <attribute name="framenum">
+          <data:dvalue value="75"/>
+        </attribute>
+      </content>
+      <content name="TextAnnotation" timespan="0:3737">
+        <attribute name="confidence">
+          <data:fvalue value="0.5"/>
+        </attribute>
+        <attribute name="value">
+          <data:svalue/>
+        </attribute>
+      </content>
+
+        ...
+
+  </data>
+
+
+Differences between TREC MPEG-7 Data and TREC ViPER Data
+--------------------------------------------------------
+
+ - MPEG-7 data is in 30,000ths of a second, while ViPER data is rounded to
+the nearest millisecond. Also, since viper doesn't have an ISO-8601 data
+type, it is difficult to tell what 'TIME: dvalue' means (second,
+microsecond?). This also means that conversion to frames will be slightly
+slower and that the times are less accurate.
+
+ - Binary features in the MPEG-7 data are represented as keywords with
+relevence values. In viper, each keyword has its own descriptor type.
+Perhaps a more appropriate conversion would be an object keyword
+descriptor, that takes 'word:svalue' and 'relevance:fvalue'.
+
+ - The CMU face data set includes face counts. However, they still use the
+<keyword> element, so it isn't really valid mpeg-7.
+
+As a whole, this has shown several deficiencies in the viper format.
+These include a need for more data types: ISO 8601 for times, rich text
+for text and speech recognition, mimetype for the media type, binhex
+encoding for the MD5 hash, and perhaps even a URL type for keyframes and
+SOURCE (or some method of specifying relative URLs). For now, these can
+all be approximated using strings and integers.
+

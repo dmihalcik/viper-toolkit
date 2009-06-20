@@ -1,0 +1,8 @@
+SOURCE_FILES : 
+SOURCE_DIR :   
+OUTPUT_FORMAT : jpg
+DEST_DIR : /fs/orion3/LAMP/viper-tmp/GTF-FACE-TEXT-OVERLAY/presentations-partial
+ATTRIBTYPE : BBOX
+DATAFILES :  /fs/orion4/LAMP/ViPER-Scripts/ViPERSplit/presentations-partial.gtf
+COLORS : *red
+ATTRIBUTES : FACEBOX

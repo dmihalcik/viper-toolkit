@@ -1,0 +1,30 @@
+This version of the interface software requires 
+
+	jdk1.2.1
+
+The software comes with a RunIt utility, which looks something like this:
+
+	<java 1.2.1+ interpreter> -cp gtfC1.0.jar GtfC $*
+
+The interpreter is set up by default to use the environment variables specified in
+gtfC.config. Run:
+	source gtfC.config
+to set them up, or change RunIt to link to the java interpreter via your own
+bindings.
+
+
+gtfC.config looks something like this:
+
+setenv GTFC_HOME <path>/gtfC1.0
+ 
+setenv GTFC_DATA $GTFC_HOME/data
+setenv GTFC_SRC $GTFC_HOME/src
+setenv GTFC_BIN $GTFC_HOME/bin
+ 
+setenv JAVA_HOME  <jdk1.2.1 home>
+setenv JAVA $JAVA_HOME/bin/java
+
+
+If you are getting errors in finding your classpath, your GTFC
+directories are set up incorrectly. If you are having trouble with java,
+change those variables.

@@ -1,0 +1,18 @@
+ * ************************************************************************ *
+       Copyright (C) 2002 by the University of Maryland, College Park
+
+		Laboratory for Language and Media Processing
+		   Institute for Advanced Computer Studies
+	       University of Maryland, College Park, MD  20742
+
+   email: lamp@cfar.umd.edu               http: lamp.cfar.umd.edu
+          viper-bugs@cfar.umd.edu
+ * ************************************************************************ *
+
+ViPER Data API
+
+The ViPER API provides programmatic access to data stored in a ViPER file. The 
+API may be useful in a read-only sense, but this implementation includes
+the ability to change the model directly. The basic, read-only functionality
+is detailed in the viper.api package, while extended functionality, such as
+modification and events, are detailed in the viper.api.extensions package.

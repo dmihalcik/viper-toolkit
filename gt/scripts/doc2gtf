@@ -1,0 +1,83 @@
+#! /usr/bin/perl
+
+
+
+$status = 0;
+$Line = "";
+$Line1 = "";
+@field = ();
+$result = "";
+$srcdir = "";
+@srcfile = ();
+
+($docFile,$outFile) = @ARGV;
+$ready = 0;
+$index = 0;
+
+open(DOCFILE, $docFile) || die "CAN'T OPEN $docFile $!";
+open(OUTFILE, ">$outFile") || die "CAN'T OPEN $ARGV[1] $!";
+
+
+printf OUTFILE "#BEGIN_CONFIG\n";
+printf OUTFILE "FILE  Information\n";
+printf OUTFILE "   SOURCE : svalue\n";
+printf OUTFILE "   FORMAT : lvalue [MPEG MJPEG MOVI]\n";
+printf OUTFILE "   COMPOSITION : lvalue [COLOR GRAY BW]\n";
+printf OUTFILE "   NFRAMES : dvalue\n";
+printf OUTFILE "   H-FRAME-SIZE : dvalue\n";
+printf OUTFILE "   V-FRAME-SIZE : dvalue\n";
+printf OUTFILE "   COMMENT : svalue\n\n";
+
+printf OUTFILE "CONTENT  Shot-Change\n";
+printf OUTFILE "   TYPE : lvalue [CUT FADE-IN FADE-OUT DISSOLVE TRANSLATE SPECIAL-EFFECT]\n";
+
+printf OUTFILE "OBJECT  Text\n";
+printf OUTFILE "   POSITION : bbox\n";
+printf OUTFILE "   TEXT : svalue\n\n";
+printf OUTFILE "#END_CONFIG\n";
+
+printf OUTFILE "\n#BEGIN_DATA\n\n";
+printf OUTFILE "FILE   Information\n";
+printf OUTFILE "   SOURCE : \"LAMP.mpg\"\n";
+printf OUTFILE "   FORMAT : \"MPEG\"\n";
+printf OUTFILE "   COMPOSITION : \"COLOR\"\n";
+printf OUTFILE "   NFRAMES : \"108\"\n";
+printf OUTFILE "   H-FRAME-SIZE : \"352\"\n";
+printf OUTFILE "   V-FRAME-SIZE : \"240\"\n";
+printf OUTFILE "   COMMENT : \"Indoor scene of people moving\"\n";
+
+printf OUTFILE "\nCONTENT Shot-Change   1:1\n";
+printf OUTFILE "   TYPE : \"FADE-OUT\"\n";
+
+$index = 0;
+while (<DOCFILE>)
+{
+	$Line = $_;
+	getValue();
+	
+
+	if ($field[0] eq "x:")
+	{
+	   $index ++;
+	   printf OUTFILE "OBJECT  Text $index 1:1\n";
+	   printf OUTFILE "   POSITION : \"$field[1] $field[3] $field[5] $field[7]\"\n";
+	   printf OUTFILE "   TEXT : \"$field[8]\"\n\n";
+	}
+}
+
+printf OUTFILE "\n\#END_DATA";
+close DOCFILE;
+close OUTFILE;	
+
+
+
+sub getValue {
+        $Line1 = $Line;
+	chomp($Line);
+	$Line =~ s/^\s+//;
+	@field = split(/\s+/,$Line); 
+}
+
+
+
+

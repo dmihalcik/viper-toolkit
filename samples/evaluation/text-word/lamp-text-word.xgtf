@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<viper xmlns="http://lamp.cfar.umd.edu/viper#" xmlns:data="http://lamp.cfar.umd.edu/viperdata#">
+    <config>
+        <descriptor name="Information" type="FILE">
+            <attribute dynamic="false" name="SOURCETYPE" type="http://lamp.cfar.umd.edu/viperdata#lvalue">
+                <data:lvalue-possibles>
+                    <data:lvalue-enum value="SEQUENCE"/>
+                    <data:lvalue-enum value="FRAMES"/>
+                </data:lvalue-possibles>
+            </attribute>
+            <attribute dynamic="false" name="NUMFRAMES" type="http://lamp.cfar.umd.edu/viperdata#dvalue"/>
+            <attribute dynamic="false" name="FRAMERATE" type="http://lamp.cfar.umd.edu/viperdata#fvalue"/>
+            <attribute dynamic="false" name="H-FRAME-SIZE" type="http://lamp.cfar.umd.edu/viperdata#dvalue"/>
+            <attribute dynamic="false" name="V_FRAME_SIZE" type="http://lamp.cfar.umd.edu/viperdata#dvalue"/>
+            <attribute dynamic="false" name="V-FRAME-SIZE" type="http://lamp.cfar.umd.edu/viperdata#dvalue"/>
+        </descriptor>
+        <descriptor name="Text" type="OBJECT">
+            <attribute dynamic="true" name="Contents" type="http://lamp.cfar.umd.edu/viperdata#svalue">
+                <default>
+                    <data:svalue value="NULL"/>
+                </default>
+            </attribute>
+            <attribute dynamic="true" name="Location" type="http://lamp.cfar.umd.edu/viperdata#obox"/>
+        </descriptor>
+    </config>
+    <data>
+        <sourcefile filename="http://viper-toolkit.sourceforge.net/stuff/lamp-moving.mpg">
+            <file id="0" name="Information">
+                <attribute name="SOURCETYPE"/>
+                <attribute name="NUMFRAMES">
+                    <data:dvalue value="122"/>
+                </attribute>
+                <attribute name="FRAMERATE">
+                    <data:fvalue value="30.0"/>
+                </attribute>
+                <attribute name="H-FRAME-SIZE"/>
+                <attribute name="V_FRAME_SIZE"/>
+                <attribute name="V-FRAME-SIZE"/>
+            </file>
+            <object framespan="1:92" id="0" name="Text">
+                <attribute name="Contents">
+                    <data:svalue framespan="1:92" value="LAMP"/>
+                    <data:svalue framespan="93:95" value="LAMP Laboratory"/>
+                </attribute>
+                <attribute name="Location">
+                    <data:obox framespan="1:92" height="28" rotation="0"
+                        width="95" x="44" y="7"/>
+                    <data:obox framespan="93:95" height="36"
+                        rotation="0" width="260" x="43" y="5"/>
+                </attribute>
+            </object>
+            <object framespan="1:92" id="1" name="Text">
+                <attribute name="Contents">
+                    <data:svalue framespan="1:95" value="UMD"/>
+                </attribute>
+                <attribute name="Location">
+                    <data:obox framespan="1:95" height="23" rotation="0"
+                        width="57" x="289" y="212"/>
+                </attribute>
+            </object>
+            <object framespan="1:92" id="2" name="Text">
+                <attribute name="Contents">
+                    <data:svalue framespan="1:94" value="Laboratory"/>
+                </attribute>
+                <attribute name="Location">
+                    <data:obox framespan="1:94" height="30"
+                        rotation="359" width="158" x="147" y="7"/>
+                </attribute>
+            </object>
+        </sourcefile>
+        <sourcefile filename="http://www.example.com/MissingFile.mpg">
+            <file id="0" name="Information">
+                <attribute name="SOURCETYPE"/>
+                <attribute name="NUMFRAMES">
+                    <data:dvalue value="122"/>
+                </attribute>
+                <attribute name="FRAMERATE">
+                    <data:fvalue value="1.0"/>
+                </attribute>
+                <attribute name="H-FRAME-SIZE"/>
+                <attribute name="V_FRAME_SIZE"/>
+                <attribute name="V-FRAME-SIZE"/>
+            </file>
+        </sourcefile>
+    </data>
+</viper>

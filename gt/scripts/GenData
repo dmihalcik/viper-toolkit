@@ -1,0 +1,49 @@
+#!/bin/csh
+
+# Usage: gendata <data_directory> <new_size>
+#
+# this script copy and rename existing image files, to make a larger
+# data set, then create a new data .info file
+#
+
+if ($2x == x) then
+	echo "Usage: gendata <data_directory> <new_size>"
+	exit
+endif
+
+set datad = $1
+set new_size = $2
+
+
+#
+# Copy Files
+#
+set count = 0;
+echo "Copy and Renaming"
+foreach ppmfile ($datad/*.jpg)
+	@ count += 1;
+	set tailfile = $ppmfile:t
+	set basefile = $tailfile:r
+	set jpgfile = $datad/$basefile$count.jpg
+	echo -n ".";
+	cp $ppmfile $jpgfile
+	if ( $count >= $new_size) then
+		break
+	endif
+end
+
+#
+# 
+#
+set infofile =  $datad/$datad:t.info
+
+echo "#VIPER_VERSION_3.0" >! $infofile
+echo "1" >> $infofile
+
+foreach jpgfile ($datad/*.jpg)
+  set basefile = $jpgfile:t
+  echo $basefile >> $infofile
+end
+
+echo " "
+echo "Generate Complete"

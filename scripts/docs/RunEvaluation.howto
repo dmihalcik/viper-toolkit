@@ -1,0 +1,402 @@
+HOWTO: Using RunEvaluation.pl
+----------------------------------------------------------------------
+
+RunEvaluation.pl is a perl script that uses ViPER-PE and gtfC-graphics
+to run multiple trials between different sets of data. As ViPER-PE 
+supports no aggregation features of its own, and gtfC-graphics is 
+arcane, this script comes in handy often.
+
+To invoke RunEvaluation, call
+  RunEvaluation.pl <Eval script> <.epf template file>
+
+A script looks something like this (for an explanation, 
+see Example 1 below):
+	$PR = gtfC.pr
+	$GTF = face-text.gtf
+	
+	$RDF = caere.rdf
+	$NAME = Caere OCR
+	#RUN_EVAL
+	#INCLUDE_GRAPH
+	
+	$RDF = clara.rdf
+	$NAME = Clara OCR
+	#RUN_EVAL
+	#INCLUDE_GRAPH
+	
+	#RUN_COMBINED_GRAPHS
+	CaereVClara
+	
+	#END
+
+An EPF template looks like an EPF file, but it may contain
+variable substitutions. For more information on the EPF format,
+see the included README or the ViPER-PE manual. The variable
+substitutions are of the form <varName>, and will be described 
+below.
+
+----------------------------------------------------------------------
+
+RunEvaluation works in a simple manner, looping through the lines of 
+the script, executing them as commands. There are no looping or jump
+constructs. The main goal of the program is to generate .config files
+to pass to makeGraph, and the .raw files to go with them. To do this, 
+it does the following:
+
+0. Interspersed among the commands, are parameter settings. These are
+   of the form "$PARAMETER = value" Each parameter has a specific
+   meaning to the various directives. For a complete list, see the 
+   appendix.
+
+1. Generates an .epf file from the template and using the 
+   substitutions given on the "* <name> = value" lines. It stores
+   the generated EPF file in the $EPF_EVAL directory.
+
+2. Generates a .raw file using the generated .epf file and the
+   properties, result, and truth data specified in the $PR, $RDF, and
+   $GTF variables, respectively. This is invoked via the RUN_EVAL 
+   call.
+    * This means you may specify multiple results files in the data
+      file. The main difficulty is that you cannot specify multiple
+      templates, so you have to do more variable substitution.
+    * The RUN_EVAL directive is not always required. If you have
+      already generated the appropriate .raw output earlier in your
+      script, it does not have to be generated again. This behaviour
+      is almost always seen after a call to CLEAR_GRAPH, which clears
+      the graph stack, but does not erase any generated files.
+
+3. Generates .config files (and directories to put the files in) based
+   on the NAME option, and runs makeGraph on them. There are two ways
+   to make a graph, the rather boring RUN_GRAPH option, which makes a
+   graph from a single raw file (the one most recently generated), and
+   the more interesting RUN_COMBINED_GRAPHS options, which requires
+   some explaining.
+    * RUN_COMBINED_GRAPHS operates on all of the raw files generated 
+      and then included via INCLUDE_GRAPH or APPEND_GRAPH since the 
+      last call to CLEAR_GRAPH. Append and include are orthogonal
+      functions
+       - APPEND_GRAPH sums the results of the raw file to the one
+         previous, or, if it called append_graph, its sum. makeGraph
+         does not support any fancy multicolored bars, so the appended
+         tests are mushed together as one, larger test.
+       - INCLUDE_GRAPH starts a new sample set. 
+    * Basically, append when you want two bars added together, and
+      include when you want to compare two bars.
+    * If you want to use APPEND_GRAPH, the name of the first run will
+      be the name of the combined run. Therefore, it is a good idea to
+      use the NAME_GRAPH option, as the name of the combined thing
+      should usually be kept seperate from each individual name.
+    * It should be noted that RUN_COMBINED_GRAPHS must be followed by
+      the new name for the graph. Like the other graph names, this 
+      will be used for its directory and the names of the associated
+      .gifs and .config files.
+
+4. When it encounters a #CLEAR_GRAPH directive, it removes all of the
+   test information from the data stack, but it does not erase the
+   raw output, nor does it reset the variables.
+
+5. Stops when it encounters the #END directive. Otherwise it will
+   continue running, waiting for a line of input that will not appear.
+
+----------------------------------------------------------------------
+EXAMPLES
+
+Example 1-
+If I want to compare two different RDF files:
+
+1. Set up the variables that are used throughout:
+$PR = properties_file.pr
+$GTF = gtf 
+
+2. Process the first rdf file
+$RDF = first_rdf_file
+$NAME = first-run
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+3. Process the second. This looks the same, except different name &
+   RDF. Remember that all graph names must be unique (for a given
+   results directory), or they will overwrite each other.
+
+4. Create the graph. Note that the Combined-graph name is on the line
+   following the directive, as opposed to on the line like the others
+#RUN_COMBINED_GRAPHS
+comparison_between_two
+
+
+5. If you want to do some more, first clear the graph stack:
+#CLEAR_GRAPH
+
+
+
+Example 2
+Comparing RDF files with different schema to the same gtf file.
+
+A - Before creating a .data file, edit a .template file to contain the
+    appropriate variables. For example, its EQUIVALENCE section should
+    look something like:
+#BEGIN_EQUIVALENCE
+   TextBlock : <textEquivalent>
+   BBOX : <bboxEquivalent>
+#END_EQUIVALENCE
+
+1. Set up the header. See example 1.
+
+2. Create the first instance. Make sure to look at your results file
+   to get the appropriate variable values.
+$RDF = first_rdf_file
+$NAME = first-run
+ * <textEquivalent> = Text
+ * <bboxEquivalent> = LOCATION
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+3. The same as step 2, but with new values.
+
+4. See example 1 steps 4 & 5 for advice on how to create the graphs.
+
+
+
+Example 3
+Summing together the results for multiple ground truth sections; if 
+for example, you ran your test on two different mpegs but now wish to
+evaluate them as one. This is a variation on example 1.
+
+
+1. Set up the variables that are used throughout:
+$PR = properties_file.pr
+
+2. Process the first results, summing them up against multiple ground
+   truth files.
+$GTF = mpeg_1_truth
+$RDF = first_rdf_file_on_mpeg_1
+$NAME = first-run-mpeg-1
+#NAME_GRAPH first-test
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+$GTF = mpeg_2_truth
+$RDF = first_rdf_file_on_mpeg_2
+$NAME = first-run-mpeg-2
+#RUN_EVAL
+#APPEND_GRAPH
+
+3. Process the second. Looks like the stuff in step 2, but referring
+   to the second result set.
+
+4. Create the graph.
+#RUN_COMBINED_GRAPHS
+comparison_between_two
+
+5. If you want to do some more, first clear the graph stack:
+#CLEAR_GRAPH
+
+
+
+----------------------------------------------------------------------
+APPENDIX A - Eval Script Parameters
+
+Some of the parameters can be set as environment variables. These are
+marked with (Env). Most of these parameters must be set before calling
+RUN_EVAL or creating a graph. The distinction of file names and paths 
+can be quite annoying, but often pays off for processing large 
+directories. Currently, the file names must be relative to the 
+appropriate directory.
+
+To set a parameter, use the form
+$PARAM = value
+
+
+DATA_HOME
+  (Env) Root of the data directory. Pretty much the same as EVAL_HOME.
+
+EVAL_EPF
+  (Env) Directory to contain the generated EPF files.
+
+EVAL_GTF
+  (Env) Directory that contains the gtf files.
+
+EVAL_HOME
+  (Env) The root of the evaluation directories.
+
+EVAL_PROP
+  (Env) Directory containing the properties file.
+
+EVAL_RDF
+  (Env) Directory that contains the rdf files.
+
+EVAL_RESULTS
+  (Env) Directory to store the results.
+
+GTF
+  The truth file to use. See RDF.
+
+NAME
+  The name to associate with the graph. This name will be used for the
+  individual run in the generated graph. This is important, since it 
+  informs RUN_EVAL where to store the eval results and INCLUDE_GRAPH, 
+  APPEND_GRAPH, etc. where to look it up.
+
+PR
+  The properties file to send to ViPER-PE. For more information about
+the properties, see the README or the manual.
+
+RDF
+  The result file to use. ViPER-PE measures this against the specified
+  truth file in the GTF parameter.
+
+----------------------------------------------------------------------
+APPENDIX B - Directives
+
+To invoke a directive, use the form
+#<DIRECTIVE_NAME>
+
+APPEND_GRAPH
+  Appends the most current data set to the previous data set and
+  stores that as the current data set.
+
+CLEAR_GRAPH
+  Clears the current test set.
+
+END
+  Terminates the script. Required.
+
+INCLUDE_GRAPH
+  Marks the end of any previous "append graph" sets and starts a new
+  test set. 
+
+NAME_GRAPH
+  The title to give the graph. Has a character limit of something
+  like 100, but most graphs will crop much more than that, anyway.
+
+RUN_COMBINED_GRAPHS
+  Generates a graph from the current test set, including all sets 
+  generated by INCLUDE_GRAPH and APPEND_GRAPH since the start of the
+  script or the most recent CLEAR_GRAPH directive. It takes one argument
+  on the line after it (unlike the other commands, which take an argument,
+  if any, on the same line after an '='.)
+
+RUN_EVAL
+  Runs a test using the current parameter state. This includes
+  generating the required .epf and .raw files, but no graphs are
+  created.
+
+RUN_GRAPH
+  Generates a graph based on the most recent run. Not very useful for
+  comparison, but still somewhat interesting.
+
+
+----------------------------------------------------------------------
+APPENDIX C - EPF Substitutions
+
+Substitutions are indicated in the form:
+ * <variable> = value
+This replaces every occurance of the string '<variable>' with the 
+given value. 
+
+NOTE: 
+What the code currently does is a simple perl regexp matching the 
+characters (minus spaces) between the * and the = with the string
+after the = (spaces removed, and any = signs replaced with spaces).
+This is just a generic sort of hack, but could be annoying if you
+want to use the equality filter. This will likely be changed in a 
+newer version to allow the user to list perl regexps, or use quoted
+strings, or both. 
+
+
+
+----------------------------------------------------------------------
+APPENDIX D - Full Scripts
+
+**** Script 1 ****
+ ++++ .data  ++++
+$PR = properties_file.pr
+$GTF = gtf 
+
+$RDF = first_rdf_file
+$NAME = first-run
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+$RDF = second_rdf_file
+$NAME = second-run
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+
+#RUN_COMBINED_GRAPHS
+comparison_between_two
+
+#CLEAR_GRAPH
+#END
+
+
+
+**** Script 2 ****
+ ++ .template  ++
+#BEGIN_EQUIVALENCE
+   TextBlock : <textEquivalent>
+   BBOX : <bboxEquivalent>
+#END_EQUIVALENCE
+
+ ++++ .data ++++
+$PR = properties_file.pr
+$GTF = gtf 
+
+$RDF = first_rdf_file
+$NAME = first-run
+ * <textEquivalent> = Text
+ * <bboxEquivalent> = LOCATION
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+$RDF = second_rdf_file
+$NAME = second-run
+ * <textEquivalent> = TEXT
+ * <bboxEquivalent> = SEGMENT
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+#RUN_COMBINED_GRAPHS
+comparison_between_two
+
+#END
+
+
+
+**** Script 3 ****
+$PR = properties_file.pr
+
+$GTF = mpeg_1_truth
+$RDF = first_rdf_file_on_mpeg_1
+$NAME = first-run-mpeg-1
+#NAME_GRAPH first-test
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+$GTF = mpeg_2_truth
+$RDF = first_rdf_file_on_mpeg_2
+$NAME = first-run-mpeg-2
+#RUN_EVAL
+#APPEND_GRAPH
+
+
+$GTF = mpeg_1_truth
+$RDF = second_rdf_file_on_mpeg_1
+$NAME = second-run-mpeg-1
+#NAME_GRAPH first-test
+#RUN_EVAL
+#INCLUDE_GRAPH
+
+$GTF = mpeg_2_truth
+$RDF = second_rdf_file_on_mpeg_2
+$NAME = second-run-mpeg-2
+#RUN_EVAL
+#APPEND_GRAPH
+
+
+#RUN_COMBINED_GRAPHS
+comparison_between_two
+
+#CLEAR_GRAPH
+#END

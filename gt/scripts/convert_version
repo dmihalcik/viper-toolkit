@@ -1,0 +1,59 @@
+#!/bin/csh
+
+# Usage: convert_version <from_directory> <to_direcetory> <info_directory>
+#
+# this script convert all old version gtf in a dir to new version 
+#
+
+if ($2x == x) then
+	echo "Usage: convert_version <from_directory> <to_directory> <info_directory>"
+	exit
+endif
+
+set ind = $1
+set outd = $2
+set infod = $3
+
+if (!(-e $outd)) then
+        echo "Creating data directory: $outd"
+        mkdir $outd
+else
+        echo " "  
+        echo "$outd already exists...."
+        echo "GTF files will be overwritten..."
+        echo "Continue? (Y/N) ";
+        set ans = ($<)
+        if ($ans != "y") then
+         echo "Exiting..."
+          exit
+        endif
+        else if ($ans != "Y") then
+         echo "Exiting..."
+          exit
+        endif
+
+endif
+
+#
+# Converting Files
+#
+set count = 0;
+echo "converting"
+foreach oldfile ($ind/*.gtf)
+	@ count += 1;
+	set tailfile1 = $oldfile:t
+	set basefile = $tailfile1:r
+	set newfile = $outd/$tailfile1
+	set infofile = $infod/$basefile/$basefile.info
+	echo $infofile
+	echo -n ".";
+	VerGTF1  $oldfile $newfile $infod $infofile
+
+end
+
+#
+# 
+#
+
+echo " "
+echo "Converting Complete"

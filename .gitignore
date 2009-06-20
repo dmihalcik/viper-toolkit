@@ -1,0 +1,10 @@
+common/lib/*.jar
+common/lib/*.zip
+common/lib/*.dll
+common/lib/*.so
+bin
+doc
+viper-full-*
+*/bin
+*/classes
+dist/viper-light-*

@@ -1,0 +1,14 @@
+#! /usr/imports/bin/tcsh -f
+
+#rm -f debug
+foreach file(`ls $GTFPATH`)
+    echo " "
+    echo "######################################"
+    echo "Processing: $file:r"
+    if ($RDFFLAG == 1 && !(-e $RDFPATH/$file:r.rdf)) then
+        echo "ERROR: Missing RDF File for $file"
+    else 
+        doEverything $file:r
+    endif
+end
+

@@ -1,0 +1,43 @@
+
+packages:
+
+The source is divided into packages under the viper domain. Perhaps they 
+should be under edu.umd.cfar.viper, but that can be altered later if necessary.
+
+They depend upon some other packages. The org.apache and org.w3c domains
+are for parsing XML formatted data. The test packages are for running 
+unit tests, like viper.geometry.GeometryTest, but aren't necessary for
+production code. Also, the edu.umd.cs.jazz packages are for the jazz ZUI
+toolkit, which I used at one point to do visualization. There is still some
+legacy code (getVisualRepresentation) that uses the packages, but these can be
+removed, as there is no longer any visualization program that uses them
+(It might still be in RCS, as viper.descriptors.DisplayDescriptors.java.
+It only worked on bboxes.)
+
+viper.comparison:
+  These are classes for comparing sets of descriptors. GtfC provides the main
+method for using CompEvaluator, which compares two DescriptorData objects.
+The CompEvaluator uses the Filters to do filtering. A CompEvautor works
+on a set of CompMatrixes. A CompMatrix compares two DescriptorList objects.
+A Comparison object represents a relation between two individual descriptors.
+
+viper.descriptors:
+  These are classes for dealing with ViPER data. A DescriptorData interface,
+implemented by the DescHolder object, is representative of a single viper
+data file. A DescriptorList, implemented by DescVector, represents all 
+Descriptors from a single source file. The Converter class reads in data
+from one of the two formats, then spits it back out; this is useful
+for both converting and checking the data format. A Descriptor represents
+a single descriptor, with DescPrototype representing a Descriptor config,
+DescSingle a standard descriptor, and DescAggregate a descriptor after it
+has been combined with other descriptors in an attempt to match a target.
+To read in descriptor data, first read the configs into a DescriptorConfigs
+object, and and Equivalencies if necessary, and then use DescriptorConfig's
+factory method to parse data.
+
+viper.descriptors.attributes:
+  These are classes representing various attributes for the descriptors.
+
+
+
+

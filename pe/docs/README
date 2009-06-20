@@ -1,0 +1,323 @@
+ * ************************************************************************ *
+       Copyright (C) 2000 by the University of Maryland, College Park
+
+		Laboratory for Language and Media Processing
+		   Institute for Advanced Computer Studies
+	       University of Maryland, College Park, MD  20742
+
+   email: lamp@cfar.umd.edu               http: lamp.cfar.umd.edu
+ * ************************************************************************ *
+
+Running the Software:
+
+ViPER-PE [-options]
+options are:
+	-b <file name prefix> 	Sets a base for .pr, .epf, .gtf, rdf,
+				and .out files. For example, 
+				'-b face-text' would automatically
+				attempt to load 'face-text.pr' as the 
+				properties file, 'face-text.gtf' as
+				the truth file, 'face-text.rdf as the
+				result data file, and so on.
+	-(g/r)c	<Cfg file name>	If the configuration of the .rdf or .gtf
+				is stored seperately from the data, 
+				specify it with -gc or -rc. The XML format
+				does not support this feature.
+	-raw <raw file>		Where to output the raw data.
+				If none specified, none output.
+
+These can be specified in the properties file:
+	-L <#>	Level at which to evaluate
+			(0=None, 1=Temporal Match, 2=Frame Constrained
+			3=Attribute Constrained)
+	
+
+These options override what is found in the -b option or the properties file.
+	-r <Results file name>	the Results Data file (Candidate set)
+	-g <Truth file name>	the Ground Truth file (Target set)
+	-o <Output file>	where to store the verbose output
+				"-" indicates System.out
+	-epf <EPF name>		the evaluation parameters file to use
+	-pr <PROPERTIES file>	(defaults to GtfC.pr)
+
+        -P<property> <value>    Override a given property by name.
+
+Remember, truth and results files must be present to perform evaluation,
+either in the properties file or listed by the -b option or the -r and -g
+options.
+
+
+************************************************************************
+Properties File Format:
+
+
+File Configuration section:
+
+ gtconfig_file: where the truth config is stored. Not necessary if the
+	same as gt_file.
+
+ gt_file: where the truth data (Target set) is stored.
+
+ resultsconfig_file: where the results config info is stored. Not
+	necessary if the same as results_file.
+
+ results_file: where the results data (Candidate set) is stored.
+
+ epf_file: name of the Evaluation Parameters file. It contains which
+	attributes to evaluate, typewise metrics and tolerances, and
+	equivalencies between the result and truth naming conventions.
+
+ output_file: where to print the verbose output. Defaults to System out.
+
+ raw_file: Where to print the raw output. Defaults to no raw output.
+
+ base: the base file name, same as -b option
+
+
+Formatting:
+
+ verbose: true or false - prints out distance coefficients
+
+ attrib_width: the width of the data to print in the output file
+
+
+
+Descriptor-wide Metric Configuration:
+
+ level: what level to take the comparison
+	1 = Detection
+		the objects overlap temporally better than some threshold
+		see range_tol, rmetric_default
+	2 = Localization
+		performs detection using only the frames whose attributes
+		meet necessary thresholds 
+	3 = Statistical Comparison
+		the average/median/max/min, depending on which was
+		selected, meets a certain threshold
+
+ target_match: How to crop the set of possibles at the end, when using an
+               OBJECT_EVALUATION
+	ALL, DEFAULT = No cropping
+	SINGLE-GREEDY = Only allow one Candidate for each Target
+	SINGLE-BEST = Allow only one Candidate for each Target and
+		vice-versa
+	MULTIPLE = Allow multiple Candidates to be mapped to a single
+		Target using composition
+
+ range_metric: the distance metric to use for the frame overlap test
+	dice = 1- Dice coefficient (2 & intersection / sum of candidate
+		and target)
+	overlap = 1 - amount of candidate on target / size of target
+	E = equality (0 if equal, 1 if not)
+
+ range_tol: comparisons that indicate the distance between two 
+	descriptor's frame span is greater than this will be dropped. 
+
+ level3_metric: the statistic to use for statistical comparison.
+	either minimum, maximum, median, or average
+
+ level3_tol: the tolerance to use on the generated distance statistic
+	Anything less than or equal to this will still count as a valid
+	comparison.
+
+
+Attribute Metric and Tolerance Configuration:
+
+ svalue_metric: The default metric for comparison of svalues. Note that the
+		actual values are calculated in a function of the form:
+		1 - e^(-distance)
+	L = Levenshtein (edit) distance
+	H = Hamming (Strings of different length are counted as failures)
+	E = equality (either 0 or 1)
+
+ bbox_metric, obox_metric: The default metric for these data types.
+	dice - same as above
+	overlap - same as above
+	maxdev - max ((A - overlap) / A, (B - overlap) / B)
+	E - same as above
+
+  These set default tolerances on the different attribute type:
+ bvalue_tol, dvalue_tol, fvalue_tol, svalue_tol, point_tol, circle_tol, 
+bbox_tol, obox_tol, lvalue_tol
+
+
+************************************************************************
+Evaluation Parameters File Format:
+
+	The .epf file tells the software which attributes of which 
+descriptors to compare and what metrics to use. This is done with the
+Equivalency, Evaluation, and Filter sections. 
+
+ + EQUIVALENCY
+
+	It is not uncommon to have descriptors with different names and
+signatures between the candidate (.rdf) and target (.gtf) data sets; in
+fact, since the data is often generated by different people with different
+goals, it is rare that the signatures line up. Also, what in the
+candidates are one type of descriptor may be divided in two among the
+targets, or some more complex permutation. The Equivalency section of the
+.epf file allows the program to map the namespaces together. The general
+format for this is:
+
+	<target name> : <candidate name>
+
+where the target name is the name of some descriptor or attribute and the
+candidate is the name of the descriptor or attribute that you want to
+compare it with.
+
+
+ + EVALUATION
+
+	The evaluation format, marked by the #BEGIN_<Evaluation
+Type>_EVALUATION and  #END_<Type>_EVALUATION, determines what descriptors
+and which attributes will be considered relevent for analysis. If no
+evaluation is specified, the  program will evaluate all descriptor
+types using the Object evaluation protocol. If only the descriptor name
+and type is listed, it will analyze all attributes found in both target
+and  candidates of the type. Alternatively, each attribute can either be
+selected  or removed from comparison.
+	The evaluation section is also used to set descriptor specific
+metrics. These metrics follow the name of the descriptor or attribute that 
+they modify in brackets, containing the threshold for the given attribute 
+and the metric that will be used to calculate the distance. For example, 
+
+#BEGIN_OBJECT_EVALUATION
+OBJECT Text [- -]
+	LOCATION : [.9 maxdev]
+	TYPE : [- -]
+#END_OBJECT_EVALUATION
+
+This evaluates Text ground truth objects, comparing only their LOCATION
+and TYPE attributes. 
+
+
+For Framewise Evaluation, there is no frame span metric, but there can be
+a list of as many metrics for each attribute as you wish, for example:
+
+#BEGIN_FRAMEWISE_EVALUATION
+OBJECT Text
+    LOCATION : matchedpixels missedpixels falsepixels fragmentation \
+arearecall areaprecision [arearecall 0.7] [areaprecision 0.7] <dice 0.6>
+#END_FRAMEWISE_EVALUATION
+
+Note: This is the format required for RunEvaluation.pl
+The bracketed metrics are used for localization - objects that are less
+than the number (in this case, .7) in distance by the specified metric
+(either arearecall or areaprecision), they are counted as in. The
+angle-bracketed metric is used for dont-care regions: objects that are
+within the specified threshold by the specified metric of some object that
+is specified as dont-care by one of the output filters (see below), it is
+marked as dont-care as well. Note that there can be only one dont-care
+metric/threshold pair per attribute.
+
+
+For Tracking Evaluation, you may specify an attribute as the
+"KEY" attribute with an asterisk, use Object Evaluation metrics to select
+which descriptors match, or both (the object evaluation being applied to
+the descriptors that do not have a key match). Then, the list of metrics
+are applied to each tracking match. For example:
+
+#BEGIN_TRACKING_EVALUATION
+OBJECT Text [- -] recall precision
+   LOCATION : [dice 0.99] positional size orientation
+ * KEY
+#END_TRACKING_EVALUATION
+
+This Evaluation will first attempt to align ground truth descriptors with
+candidate descriptors whose KEY attribute is the same. For those that are
+left over, it will perform a SINGLE-GREEDY matching using the default
+frame span metrics (as specified with [- -]) and a dice metric with
+threshold of 0.99 for the LOCATION attribute. For each found pair, it will
+return recall and precision for the frame spans, and average positional,
+size, and orientation coefficients for the LOCATION spatial attribute.
+
+
+ + FILTERS
+
+	Filters are a way to only read in a subset of the descriptors
+listed in a file. They are useful mostly for only examinig descriptors
+from certain frames, but can also be used on any of the attributes. Note
+that this will often have a strange effect on your data, as using a subset
+of the truth will increase the amount of false detections if no similar
+filter is applied to the results. This is the opposite of EVALUATION, where
+the distance data is computed but not output.
+	In the file, the filter blocks are delimited by 
+#BEGIN_GROUND_FILTER and #END_GROUND_FILTER for filters on .gtf, and
+#BEGIN_RESULT_FILTER and #END_RESULT_FILTER for filters on .rdf. Inside,
+the data format is similar to the EVALUATIONS section. Rules can be anded
+and ored together, with the &&'s taking precedence. There is as of yet no
+support for parentheses. Each attribute type may define its own rule
+operators, but the only allowed logical connectives are && and ||.
+Standard operators include contains, intesects, and excludes for frame
+numbers, == , !=, <=, <, etc for numerics, etc. 
+
+	#BEGIN_GROUND_FILTER
+	OBJECT Text : contains 1:5 || (intersects 100:200 && excludes 50:50)
+		READABLE : == true
+	#END_GROUND_FILTER
+
+This filter will only read in .gtf descriptors that contain the first five
+frames or ones that have some frames between 100 and 200 and no frame at
+50.
+
+  attributeFilter ::==  <attribute name> : filters
+  filters ::== filter | filters connective filter
+             | (filters) connective filters || (filters)
+  connective ::== || | &&
+  filter ::== rule value | rule("value")
+  rule ::== (depends on attribute type. Some rules include:
+		==, !=    	Defined for most types
+		<. <=, >, >=  	Defined for most numbers
+		contains, excludes,
+			intersects  Defined for dimensional data
+				  ex. frames)
+
+There is also a shortcut, if you only have one equlity rule you can leave
+the == symbol off. This is useful for lvalues, when you want to only look
+at one.
+
+
+ + Deficiencies of the Format
+  - Cannot specify complex equivalency/filter/evaluation relationships,
+such as "Map all candidates with the lvalue==FACE to all of the target
+FACE descriptors, and all candidates with lvalue==HAND to all of the
+target HAND descriptors."
+  - Cannot use filters to specify scope, like in Evaluations
+  - How to handle relations? This is a real problem, as the spec for
+relations is pretty much undefined.
+
+
+************************************************************************
+Examples:
+
+
+	gtfc1.1 -b data/textdetect -r text01.rdf -raw raw.out -o -
+This will compare text01.rdf to textdetect.gtf using textdetect.epf, .pr,
+etc. and output raw data to raw.out and verbose data to standard out.
+
+
+************************************************************************
+Bugs/Deficiencies:
+
+- Relation attributes/descriptors are not currently supported. There is no
+	rush to add this, as it is not yet available in ViPER-GT.
+- MULTIPLE cropping is innaccurate for certain types of data. For example,
+	what does it mean to merge two strings? two points? Also, there
+	is some question about how to score two merging objects.
+- Some metrics are calculated using arbitrary weights. These should be
+	able to be set by the user.
+- The current .epf format has many deficiencies, as listed in the .epf
+	section. These will probably be replaced with a new .epf format in
+	1.2 (the version that integrates XML).
+- The .gtf program can take a very long time to compute certain matches.
+	That is because the algorithm has exponential time complexity. 
+	With some luck, I might be able to reduce the average case time
+	complexity.
+
+If you find one not listed here, email me with an adequate description of
+the problem and a copy of the output/stack dump/miscalculation. My
+address:
+	davidm@cfar.umd.edu AND viper-bugs@cfar.umd.edu
+
+
+Be assured that these issues are being addressed for the next release!
