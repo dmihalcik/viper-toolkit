@@ -20,6 +20,7 @@ import javax.swing.border.*;
  * An empty border with zero margin size.
  */
 public class ReallyEmptyBorder extends EmptyBorder {
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Constructs the empty border.
 	 */

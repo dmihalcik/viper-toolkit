@@ -31,6 +31,7 @@ import edu.umd.cfar.lamp.apploader.prefs.*;
  * @author davidm
  */
 class Actionator extends AbstractAction {
+	private static final long serialVersionUID = 1L;
 	private EventListenerList handlers = new EventListenerList();
 	private static Logger logger = Logger.getLogger("edu.umd.cfar.lamp.apploader");
 	private String description;
@@ -66,8 +67,9 @@ class Actionator extends AbstractAction {
 	 */
 	public void addHandler(ActionListener al) {
 		if (al instanceof Action) {
-			((Action) al).addPropertyChangeListener(enabledListener);
-			handlers.add(Action.class, al);
+			Action a = (Action) al;
+			a.addPropertyChangeListener(enabledListener);
+			handlers.add(Action.class, a);
 		} else {
 			handlers.add(ActionListener.class, al);
 		}
@@ -79,8 +81,9 @@ class Actionator extends AbstractAction {
 	 */
 	public void removeHandler(ActionListener al) {
 		if (al instanceof Action) {
-			((Action) al).removePropertyChangeListener(enabledListener);
-			handlers.remove(Action.class, al);
+			Action a = (Action) al;
+			a.removePropertyChangeListener(enabledListener);
+			handlers.remove(Action.class, a);
 		} else {
 			handlers.remove(ActionListener.class, al);
 		}
