@@ -69,5 +69,11 @@ public interface TimeLine {
 	 * @return the plural form of the timeline type name
 	 */
 	public String getPluralName();
+	
+	public boolean hasInterpolatedInformation();
+
+	public InstantRange getInterpolatedOverRange();
+	
+	
 }
 

@@ -14,6 +14,7 @@
 package edu.umd.cfar.lamp.viper.gui.chronology;
 
 import viper.api.*;
+import viper.api.time.InstantRange;
 import edu.umd.cfar.lamp.chronicle.*;
 
 /**
@@ -35,4 +36,13 @@ public abstract class ViperNodeTimeLine implements TimeLine {
 	public void setSelectionModel(ViperChronicleSelectionModel selectionModel) {
 		this.selectionModel = selectionModel;
 	}
+	@Override
+	public boolean hasInterpolatedInformation() {
+		return false;
+	}
+	@Override
+	public InstantRange getInterpolatedOverRange() {
+		throw new UnsupportedOperationException();
+	}
+
 }

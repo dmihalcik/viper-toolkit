@@ -528,6 +528,7 @@ public class PropagateInterpolateImpl implements PropagateInterpolateModule {
 						Attribute a = (Attribute) ats.next();
 						Interpolator magic = getInterpolatorForType(a
 								.getAttrConfig().getAttrType());
+						a.startAggregating();
 						try {
 							helpInterpolateAttribute(a, start, newSpan, magic);
 						} catch (InterpolationException e) {
@@ -535,6 +536,8 @@ public class PropagateInterpolateImpl implements PropagateInterpolateModule {
 									.severe("Error while interpolating descriptors: "
 											+ e.getLocalizedMessage());
 							throw new RuntimeException(e);
+						} finally {
+							a.finishAggregating(true);
 						}
 					}
 				}

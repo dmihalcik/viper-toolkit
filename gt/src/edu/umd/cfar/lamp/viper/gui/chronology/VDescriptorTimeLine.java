@@ -146,4 +146,14 @@ public class VDescriptorTimeLine extends ViperNodeTimeLine  {
 	public void setNameAttr(Attribute nameAttr) {
 		this.nameAttr = nameAttr;
 	}
+	
+	
+	@Override
+	public boolean hasInterpolatedInformation() {
+		return true;
+	}
+	@Override
+	public InstantRange getInterpolatedOverRange() {
+		return getDescriptor().getInterpolatedOverRange();
+	}
 }

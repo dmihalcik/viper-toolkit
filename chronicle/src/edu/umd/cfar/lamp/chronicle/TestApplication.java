@@ -70,6 +70,15 @@ public class TestApplication {
 			this.color = color;
 		}
 
+		@Override
+		public boolean hasInterpolatedInformation() {
+			return false;
+		}
+		@Override
+		public InstantRange getInterpolatedOverRange() {
+			throw new UnsupportedOperationException();
+		}
+		
 		public Iterator getChildren() {
 			return children.iterator();
 		}

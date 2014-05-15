@@ -12,16 +12,21 @@
 
 package edu.umd.cfar.lamp.chronicle;
 
-import java.awt.*;
-import java.awt.geom.*;
-import java.util.*;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.awt.geom.Rectangle2D;
+import java.util.Iterator;
 
-import viper.api.time.*;
-import edu.umd.cfar.lamp.viper.gui.chronology.VDescriptorTimeLineRenderer;
-import edu.umd.cfar.lamp.viper.gui.chronology.VDescriptorTimeLine;
-import edu.umd.cfar.lamp.viper.util.*;
-import edu.umd.cs.piccolo.*;
-import edu.umd.cs.piccolo.util.*;
+import viper.api.time.FrameRate;
+import viper.api.time.InstantInterval;
+import viper.api.time.InstantRange;
+import viper.api.time.TemporalRange;
+import edu.umd.cfar.lamp.viper.util.Interval;
+import edu.umd.cfar.lamp.viper.util.ShapeDisplayProperties;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.util.PBounds;
+import edu.umd.cs.piccolo.util.PPaintContext;
 
 
 
@@ -162,8 +167,8 @@ public abstract class SegmentedTimeLineView extends PNode {
 				normalizedCurrStart * alpha + bref.getX();
 
 			PNode currRect = null;
-			if(c instanceof VDescriptorTimeLine){
-				currRect = makeSegment(currSpan, currRectWidth, height, ((VDescriptorTimeLine)c).getDescriptor().getInterpolatedOverRange());
+			if (c.hasInterpolatedInformation()) {
+				currRect = makeSegment(currSpan, currRectWidth, height, c.getInterpolatedOverRange());
 			}else{
 				currRect = makeSegment(currSpan, currRectWidth, height);
 			}
