@@ -17,19 +17,19 @@ import java.util.*;
  * Stores an ordered pair of comparable objects that
  * together describe a half-open interval. 
  */
-public interface Interval {
+public interface Interval<C extends Comparable<?>> {
 	/**
 	 * Gets the start of the interval.
 	 * @return first element in the interval
 	 */
-	public abstract Comparable getStart();
+	public abstract C getStart();
 
 	/**
 	 * Gets the end of the interval, which is not an element
 	 * of the interval.
 	 * @return the first element after the interval
 	 */
-	public abstract Comparable getEnd();
+	public abstract C getEnd();
 
 	/**
 	 * Tests to see if an object exists that this Interval contains.
@@ -45,7 +45,7 @@ public interface Interval {
 	 * @return boolean true when some element of the set is contained
 	 * within or intersects this interval
 	 */
-	public abstract boolean intersects(Set s);
+	public abstract boolean intersects(Set<C> s);
 
 	/**
 	 * Tests to see that the two intervals have some shared
@@ -53,14 +53,14 @@ public interface Interval {
 	 * @param other the interval to check against
 	 * @return true if the intervals intersect.
 	 */
-	public abstract boolean intersects(Interval other);
+	public abstract boolean intersects(Interval<C> other);
 
 	/**
 	 * Checks to see if this interval contains the given element.
 	 * @param i
 	 * @return
 	 */
-	public abstract boolean contains(Comparable i);
+	public abstract boolean contains(C i);
 
 	/**
 	 * Checks to see if the other interval is a subset of this one.
@@ -68,7 +68,7 @@ public interface Interval {
 	 * @return true if other contains only elements that are 
 	 * elements of this
 	 */
-	public abstract boolean contains(Interval other);
+	public abstract boolean contains(Interval<C> other);
 
 	/**
 	 * Checks to see if this contains all elements of the set.
@@ -76,7 +76,7 @@ public interface Interval {
 	 * @return true if s contains only elements that are 
 	 * elements or subsets of this
 	 */
-	public abstract boolean contains(Set s);
+	public abstract boolean contains(Set<C> s);
 
 	/**
 	 * Since an Interval is designed to be immutable, you need this 
@@ -86,6 +86,6 @@ public interface Interval {
 	 * of the interval are strictly less than this.
 	 * @return A copy of this Interval with the new start and stop
 	 */
-	public abstract Interval change(Comparable start, Comparable stop);
+	public abstract Interval<C> change(C start, C stop);
 
 }
