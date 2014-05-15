@@ -17,6 +17,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.*;
 
 import javax.swing.*;
@@ -47,13 +48,15 @@ public class ScriptManager implements ActionListener {
 	private ViperViewMediator mediator;
 	private Resource parentResource;
 	private Action resetAction = new AbstractAction("Reset Menu") {
+		private static final long serialVersionUID = 1L;
+
 		public void actionPerformed(ActionEvent e) {
 			resetScriptMenu();
 		}
 	};
 	private CacheScripts cache = new CacheScripts();
 	private class CacheScripts {
-		private Map uri2script = new HashMap();
+		private Map<URI, Pair> uri2script = new HashMap<>();
 		/// load the script and put it in the map
 		private Pair loadScript(URI uri) {
 			File script = new File(uri);
@@ -63,7 +66,7 @@ public class ScriptManager implements ActionListener {
 				ClassLoader parent = getClass().getClassLoader();
 				GroovyClassLoader loader = new GroovyClassLoader(parent);
 				try {
-					Class groovyClass = loader.parseClass(script);
+					Class<?> groovyClass = loader.parseClass(script);
 					p = new Pair(l, groovyClass.newInstance());
 				} catch (CompilationFailedException e1) {
 					logger.log(Level.SEVERE, "Error while trying to compile groovy script " + script, e1);
@@ -288,8 +291,9 @@ public class ScriptManager implements ActionListener {
 			msg.setOptions(new Object[] {okayButton, cancelButton});
 			final JDialog dialog = msg.createDialog(appFrame, script.getName());
 			final boolean[] hasBeenCanceled = new boolean[] {false};
-			final SwingWorker sw = new SwingWorker() {
-				public Object construct() {
+			final SwingWorker<ViperData, Void> sw = new SwingWorker<ViperData, Void>() {
+				@Override
+				protected ViperData doInBackground() {
 					BufferedInputStream in = new BufferedInputStream(scriptProc.getInputStream());
 					try {
 						ViperData v = new ViperParser().parseDoc(ImportExport.convertToModern(in));
@@ -312,13 +316,22 @@ public class ScriptManager implements ActionListener {
 					}
 				}
 				
-				public void finished() {
+				public void done() {
 					okayButton.setEnabled(true);
 				}
 			};
 			okayButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					ViperData v = (ViperData) sw.get();
+					ViperData v;
+					try {
+						v = sw.get();
+					} catch (InterruptedException e1) {
+						logger.log(Level.INFO, "Interrupted while opening script", e);
+						v = null;
+					} catch (ExecutionException e1) {
+						logger.log(Level.SEVERE, "Error while opening script", e);
+						v = null;
+					}
 					if (v != null && v.getConfigsNode().getNumberOfChildren() > 0) {
 						ImportExport.importConfig(mediator.getViperData(), v.getConfigsNode());
 						if (v.getSourcefilesNode().getNumberOfChildren() > 0) {
@@ -335,13 +348,13 @@ public class ScriptManager implements ActionListener {
 			cancelButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					hasBeenCanceled[0] = true;
-					sw.interrupt();
+					sw.cancel(true);
 					dialog.setVisible(false);
 					dialog.dispose();
 				}
 			});
-			sw.start();
-			dialog.show();
+			sw.execute();
+			dialog.setVisible(true);
 		}
 
 		public String getScriptName() {

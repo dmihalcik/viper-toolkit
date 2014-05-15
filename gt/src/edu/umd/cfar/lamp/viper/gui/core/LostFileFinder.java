@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.*;
 
@@ -343,7 +344,7 @@ public class LostFileFinder {
 		}
 	}
 	
-	private static class Searcher extends SwingWorker {
+	private static class Searcher extends SwingWorker<URI, Void> {
 		private URI oldURI;
 		private File[] paths;
 		private SearchCompleted f;
@@ -356,10 +357,8 @@ public class LostFileFinder {
 			this.f = f;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		public Object construct() {
+		@Override
+		protected URI doInBackground() {
 			try {
 				Thread.sleep(1000);
 				File f = LostFileFinder.findTheFile(oldURI, paths);
@@ -375,13 +374,14 @@ public class LostFileFinder {
 			}
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		public void finished() {
-			// Inside event thread
-
-			URI found = (URI) this.get();
+		
+		public void done() {
+			URI found;
+			try {
+				found = this.get();
+			} catch (InterruptedException | ExecutionException e) {
+				return;
+			}
 			if (notFoundURI.equals(found)) {
 				found = null;
 			} else if (container != null) {
@@ -393,7 +393,7 @@ public class LostFileFinder {
 			} else {
 				f.found(new File(found));
 			}
-			super.finished();
+			super.done();
 		}
 
 		/**
@@ -451,7 +451,7 @@ public class LostFileFinder {
 		Searcher s = new Searcher(oldURI, paths, whenDone);
 		MissingSearchDialog msd = new MissingSearchDialog(parent, s);
 		s.setContainer(msd);
-		s.start();
+		s.execute();
 		msd.setModal(false);
 		msd.setLocationRelativeTo(parent);
 		msd.setVisible(true);
@@ -466,7 +466,7 @@ public class LostFileFinder {
 		
 		
 		private void closeWindow() {
-			searchThread.interrupt();
+			searchThread.cancel(true);
 			searchThread.setContainer(null);
 			setVisible(false);
 			dispose();

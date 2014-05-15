@@ -20,6 +20,7 @@ import java.net.*;
 import java.text.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.*;
 
 import javax.swing.*;
@@ -219,7 +220,7 @@ public class ViperViewMediator {
 	public void openCanonicalFileAsLocalFile(URI canonical, URI local, MediaElement fileInfo) {
 		if (canonical.equals(getCurrFileName())) {
 			Loader l = new Loader(local, fileInfo);
-			l.start();
+			l.execute();
 			AppLoader appFrame = getPrefs().getCore();
 			JOptionPane msg = new JOptionPane("Loading media file:\n" + local,
 					JOptionPane.INFORMATION_MESSAGE);
@@ -279,7 +280,7 @@ public class ViperViewMediator {
 			getPrefs().changeUser(toRemove, toAdd);
 		}
 	}
-	private class Loader extends SwingWorker {
+	private class Loader extends SwingWorker<DataPlayer, Void> {
 		private URI local;
 		private Window dialog;
 		private MediaElement fileInfo;
@@ -290,16 +291,20 @@ public class ViperViewMediator {
 			this.fileInfo = fileInfo;
 		}
 		
-		/** @inheritDoc */
-		public Object construct() {
+		@Override
+		protected DataPlayer doInBackground() {
 			// XXX: Uses mediator in another thread. Dangerous.
 			// XXX: should allow for interruptions
 			return DataPlayer.createDataPlayer(fileInfo.getSourcefileIdentifier(), local == null ? null : new File(local), getPrefs());
 		}
 		
-		/** @inheritDoc */
-		public void finished() {
-			DataPlayer player = (DataPlayer) get();
+		public void done() {
+			DataPlayer player;
+			try {
+				player = (DataPlayer) get();
+			} catch (InterruptedException | ExecutionException e) {
+				return;
+			}
 			player.setMediator(ViperViewMediator.this);
 			player.setElement(fileInfo);
 
@@ -318,7 +323,7 @@ public class ViperViewMediator {
 				dialog.setVisible(false);
 				dialog.dispose();
 			}
-			super.finished();
+			super.done();
 		}
 
 		/**
@@ -338,7 +343,6 @@ public class ViperViewMediator {
 		public void setContainer(Window frame) {
 			dialog = frame;
 		}
-
 	}
 
 	/**
