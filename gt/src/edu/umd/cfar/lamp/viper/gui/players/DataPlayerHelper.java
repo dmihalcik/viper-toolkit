@@ -200,7 +200,7 @@ abstract class DataPlayerHelper extends DataPlayer {
 				cacheImage(f, currImage);
 				return currImage;
 			} catch (IOException iox) {
-				logger.severe("Error while reading media: " + iox.getMessage());
+				logger.log(Level.SEVERE, "Error while reading media.", iox);
 				return getMostRecentImage();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
