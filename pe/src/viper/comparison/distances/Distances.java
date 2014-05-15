@@ -626,7 +626,7 @@ public class Distances {
 		}
 	}
 
-	private static HashMap distanceMap = new HashMap();
+	private static HashMap<String, Map<String, Distance>> distanceMap = new HashMap<String, Map<String, Distance>>();
 	
 	/**
 	 * Adds a new distance functor for the given attribute data 
@@ -635,9 +635,9 @@ public class Distances {
 	 * @param d the distance functor to use on the data type
 	 */
 	public static final void putDistanceFunctorFor(String type, Distance d) {
-		Map fs = (Map) distanceMap.get(type);
+		Map<String, Distance> fs = distanceMap.get(type);
 		if (fs == null) {
-			fs = new HashMap();
+			fs = new HashMap<String, Distance>();
 		}
 		fs.put(d.toString(), d);
 		distanceMap.put(type, fs);
@@ -655,7 +655,7 @@ public class Distances {
 	 */
 	public static final boolean isDistanceFor(Measurable type, String s)
 			throws UnknownDistanceException {
-		Map values = (Map) distanceMap.get(type.getType());
+		Map<String, Distance> values = distanceMap.get(type.getType());
 		if (values != null) {
 			return values.containsKey(s.toLowerCase());
 		} else {
@@ -676,7 +676,7 @@ public class Distances {
 	public static final boolean isDistanceFor(String type, String s)
 			throws UnknownDistanceException {
 		check(type);
-		Map values = (Map) distanceMap.get(type);
+		Map<String, Distance> values = distanceMap.get(type);
 		if (values != null) {
 			return values.containsKey(s.toLowerCase());
 		} else {
@@ -730,7 +730,7 @@ public class Distances {
 			throw new UnknownDistanceException("Attribute type not found: "
 					+ type);
 		} else {
-			Map distances = (Map) distanceMap.get(type);
+			Map<String, Distance> distances = distanceMap.get(type);
 			if (!distances.containsKey(metric)) {
 				throw new UnknownDistanceException(type, metric);
 			} else {
@@ -750,13 +750,13 @@ public class Distances {
 	 */
 	public static final void useSameDistances(String to, String from) {
 		check(from);
-		Map fromValues = (Map) distanceMap.get(from);
-		Map toValues = (Map) distanceMap.get(to);
+		Map<String, Distance> fromValues = distanceMap.get(from);
+		Map<String, Distance> toValues = distanceMap.get(to);
 		if (fromValues != null) {
 			if (toValues != null) {
 				toValues.putAll(fromValues);
 			} else {
-				toValues = new HashMap();
+				toValues = new HashMap<String, Distance>();
 				toValues.putAll(fromValues);
 				distanceMap.put(to, toValues);
 			}

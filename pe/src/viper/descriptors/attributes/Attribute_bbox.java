@@ -26,14 +26,17 @@ import edu.umd.cfar.lamp.viper.util.*;
  * and equality metrics.
  */
 public class Attribute_bbox extends Attribute_polygon {
+	public static final String LOCAL_TYPE_NAME = "bbox";
+	public static final String TYPE = Attributes.DEFAULT_NAMESPACE_URI + LOCAL_TYPE_NAME;
+
 	static {
-		Distances.useSameDistances("bbox", "obox");
+		Distances.useSameDistances(TYPE, Attribute_obox.TYPE);
 		try {
-			DefaultMeasures.setDefaultMetricFor("bbox", "dice");
+			DefaultMeasures.setDefaultMetricFor(TYPE, "dice");
 		} catch (ImproperMetricException imx) {
 			throw new RuntimeException(imx.getMessage());
 		}
-		DefaultMeasures.setDefaultToleranceFor("bbox", 0.0);
+		DefaultMeasures.setDefaultToleranceFor(TYPE, 0.0);
 	}
 
 	static String defaultCompositionType = "union";
@@ -54,7 +57,7 @@ public class Attribute_bbox extends Attribute_polygon {
 	 * @return "bbox"
 	 */
 	public String getType() {
-		return "bbox";
+		return TYPE;
 	}
 
 	private static final Bbox arch = new Bbox();
@@ -411,7 +414,7 @@ public class Attribute_bbox extends Attribute_polygon {
 		 * @return "bbox"
 		 */
 		public String getType() {
-			return "bbox";
+			return TYPE;
 		}
 
 		/**
@@ -425,7 +428,7 @@ public class Attribute_bbox extends Attribute_polygon {
 		 *             If the data is ill-formed
 		 */
 		public AttributeValue setValue(Element el) {
-			if (!"bbox".equals(el.getLocalName())) {
+			if (!Attribute_bbox.LOCAL_TYPE_NAME.equals(el.getLocalName())) {
 				throw new IllegalArgumentException("Unexpected data type: "
 						+ el.getTagName());
 			} else {

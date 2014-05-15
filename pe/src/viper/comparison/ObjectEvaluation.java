@@ -28,16 +28,15 @@ import edu.umd.cfar.lamp.viper.util.reader.*;
  */
 public class ObjectEvaluation implements Evaluation
 {
-    private void helpPrintMetricsTo (Descriptor D, Map M, PrintWriter output)
+    private void helpPrintMetricsTo (Descriptor D, Map<String,AttrMeasure> M, PrintWriter output)
     {
         output.print ("\n" + D.getCategory() + " " + D.getName());
-        AttrMeasure fspanM = (AttrMeasure) M.get (" framespan");
+        AttrMeasure fspanM = M.get (" framespan");
         if (fspanM != null) {
             output.print ("\t[" + fspanM + "]");
         }
         output.println ();
-        for (Iterator iter = M.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry curr = (Map.Entry) iter.next();
+        for (Map.Entry<String,AttrMeasure> curr :  M.entrySet()) {
             String attrib = (String) curr.getKey();
             if (!attrib.equals (" framespan")) {
                 AttrMeasure meas = (AttrMeasure) curr.getValue();
@@ -51,10 +50,9 @@ public class ObjectEvaluation implements Evaluation
      */
     public void printMetricsTo (PrintWriter output)
     {
-        for (Iterator iter = descriptors.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry curr = (Map.Entry) iter.next();
+        for (Map.Entry<DescPrototype, Map<String, AttrMeasure>> curr : descriptors.entrySet()) {
             helpPrintMetricsTo ((Descriptor) curr.getKey(),
-                                (Map) curr.getValue(), output);
+                                (Map<String, AttrMeasure>) curr.getValue(), output);
         }
     }
 
@@ -123,10 +121,10 @@ public class ObjectEvaluation implements Evaluation
         }
     }
     
-    private Map helpParseAttribMap(VReader reader, DescPrototype proto) 
+    private Map<String, AttrMeasure> helpParseAttribMap(VReader reader, DescPrototype proto) 
         throws IOException, NoSuchElementException
     {
-        TreeMap attribMap = new TreeMap();
+        TreeMap<String, AttrMeasure> attribMap = new TreeMap<String, AttrMeasure>();
 
         StringTokenizer st = new StringTokenizer (reader.getCurrentLine());
 
@@ -152,7 +150,7 @@ public class ObjectEvaluation implements Evaluation
                     if (!st.nextToken().equals (":")) {
                         reader.printError( "Improper placement of colon" );
                     } else {
-                        attribMap.put (attribName, new AttrMeasure (curr.getLocalType(), st));
+                        attribMap.put (attribName, new AttrMeasure (curr.getType(), st));
                         if (st.hasMoreTokens()) {
                             throw (new BadDataException ("Unparsed data at end of line"));
                         }
@@ -176,7 +174,7 @@ public class ObjectEvaluation implements Evaluation
      * is of the form (String AttribName)->(AttrMeasure)
      * Note that AttribName is " framespan" for the framespan measure.
      */
-    private TreeMap descriptors = new TreeMap(EvaluationParameters.descriptorComparator);
+    private TreeMap<DescPrototype, Map<String, AttrMeasure>> descriptors = new TreeMap<DescPrototype, Map<String, AttrMeasure>>(EvaluationParameters.descriptorComparator);
 
     private EvaluationParameters epf;
     
@@ -254,8 +252,8 @@ public class ObjectEvaluation implements Evaluation
 			output.print (StringHelp.banner("DETECTION(S)", 53));
 	}
         mat.printCandidates (output, raw, descriptors.keySet());
-        for (Iterator iter = descriptors.keySet().iterator(); iter.hasNext(); ) {
-            Descriptor curr = (Descriptor) iter.next();
+        for (Iterator<DescPrototype> iter = descriptors.keySet().iterator(); iter.hasNext(); ) {
+            Descriptor curr = iter.next();
             PrecisionRecall pr = new PrecisionRecall ();
             mat.addPRInfo (curr, pr);
             sum.setPrecisionRecall (curr.getType() + " " + curr.getName(), pr);
@@ -336,7 +334,7 @@ public class ObjectEvaluation implements Evaluation
      * Return a map of DescPrototypes to their evaluations.
      * @see Evaluation#getMeasureMap()
      */
-    public Map getMeasureMap() {
+    public Map<DescPrototype, Map<String, AttrMeasure>> getMeasureMap() {
         return descriptors;
     }
     

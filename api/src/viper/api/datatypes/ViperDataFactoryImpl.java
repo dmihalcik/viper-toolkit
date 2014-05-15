@@ -18,51 +18,50 @@ import java.util.*;
 
 import viper.api.*;
 import viper.api.extensions.*;
-import edu.umd.cfar.lamp.viper.util.*;
+
 /**
- * Class that constructs viper data given the full URL of 
- * the data type. 
+ * Class that constructs viper data given the full URL of the data type.
  */
 public class ViperDataFactoryImpl implements ViperDataFactory {
 	/**
 	 * URI for the boolean value type.
 	 */
-	public static final String BVALUE  = ViperData.ViPER_DATA_URI + "bvalue";
+	public static final String BVALUE = ViperData.ViPER_DATA_URI + "bvalue";
 
 	/**
 	 * URI for the integer value type.
 	 */
-	public static final String DVALUE  = ViperData.ViPER_DATA_URI + "dvalue";
+	public static final String DVALUE = ViperData.ViPER_DATA_URI + "dvalue";
 
 	/**
 	 * URI for the double floating point value type.
 	 */
-	public static final String FVALUE  = ViperData.ViPER_DATA_URI + "fvalue";
+	public static final String FVALUE = ViperData.ViPER_DATA_URI + "fvalue";
 
 	/**
 	 * URI for the enumeration type.
 	 */
-	public static final String LVALUE  = ViperData.ViPER_DATA_URI + "lvalue";
+	public static final String LVALUE = ViperData.ViPER_DATA_URI + "lvalue";
 
 	/**
 	 * URI for the character string type.
 	 */
-	public static final String SVALUE  = ViperData.ViPER_DATA_URI + "svalue";
+	public static final String SVALUE = ViperData.ViPER_DATA_URI + "svalue";
 
 	/**
 	 * URI for the bounding box type.
 	 */
-	public static final String BBOX    = ViperData.ViPER_DATA_URI + "bbox";
+	public static final String BBOX = ViperData.ViPER_DATA_URI + "bbox";
 
 	/**
 	 * URI for the oriented bounding box type.
 	 */
-	public static final String OBOX    = ViperData.ViPER_DATA_URI + "obox";
+	public static final String OBOX = ViperData.ViPER_DATA_URI + "obox";
 
 	/**
 	 * URI for the point value type.
 	 */
-	public static final String POINT   = ViperData.ViPER_DATA_URI + "point";
+	public static final String POINT = ViperData.ViPER_DATA_URI + "point";
 
 	/**
 	 * URI for the polygon type.
@@ -72,28 +71,27 @@ public class ViperDataFactoryImpl implements ViperDataFactory {
 	/**
 	 * URI for the circle type.
 	 */
-	public static final String CIRCLE  = ViperData.ViPER_DATA_URI + "circle";
+	public static final String CIRCLE = ViperData.ViPER_DATA_URI + "circle";
 
 	/**
 	 * URI for the oriented ellipse type.
 	 */
 	public static final String ELLIPSE = ViperData.ViPER_DATA_URI + "ellipse";
-	
-	
-	private Properties dataTypes;
-	private Map cachedTypes;
-	private static final String charset = "UTF-8";
-	public void helpLoadDefault(String type, Class c) {
+
+	private Map<String, String> dataTypes;
+	private Map<String, AttrValueWrapper> cachedTypes;
+
+	public void helpLoadDefault(String type, Class<?> c) {
 		String value = c.getName();
-		dataTypes.setProperty(type, value);
+		dataTypes.put(type, value);
 	}
 
 	/**
 	 * Constructs a new data factory containing the default types.
 	 */
-	public ViperDataFactoryImpl()  {
-		dataTypes = new Properties();
-		cachedTypes = new WeakHashMap();
+	public ViperDataFactoryImpl() {
+		dataTypes = new HashMap<String, String>();
+		cachedTypes = new WeakHashMap<String, AttrValueWrapper>();
 		helpLoadDefault(BVALUE, Bvalue.class);
 		helpLoadDefault(LVALUE, Lvalue.class);
 		helpLoadDefault(DVALUE, Dvalue.class);
@@ -109,90 +107,99 @@ public class ViperDataFactoryImpl implements ViperDataFactory {
 
 	/**
 	 * Adds the data types from the input stream.
-	 * @param props the java properties file format string.
+	 * 
+	 * @param props
+	 *            the java properties file format string.
 	 * @throws java.io.IOException
 	 */
 	public void remapTypes(InputStream props) throws java.io.IOException {
-		dataTypes.load(props);
+		Properties p = new Properties();
+		p.load(props);
+		copyToDataTypes(p);
+	}
+
+	private void copyToDataTypes(Properties p) {
+		for (Object o : p.keySet()) {
+			String k = (String) o;
+			String v = p.getProperty(k);
+			dataTypes.put(k, v);
+		}
 	}
 
 	/**
 	 * Adds the data types from the properties file.
-	 * @param props the mapping from types to java class names
+	 * 
+	 * @param props
+	 *            the mapping from types to java class names
 	 */
 	public void loadTypes(Properties props) {
-		dataTypes.putAll(props);
+		copyToDataTypes(props);
 	}
-	
+
 	/**
 	 * Adds the given type, by namespace, local name and java class name
-	 * @param namespace the namespace
-	 * @param locator the local part of the type name
-	 * @param classname the name of the class that implements {@link AttrValueWrapper}
+	 * 
+	 * @param namespace
+	 *            the namespace
+	 * @param locator
+	 *            the local part of the type name
+	 * @param classname
+	 *            the name of the class that implements {@link AttrValueWrapper}
 	 */
 	public void addType(String namespace, String locator, String classname) {
-		dataTypes.setProperty(namespace+locator, classname);
+		dataTypes.put(namespace + locator, classname);
 	}
 
 	/**
 	 * @see viper.api.extensions.ViperDataFactory#getAttribute(java.lang.String)
 	 */
 	public AttrValueWrapper getAttribute(String uri) {
-		String className = dataTypes.getProperty(uri);
-		AttrValueWrapper newAttr = (AttrValueWrapper) cachedTypes.get(className);
+		String className = dataTypes.get(uri);
+		AttrValueWrapper newAttr = cachedTypes.get(className);
 		if (newAttr == null && className != null) {
-			Class[] constructorType = {};
+			Class<?>[] constructorType = {};
 			Object[] constructorArguments = {};
 			try {
-				newAttr =
-					((AttrValueWrapper) (AttrValueWrapper
-						.class
-						.getClassLoader()
-						.loadClass(className)
-						.getConstructor(constructorType)
+				newAttr = ((AttrValueWrapper) (AttrValueWrapper.class
+						.getClassLoader().loadClass(className).getConstructor(
+								constructorType)
 						.newInstance(constructorArguments)));
 				cachedTypes.put(className, newAttr);
 			} catch (ClassNotFoundException cnfx) {
-				throw new UnknownAttributeTypeException(
-					cnfx.getMessage()
-						+ "\n\tAttribute type "
-						+ uri
-						+ " not found (checked for "
-						+ className
-						+ ")");
+				throw new UnknownAttributeTypeException(cnfx.getMessage()
+						+ "\n\tAttribute type " + uri
+						+ " not found (checked for " + className + ")");
 			} catch (NoSuchMethodException nsmx) {
-				throw new UnknownAttributeTypeException(
-					nsmx.getMessage()
-						+ "\n\tAttribute type "
-						+ uri
+				throw new UnknownAttributeTypeException(nsmx.getMessage()
+						+ "\n\tAttribute type " + uri
 						+ " is improperly defined (missing constructor)");
 			} catch (InstantiationException ix) {
 				throw new UnknownAttributeTypeException(
-					ix.getMessage()
-						+ "\n\tAttribute type "
-						+ uri
-						+ "Attribute is improperly defined (not a concrete class)");
+						ix.getMessage()
+								+ "\n\tAttribute type "
+								+ uri
+								+ "Attribute is improperly defined (not a concrete class)");
 			} catch (IllegalAccessException iax) {
-				throw new UnknownAttributeTypeException(
-					iax.getMessage()
-						+ "\n\tAttribute type "
-						+ uri
+				throw new UnknownAttributeTypeException(iax.getMessage()
+						+ "\n\tAttribute type " + uri
 						+ " is missing or otherwise inaccessible");
 			} catch (InvocationTargetException itx) {
-				// This is an exception that wraps an exception thrown by something
-				// invoked. In this case, this is any exceptions thrown by the constructor.
+				// This is an exception that wraps an exception thrown by
+				// something
+				// invoked. In this case, this is any exceptions thrown by the
+				// constructor.
 				itx.printStackTrace();
-				throw new IllegalArgumentException(
-					itx.getTargetException().getMessage());
+				throw new IllegalArgumentException(itx.getTargetException()
+						.getMessage());
 			}
 		}
 		return newAttr;
 	}
-	
+
 	/**
 	 * @see viper.api.extensions.ViperDataFactory#getTypes()
 	 */
-	public Iterator getTypes() {
-		return new EnumIterator(dataTypes.keys());
+	public Iterator<String> getTypes() {
+		return dataTypes.keySet().iterator();
 	}
 }

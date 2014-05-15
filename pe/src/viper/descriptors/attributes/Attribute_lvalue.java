@@ -24,17 +24,22 @@ import edu.umd.cfar.lamp.viper.util.*;
  * This attribute represents an Enumerated list element. This can be one value
  * of any specified in the config file.
  */
-public class Attribute_lvalue extends Attribute implements Cloneable {
+public class Attribute_lvalue extends Attribute implements Cloneable {	
+	public static final String LOCAL_TYPE_NAME = "lvalue";
+	public static final String TYPE = Attributes.DEFAULT_NAMESPACE_URI + LOCAL_TYPE_NAME;
+	
+	
+
 	static {
-		Distances.putDistanceFunctorFor("lvalue", Distances
+		Distances.putDistanceFunctorFor(TYPE, Distances
 				.getEqualityDistance());
 
 		try {
-			DefaultMeasures.setDefaultMetricFor("lvalue", "E");
+			DefaultMeasures.setDefaultMetricFor(TYPE, "E");
 		} catch (ImproperMetricException imx) {
 			throw new RuntimeException(imx.getMessage());
 		}
-		DefaultMeasures.setDefaultToleranceFor("lvalue", 0.0);
+		DefaultMeasures.setDefaultToleranceFor(TYPE, 0.0);
 	}
 
 	/**
@@ -42,7 +47,7 @@ public class Attribute_lvalue extends Attribute implements Cloneable {
 	 * @return "lvalue"
 	 */
 	public String getType() {
-		return "lvalue";
+		return TYPE;
 	}
 
 	/**
@@ -161,13 +166,13 @@ public class Attribute_lvalue extends Attribute implements Cloneable {
 
 		/** @inheritDoc */
 		public String getType() {
-			return "lvalue";
+			return TYPE;
 		}
 
 		/** @inheritDoc */
 		public AttributeValue setValue(Element el)
 				throws IllegalArgumentException {
-			if (!el.getTagName().endsWith("lvalue")) {
+			if (!el.getTagName().endsWith(TYPE)) {
 				throw new IllegalArgumentException(
 						"Unexpected data type (not lvalue): " + el.getTagName());
 			} else {

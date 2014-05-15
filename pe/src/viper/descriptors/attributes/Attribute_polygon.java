@@ -26,6 +26,9 @@ import edu.umd.cfar.lamp.viper.util.*;
  * This attribute represents a polygon
  */
 public class Attribute_polygon extends Attribute {
+	public static final String LOCAL_TYPE_NAME = "polygon";
+	public static final String TYPE = Attributes.DEFAULT_NAMESPACE_URI + LOCAL_TYPE_NAME;
+
 	private static final Integer ONE = new Integer(1);
 	private static final Integer ZERO = new Integer(0);
 	private static final Double UNDEFINED = new Double(Double.NaN);
@@ -35,57 +38,57 @@ public class Attribute_polygon extends Attribute {
 
 		d = new Distances.HelperAttrDistance(new DiceDistance(), "dice",
 				Distance.BALANCED, "Dice coefficient", true);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new MaximumDeviationDistance(),
 				"maxdev", Distance.BALANCED, "Maximum deviation", true);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new OverlapDistance(), "overlap",
 				Distance.TARG_V_CANDS, "Target overlap", true);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new AreaRecallDistance(),
 				"arearecall", Distance.TARG_V_CANDS, "Object Area Recall",
 				false);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new AreaPrecisionDistance(),
 				"areaprecision", Distance.CAND_V_TARGS, "Box Area Precision",
 				false);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new IntersectsDistance(),
 				"intersects", Distance.BALANCED, "Some shared area", true);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new MatchedPixelCount(),
 				"matchedpixels", Distance.OVERALL_SUM, "Pixels matched", false);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new MissedPixelCount(),
 				"missedpixels", Distance.OVERALL_SUM, "Pixels missed", true);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new FalsePixelCount(),
 				"falsepixels", Distance.OVERALL_SUM, "Pixels falsely detected",
 				true);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new FragmentationDistance(),
 				"fragmentation", Distance.TARG_V_CANDS, "Fragmentation metric",
 				false);
-		Distances.putDistanceFunctorFor("polygon", d);
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, d);
 
-		Distances.putDistanceFunctorFor("polygon", Distances
+		Distances.putDistanceFunctorFor(Attribute_polygon.TYPE, Distances
 				.getEqualityDistance());
 
 		try {
-			DefaultMeasures.setDefaultMetricFor("polygon", "dice");
+			DefaultMeasures.setDefaultMetricFor(Attribute_polygon.TYPE, "dice");
 		} catch (ImproperMetricException imx) {
 			throw new RuntimeException(imx.getMessage());
 		}
-		DefaultMeasures.setDefaultToleranceFor("polygon", 0.0);
+		DefaultMeasures.setDefaultToleranceFor(Attribute_polygon.TYPE, 0.0);
 	}
 
 	private static PolygonDiff convertMD(Measurable.Difference D) {
@@ -264,10 +267,10 @@ public class Attribute_polygon extends Attribute {
 
 	/**
 	 * @inheritDoc 
-	 * @return "polygon"
+	 * @return Attribute_polygon.TYPE
 	 */
 	public String getType() {
-		return "polygon";
+		return Attribute_polygon.TYPE;
 	}
 
 	/**
@@ -1012,7 +1015,7 @@ public class Attribute_polygon extends Attribute {
 
 		/** @inheritDoc */
 		public String getType() {
-			return "polygon";
+			return Attribute_polygon.TYPE;
 		}
 
 		/** @inheritDoc */

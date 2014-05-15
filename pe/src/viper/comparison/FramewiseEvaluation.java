@@ -70,7 +70,7 @@ public class FramewiseEvaluation implements Evaluation {
 		}
 	}
 
-	private Map descriptors = new HashMap();
+	private Map<DescPrototype, Map<String, AttrMeasure>> descriptors = new HashMap<DescPrototype, Map<String, AttrMeasure>>();
 	private EvaluationParameters.ScopeRules scope;
 	private DescRules[] metrics = new DescRules[0];
 	private int numberOfMetrics = 0;
@@ -256,9 +256,9 @@ public class FramewiseEvaluation implements Evaluation {
 			Descriptor candidateDesc = null;
 			Descriptor dontCareDesc = null;
 
-			LinkedList targs = new LinkedList();
-			LinkedList cands = new LinkedList();
-			LinkedList dontCares = new LinkedList();
+			LinkedList<Descriptor> targs = new LinkedList<Descriptor>();
+			LinkedList<Descriptor> cands = new LinkedList<Descriptor>();
+			LinkedList<Descriptor> dontCares = new LinkedList<Descriptor>();
 
 			for (Iterator iter = mat.T.cropNodesToSpan(currSpan); iter
 					.hasNext();) {
@@ -290,9 +290,9 @@ public class FramewiseEvaluation implements Evaluation {
 								Attribute dcCandAttr = curr.getAttribute(
 										attrName, scope.getMap());
 								Measurable.Difference D = null;
-								for (Iterator dcIter = dontCares.iterator(); dcIter
+								for (Iterator<Descriptor> dcIter = dontCares.iterator(); dcIter
 										.hasNext();) {
-									Descriptor dcTarg = (Descriptor) dcIter
+									Descriptor dcTarg = dcIter
 											.next();
 									Attribute dcTargAttr = dcTarg.getAttribute(
 											attrName, scope.getMap());
@@ -357,10 +357,10 @@ public class FramewiseEvaluation implements Evaluation {
 					System.err.println("Ignored all data in a frame.");
 				}
 
-				for (Iterator targetIter = targs.iterator(); targetIter
+				for (Iterator<Descriptor> targetIter = targs.iterator(); targetIter
 						.hasNext();) {
 					AttributeValue tCurr = helpGetAttrValue(
-							(Descriptor) targetIter.next(), attrName, currSpan,
+							targetIter.next(), attrName, currSpan,
 							currSpan.beginning(), scope.getMap());
 					if (tCurr != null || c != null) {
 						try {
@@ -374,10 +374,10 @@ public class FramewiseEvaluation implements Evaluation {
 					}
 				}
 
-				for (Iterator candidateIter = cands.iterator(); candidateIter
+				for (Iterator<Descriptor> candidateIter = cands.iterator(); candidateIter
 						.hasNext();) {
 					AttributeValue cCurr = helpGetAttrValue(
-							(Descriptor) candidateIter.next(), attrName,
+							candidateIter.next(), attrName,
 							currSpan, currSpan.beginning(), scope.getMap());
 					if (cCurr != null || t != null) {
 						try {
@@ -556,14 +556,14 @@ public class FramewiseEvaluation implements Evaluation {
 	 * A measure for a given frame.
 	 */
 	public static class FrameMeasure extends AttrMeasure {
-		private List childMeasures = new LinkedList();
+		private List<AttrMeasure> childMeasures = new LinkedList<AttrMeasure>();
 
 		/**
 		 * Gets the localizers (measures associated with thresholds).
 		 * 
 		 * @return the list of localizing measures
 		 */
-		public List getLocalizations() {
+		public List<AttrMeasure> getLocalizations() {
 			return childMeasures;
 		}
 
@@ -572,7 +572,7 @@ public class FramewiseEvaluation implements Evaluation {
 		 * 
 		 * @return the localizing measures
 		 */
-		public Iterator getLocalizers() {
+		public Iterator<AttrMeasure> getLocalizers() {
 			return childMeasures.iterator();
 		}
 
@@ -617,14 +617,14 @@ public class FramewiseEvaluation implements Evaluation {
 			return dcMeas;
 		}
 
-		private List distances = new LinkedList();
+		private List<Distance> distances = new LinkedList<Distance>();
 
 		/**
 		 * Gets all the distance functions.
 		 * 
 		 * @return the distance functions
 		 */
-		public List getDistanceFunctors() {
+		public List<Distance> getDistanceFunctors() {
 			return distances;
 		}
 
@@ -661,11 +661,11 @@ public class FramewiseEvaluation implements Evaluation {
 		 */
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
-			for (Iterator overalls = getDistanceFunctors().iterator(); overalls
+			for (Iterator<Distance> overalls = getDistanceFunctors().iterator(); overalls
 					.hasNext();) {
 				sb.append(overalls.next()).append(" ");
 			}
-			for (Iterator locals = getLocalizers(); locals.hasNext();) {
+			for (Iterator<AttrMeasure> locals = getLocalizers(); locals.hasNext();) {
 				sb.append("[").append(locals.next().toString()).append("] ");
 			}
 			if (dcMeas != null) {
@@ -797,9 +797,9 @@ public class FramewiseEvaluation implements Evaluation {
 	 * @throws IOException
 	 * @throws NoSuchElementException
 	 */
-	private Map helpParseAttribMap(VReader reader, DescPrototype proto)
+	private Map<String, AttrMeasure> helpParseAttribMap(VReader reader, DescPrototype proto)
 			throws IOException {
-		HashMap attribMap = new HashMap();
+		HashMap<String, AttrMeasure> attribMap = new HashMap<String, AttrMeasure>();
 
 		StringTokenizer st = new StringTokenizer(reader.getCurrentLine());
 		st.nextToken();
@@ -821,7 +821,7 @@ public class FramewiseEvaluation implements Evaluation {
 						reader.printError("Improper placement of colon");
 					} else {
 						attribMap.put(attribName, new FrameMeasure(curr
-								.getLocalType(), st, reader));
+								.getType(), st, reader));
 						if (st.hasMoreTokens()) {
 							throw (new BadDataException(
 									"Unparsed data at end of line"));
@@ -843,7 +843,7 @@ public class FramewiseEvaluation implements Evaluation {
 	/**
 	 * Return a map of DescPrototypes to their evaluations. {@inheritDoc}
 	 */
-	public Map getMeasureMap() {
+	public Map<DescPrototype, Map<String, AttrMeasure>> getMeasureMap() {
 		return descriptors;
 	}
 
@@ -909,9 +909,9 @@ public class FramewiseEvaluation implements Evaluation {
 			for (int i = 0; i < metrics.length; i++) {
 				for (int j = 0; j < metrics[i].getLength(); j++) {
 					FrameMeasure curr = metrics[i].getMeasure(j);
-					for (Iterator distIter = curr.getDistanceFunctors()
+					for (Iterator<Distance> distIter = curr.getDistanceFunctors()
 							.iterator(); distIter.hasNext();) {
-						Distance dist = (Distance) distIter.next();
+						Distance dist = distIter.next();
 						Object value = values[valOffset++];
 						if (verbose)
 							sb.append(dist.getExplanation()).append(": ");
@@ -941,9 +941,9 @@ public class FramewiseEvaluation implements Evaluation {
 						if (verbose)
 							sb.append("\n");
 					}
-					for (Iterator locIter = curr.getLocalizers(); locIter
+					for (Iterator<AttrMeasure> locIter = curr.getLocalizers(); locIter
 							.hasNext();) {
-						AttrMeasure meas = (AttrMeasure) locIter.next();
+						AttrMeasure meas = locIter.next();
 						PartialSum value = (PartialSum) values[valOffset++];
 						if (verbose)
 							sb.append("Localized ").append(
@@ -985,14 +985,14 @@ public class FramewiseEvaluation implements Evaluation {
 			for (int i = 0; i < metrics.length; i++) {
 				for (int j = 0; j < metrics[i].getLength(); j++) {
 					FrameMeasure curr = metrics[i].getMeasure(j);
-					for (Iterator distIter = curr.getDistanceFunctors()
+					for (Iterator<Distance> distIter = curr.getDistanceFunctors()
 							.iterator(); distIter.hasNext();) {
-						Distance dist = (Distance) distIter.next();
+						Distance dist = distIter.next();
 						sb.append(" ").append(dist);
 					}
-					for (Iterator locIter = curr.getLocalizers(); locIter
+					for (Iterator<AttrMeasure> locIter = curr.getLocalizers(); locIter
 							.hasNext();) {
-						AttrMeasure meas = (AttrMeasure) locIter.next();
+						AttrMeasure meas = locIter.next();
 						sb.append(" ").append(meas);
 					}
 				}
@@ -1109,9 +1109,9 @@ public class FramewiseEvaluation implements Evaluation {
 				Measurable.Difference D) {
 			FrameMeasure meas = (FrameMeasure) scope.getMeasure(desc, attr);
 			int offset = meas.getOffset();
-			for (Iterator iter = meas.getDistanceFunctors().iterator(); iter
+			for (Iterator<Distance> iter = meas.getDistanceFunctors().iterator(); iter
 					.hasNext(); offset++) {
-				Distance dist = (Distance) iter.next();
+				Distance dist = iter.next();
 				if (dist.getType() == Distance.OVERALL_MEAN
 						|| dist.getType() == Distance.OVERALL_SUM) {
 					values[offset] = dist.getDistance(D);
@@ -1161,18 +1161,18 @@ public class FramewiseEvaluation implements Evaluation {
 				Measurable.Difference D, int type) {
 			FrameMeasure meas = (FrameMeasure) scope.getMeasure(desc, attr);
 			int offset = meas.getOffset();
-			for (Iterator iter = meas.getDistanceFunctors().iterator(); iter
+			for (Iterator<Distance> iter = meas.getDistanceFunctors().iterator(); iter
 					.hasNext(); offset++) {
-				Distance dist = (Distance) iter.next();
+				Distance dist = iter.next();
 				if (dist.getType() == type
 						|| dist.getType() == Distance.BALANCED) {
-					List L = (List) values[offset];
+					List<Number> L = (List<Number>) values[offset];
 					Number value = dist.getDistance(D);
 					if (value.doubleValue() != Double.NaN) {
 						if (L != null) {
 							L.add(value);
 						} else {
-							L = new LinkedList();
+							L = new LinkedList<Number>();
 							L.add(value);
 							values[offset] = L;
 						}
@@ -1180,8 +1180,8 @@ public class FramewiseEvaluation implements Evaluation {
 				}
 			}
 
-			for (Iterator iter = meas.getLocalizers(); iter.hasNext(); offset++) {
-				AttrMeasure curr = (AttrMeasure) iter.next();
+			for (Iterator<AttrMeasure> iter = meas.getLocalizers(); iter.hasNext(); offset++) {
+				AttrMeasure curr = iter.next();
 				if (curr.getMetric().getType() == type) {
 					PartialSum val = (PartialSum) values[offset];
 					if (val == null) {
@@ -1230,8 +1230,8 @@ public class FramewiseEvaluation implements Evaluation {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Map getDatasets(String name) {
-			HashMap data = new HashMap();
+		public Map<Object, CategoryDataset> getDatasets(String name) {
+			HashMap<Object, CategoryDataset> data = new HashMap<Object, CategoryDataset>();
 
 			String[] seriesName = new String[]{name};
 
@@ -1248,9 +1248,9 @@ public class FramewiseEvaluation implements Evaluation {
 			for (int i = 0; i < metrics.length; i++) {
 				for (int j = 0; j < metrics[i].getLength(); j++) {
 					FrameMeasure curr = metrics[i].getMeasure(j);
-					for (Iterator distIter = curr.getDistanceFunctors()
+					for (Iterator<Distance> distIter = curr.getDistanceFunctors()
 							.iterator(); distIter.hasNext();) {
-						Distance dist = (Distance) distIter.next();
+						Distance dist = distIter.next();
 						Object value = values[valOffset++];
 						String title = dist.getExplanation();
 						Number[] dataVal = new Number[1];

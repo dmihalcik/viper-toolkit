@@ -32,7 +32,7 @@ public interface ViperData extends Node {
 	 * 
 	 * @return <code>java.util.List</code> of {@link Config}s
 	 */
-	public List getAllConfigs();
+	public List<Config> getAllConfigs();
 
 	/**
 	 * Gets all of the configuration information for
@@ -40,7 +40,7 @@ public interface ViperData extends Node {
 	 * 
 	 * @return a java.util.Iterator of all {@viper.api.Config} type.
 	 */
-	public Iterator getConfigs();
+	public Iterator<Config> getConfigs();
 	
 	/**
 	 * Gets an iterator over only descriptor 
@@ -49,7 +49,7 @@ public interface ViperData extends Node {
 	 * @return an iterator over only descriptor 
 	 * schemata of the given type
 	 */
-	public Iterator getConfigsOfType(int type);
+	public Iterator<Config> getConfigsOfType(int type);
 	
 	/**
 	 * Gets the node that has, as its children, the
@@ -70,13 +70,13 @@ public interface ViperData extends Node {
 	 * Gets all the sourcefiles.
 	 * @return <code>java.util.List</code> of {@link Sourcefile}s
 	 */
-	public List getAllSourcefiles();
+	public List<Sourcefile> getAllSourcefiles();
 
 	/**
 	 * Gets a all the sourcefiles.
 	 * @return <code>java.util.Iterator</code> of {@link Sourcefile}s
 	 */
-	public Iterator getSourcefiles();
+	public Iterator<Sourcefile> getSourcefiles();
 	/**
 	 * Gets the configuration information for a given descriptor type.
 	 * For example, <code>getConfig( Config.FILE, "Information" )</code>

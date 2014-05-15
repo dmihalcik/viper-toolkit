@@ -19,13 +19,13 @@ import java.util.*;
  * @author davidm@cfar.umd.edu
  * @since Jun 20, 2003
  */
-public class EnumIterator implements Iterator {
-	private Enumeration enumeration;
+public class EnumIterator<X> implements Iterator<X> {
+	private Enumeration<X> enumeration;
 	/**
 	 * Constructs a new Iterator wrapping the given enumeration.
 	 * @param enumeration the enumeration to wrap
 	 */
-	public EnumIterator (Enumeration enumeration) {
+	public EnumIterator (Enumeration<X> enumeration) {
 		this.enumeration = enumeration;
 	}
 	/**
@@ -47,7 +47,7 @@ public class EnumIterator implements Iterator {
 	 * Gets the next element of the enumeration.
 	 * @return <code>enum.nextElement()</code>
 	 */
-	public Object next() {
+	public X next() {
 		return enumeration.nextElement();
 	}
 }

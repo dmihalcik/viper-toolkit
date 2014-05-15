@@ -25,39 +25,42 @@ import edu.umd.cfar.lamp.viper.util.*;
  * This attribute represents a rotated recatangle or Oriented Box.
  */
 public class Attribute_obox extends Attribute_polygon implements Cloneable {
+	public static final String LOCAL_TYPE_NAME = "obox";
+	public static final String TYPE = Attributes.DEFAULT_NAMESPACE_URI + LOCAL_TYPE_NAME;
+
 	static {
-		Distances.useSameDistances("obox", "polygon");
+		Distances.useSameDistances(Attribute_obox.TYPE, Attribute_polygon.TYPE);
 
 		Distances.HelperAttrDistance d;
 		d = new Distances.HelperAttrDistance(new PositionalCoefficient(),
 				"positional", Distance.BALANCED, "Position Accuracy", false);
-		Distances.putDistanceFunctorFor("obox", d);
+		Distances.putDistanceFunctorFor(Attribute_obox.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new SizeCoefficient(), "size",
 				Distance.BALANCED, "Size Coefficient", false);
-		Distances.putDistanceFunctorFor("obox", d);
+		Distances.putDistanceFunctorFor(Attribute_obox.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new OrientationCoefficient(),
 				"orientation", Distance.BALANCED, "Orientation Coefficient",
 				false);
-		Distances.putDistanceFunctorFor("obox", d);
+		Distances.putDistanceFunctorFor(Attribute_obox.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new PositionalAccuracyRecall(),
 				"positionalaccuracyrecall", Distance.TARG_V_CANDS,
 				"Positional Accuracy Recall", false);
-		Distances.putDistanceFunctorFor("obox", d);
+		Distances.putDistanceFunctorFor(Attribute_obox.TYPE, d);
 
 		d = new Distances.HelperAttrDistance(new PositionalAccuracyPrecision(),
 				"positionalaccuracyprecision", Distance.CAND_V_TARGS,
 				"Positional Accuracy Precision", false);
-		Distances.putDistanceFunctorFor("obox", d);
+		Distances.putDistanceFunctorFor(Attribute_obox.TYPE, d);
 
 		try {
-			DefaultMeasures.setDefaultMetricFor("obox", "dice");
+			DefaultMeasures.setDefaultMetricFor(Attribute_obox.TYPE, "dice");
 		} catch (ImproperMetricException imx) {
 			throw new RuntimeException(imx.getMessage());
 		}
-		DefaultMeasures.setDefaultToleranceFor("obox", 0.0);
+		DefaultMeasures.setDefaultToleranceFor(Attribute_obox.TYPE, 0.0);
 	}
 
 	private static final class PositionalCoefficient
@@ -239,10 +242,10 @@ public class Attribute_obox extends Attribute_polygon implements Cloneable {
 
 	/** 
 	 * @inheritDoc
-	 * @return "obox" 
+	 * @return Attribute_obox.TYPE 
 	 */
 	public String getType() {
-		return "obox";
+		return Attribute_obox.TYPE;
 	}
 
 	private static final Obox arch = new Obox();
@@ -408,7 +411,7 @@ public class Attribute_obox extends Attribute_polygon implements Cloneable {
 		}
 		/** @inheritDoc */
 		public String getType() {
-			return "obox";
+			return Attribute_obox.TYPE;
 		}
 		
 		/** @inheritDoc */
@@ -427,7 +430,7 @@ public class Attribute_obox extends Attribute_polygon implements Cloneable {
 		 *             If the data is ill-formed
 		 */
 		public AttributeValue setValue(Element el) {
-			if (!"obox".equals(el.getLocalName())) {
+			if (!Attribute_obox.LOCAL_TYPE_NAME.equals(el.getLocalName())) {
 				throw new IllegalArgumentException("Unexpected data type: "
 						+ el.getTagName());
 			} else {

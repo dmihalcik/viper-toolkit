@@ -287,6 +287,9 @@ public class ViperParser {
 	 * @return the data contained in the element
 	 */
 	public ViperData parseDoc(Element e) {
+		if (null == e.getNamespaceURI()) {
+			logger.warning("No namespace on root element. Is your DOM parser namespace aware?");
+		}
 		NodeList children = e.getChildNodes();
 		ViperDataImpl curr = new ViperDataImpl();
 
@@ -573,10 +576,7 @@ public class ViperParser {
 				}
 
 				Config cfg = null;
-				for (Iterator cfi = col.getRoot().getAllConfigs().iterator();
-					cfi.hasNext();
-					) {
-					Config curCfg = (Config) cfi.next();
+				for (Config curCfg : col.getRoot().getAllConfigs()) {
 					if (curCfg.getDescName().equals(readinName)
 						&& curCfg.getDescType() == dtype) {
 						cfg = curCfg;

@@ -74,7 +74,7 @@
 	</target>
 	<target name="compile" depends="init">
 		<mkdir dir="${gt.classes}" />
-		<javac srcdir="${gt.src}" destdir="${gt.classes}" source="1.4" classpath="${cp.alljars}" />
+		<javac srcdir="${gt.src}" destdir="${gt.classes}" source="1.6" classpath="${cp.alljars}" />
 	</target>
 	<target name="javadocs" depends="init">
 		<mkdir dir="${gt.doc}" />
