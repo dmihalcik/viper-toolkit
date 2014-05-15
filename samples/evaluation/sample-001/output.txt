@@ -1,0 +1,1677 @@
+*****************************************************
+*                 INPUT PARAMETERS                  *
+*****************************************************
+
+Ground Truth: test-truth.xml
+     Results: test-candidate.xml
+ Eval Params: object-Person.epf
+         Log: -
+      Output: output.txt
+
+       Level: 3
+       Match: NONE          
+      metric: 1
+   tolerance: 0.0
+*****************************************************
+*                      METRICS                      *
+*****************************************************
+
+OBJECT Person	[dice 1.0]
+	Location	 [dice 0.9]
+----------------------------------------------------
+
+OBJECT Person
+    Location : dice matchedpixels missedpixels falsepixels fragmentation arearecall areaprecision [arearecall 0.7] [areaprecision 0.7] 
+
+----------------------------------------------------
+
+OBJECT Person	[dice 1.0]
+	* Location	 dice matchedpixels arearecall missedpixels falsepixels fragmentation arearecall areaprecision [maxdev 0.5]
+*****************************************************
+*                 OBJECT EVALUATION                 *
+*****************************************************
+
+	For file "file:/D:/Mreuss/viper-full-20060131/samples/media/LAMP-Moving.mpeg"
+*****************************************************
+*                      LEVEL 0                      *
+*                 FALSE DETECTIONS                  *
+*****************************************************
+*****************************************************
+*                      LEVEL 0                      *
+*                 MISSED DETECTIONS                 *
+*****************************************************
+*****************************************************
+*                      LEVEL 1                      *
+*                 FALSE DETECTIONS                  *
+*****************************************************
+*****************************************************
+*                      LEVEL 1                      *
+*                 MISSED DETECTIONS                 *
+*****************************************************
+*****************************************************
+*                      LEVEL 2                      *
+*                 FALSE DETECTIONS                  *
+*****************************************************
+*****************************************************
+*                      LEVEL 2                      *
+*                 MISSED DETECTIONS                 *
+*****************************************************
+*****************************************************
+*                      LEVEL 3                      *
+*                 FALSE DETECTIONS                  *
+*****************************************************
+OBJECT Person 1 1:91
+           Location...
+               Name : "zweiter"
+
+*****************************************************
+*                      LEVEL 3                      *
+*                 MISSED DETECTIONS                 *
+*****************************************************
+OBJECT Person 1 1:92
+           Location...
+               Name : "zwei"
+
+*****************************************************
+*                   DETECTION(S)                    *
+*****************************************************
+OBJECT Person 0 1:74
+           Location...
+               Name : "eins"
+
+	OBJECT Person 0 1:100
+	           Location...
+			DISTANCE(S): 0.15854207247427762 0.0 0.0 0.0 0.0 0.0 0.0 0.05502874593018962 0.11320056259315488 0.07973643256339079 0.07973643256339079 0.11320056259315488 0.06300436801417003 0.07973643256339079 0.033832092319536995 0.04195293041037067 0.02543487773529947 0.09150708936690682 0.16503435148160642 0.17994445244779086 0.12770137522728248 0.09539401861624514 0.1269211341286642 0.11912836419377866 0.11162421485019113 0.07193881230053437 0.09879484265055268 0.05911931584548173 0.05911931584548173 0.05911931584548173 0.11440376104526397 0.13805385359472308 0.2947713347593189 0.35745832713202497 0.30728317113001047 0.27877455497103487 0.246720090623349 0.2529713759445452 0.2529713759445452 0.2529713759445452 0.20884968117291558 0.2246726878102276 0.28796471296249176 0.3196107257714545 0.340924871312885 0.32523260653262615 0.340924871312885 0.3282643255443612 0.3282643255443612 0.3126425656083238 0.3126425656083238 0.2813990457362491 0.28731061904100264 0.28731061904100264 0.2750972496695338 0.2905207124028917 0.3243704360557582 0.2943424551255733 0.24930048419595718 0.22566671167764193 0.1846910580921411 0.19210295760636356 0.16272488337137034 0.1480358462538737 0.15585203150094115 0.14129775582873158 0.14829913766509814 0.15215221846110757 0.15215221846110757 0.15215221846110757 0.15215221846110757 0.1443017759101008 0.13645133382475533 0.1473428360872636 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 
+			AVERAGE: 0.38720152095761223
+	---------------------------------------
+	DISTANCE: 0.0, OVERLAP: 0.26, DICE = 0.26, EXTENT = 0.9999999999948909, (START: 0, END: 0)
+
+
+*****************************************************
+*                  SUMMARY RESULTS                  *
+*****************************************************
+
+For OBJECT Person: Precision is 50 %  (1/2)
+For OBJECT Person: Recall is 50 %  (1/2)
+
+For TOTAL: Precision is 50 %  (1/2)
+For TOTAL: Recall is 50 %  (1/2)
+
+*****************************************************
+*                      METRICS                      *
+*****************************************************
+
+OBJECT Person	[dice 1.0]
+	Location	 [dice 0.9]
+----------------------------------------------------
+
+OBJECT Person
+    Location : dice matchedpixels missedpixels falsepixels fragmentation arearecall areaprecision [arearecall 0.7] [areaprecision 0.7] 
+
+----------------------------------------------------
+
+OBJECT Person	[dice 1.0]
+	* Location	 dice matchedpixels arearecall missedpixels falsepixels fragmentation arearecall areaprecision [maxdev 0.5]
+*****************************************************
+*                   PIXEL RESULTS                   *
+*****************************************************
+
+	For file "file:/D:/Mreuss/viper-full-20060131/samples/media/LAMP-Moving.mpeg"
+For frame 1
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.4153888223997265
+Pixels matched: 12648.0
+Pixels missed: 1741.0
+Pixels falsely detected: 1747.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8764399191720598
+Box Area Precision: 0.8760861062333389
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 2
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3589569601970525
+Pixels matched: 13843.0
+Pixels missed: 546.0
+Pixels falsely detected: 552.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9646464644300967
+Box Area Precision: 0.9642857140695145
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 3
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3589569601970525
+Pixels matched: 13843.0
+Pixels missed: 546.0
+Pixels falsely detected: 552.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9646464644300967
+Box Area Precision: 0.9642857140695145
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 4
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3589569601970525
+Pixels matched: 13843.0
+Pixels missed: 546.0
+Pixels falsely detected: 552.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9646464644300967
+Box Area Precision: 0.9642857140695145
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 5
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3589569601970525
+Pixels matched: 13843.0
+Pixels missed: 546.0
+Pixels falsely detected: 552.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9646464644300967
+Box Area Precision: 0.9642857140695145
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 6
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3589569601970525
+Pixels matched: 13843.0
+Pixels missed: 546.0
+Pixels falsely detected: 552.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9646464644300967
+Box Area Precision: 0.9642857140695145
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 7
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3589569601970525
+Pixels matched: 13843.0
+Pixels missed: 546.0
+Pixels falsely detected: 552.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9646464644300967
+Box Area Precision: 0.9642857140695145
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 8
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.37632571865167735
+Pixels matched: 13504.0
+Pixels missed: 944.0
+Pixels falsely detected: 891.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9350597858126554
+Box Area Precision: 0.9388619851967608
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 9
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3947285718260001
+Pixels matched: 13165.0
+Pixels missed: 1397.0
+Pixels falsely detected: 1230.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9024388619709941
+Box Area Precision: 0.9134382563240073
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 10
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3829461647583853
+Pixels matched: 13443.0
+Pixels missed: 1119.0
+Pixels falsely detected: 1008.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9223263333189891
+Box Area Precision: 0.930387408905843
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 11
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3829461647583853
+Pixels matched: 13443.0
+Pixels missed: 1119.0
+Pixels falsely detected: 1008.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9223263333189891
+Box Area Precision: 0.930387408905843
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 12
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3902980783676254
+Pixels matched: 13356.0
+Pixels missed: 1206.0
+Pixels falsely detected: 1234.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9148061244817479
+Box Area Precision: 0.9140648229113151
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 13
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3744042446484809
+Pixels matched: 13695.0
+Pixels missed: 867.0
+Pixels falsely detected: 895.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9395868263391716
+Box Area Precision: 0.9394885517840685
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 14
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.37970218929913924
+Pixels matched: 13582.0
+Pixels missed: 980.0
+Pixels falsely detected: 1008.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9313265923090869
+Box Area Precision: 0.9310139754931508
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 15
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.36510633368282874
+Pixels matched: 13921.0
+Pixels missed: 701.0
+Pixels falsely detected: 669.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9519412631410832
+Box Area Precision: 0.9564377043659043
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 16
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.36757422593309275
+Pixels matched: 13921.0
+Pixels missed: 816.0
+Pixels falsely detected: 669.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9441555656698326
+Box Area Precision: 0.9564377043659043
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 17
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3623193969774616
+Pixels matched: 14034.0
+Pixels missed: 703.0
+Pixels falsely detected: 556.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.952209735266962
+Box Area Precision: 0.9649122806568222
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 18
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3699624086124647
+Pixels matched: 13584.0
+Pixels missed: 1153.0
+Pixels falsely detected: 441.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9201356086042409
+Box Area Precision: 0.9467459036720665
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 19
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3545101216782397
+Pixels matched: 13144.0
+Pixels missed: 1593.0
+Pixels falsely detected: 147.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8884283741416542
+Box Area Precision: 0.9899095268873077
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 20
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3519100684681488
+Pixels matched: 12830.0
+Pixels missed: 1677.0
+Pixels falsely detected: 235.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8824412037536694
+Box Area Precision: 0.9827098869638098
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 21
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.33675544305553445
+Pixels matched: 12879.0
+Pixels missed: 1339.0
+Pixels falsely detected: 186.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9071696181349316
+Box Area Precision: 0.9866353296612553
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 22
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3273538430581586
+Pixels matched: 12879.0
+Pixels missed: 1107.0
+Pixels falsely detected: 186.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9235630607807837
+Box Area Precision: 0.9866353296612553
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 23
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3222373256330552
+Pixels matched: 12644.0
+Pixels missed: 1226.0
+Pixels falsely detected: 222.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.915539410391608
+Box Area Precision: 0.9837391872348912
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 24
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.31150752809434545
+Pixels matched: 12384.0
+Pixels missed: 1138.0
+Pixels falsely detected: 256.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9216573191441862
+Box Area Precision: 0.9808893296778618
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 25
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.304543092872269
+Pixels matched: 12236.0
+Pixels missed: 1054.0
+Pixels falsely detected: 291.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9274971410294516
+Box Area Precision: 0.9779644759734927
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 26
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2876688718272694
+Pixels matched: 12275.0
+Pixels missed: 667.0
+Pixels falsely detected: 252.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9544020355466762
+Box Area Precision: 0.9811893147328818
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 27
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2832003444354983
+Pixels matched: 12002.0
+Pixels missed: 708.0
+Pixels falsely detected: 496.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9512939783517709
+Box Area Precision: 0.9628125892313255
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 28
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.26185961103153393
+Pixels matched: 11745.0
+Pixels missed: 657.0
+Pixels falsely detected: 162.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9551658017817726
+Box Area Precision: 0.9885808716009282
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 29
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2526832045999743
+Pixels matched: 11523.0
+Pixels missed: 645.0
+Pixels falsely detected: 158.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9559929314795849
+Box Area Precision: 0.9888808566559483
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 30
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2385024459746212
+Pixels matched: 11190.0
+Pixels missed: 627.0
+Pixels falsely detected: 152.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9572336263755492
+Box Area Precision: 0.9893308340056477
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 31
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.23417737904664937
+Pixels matched: 10635.0
+Pixels missed: 1065.0
+Pixels falsely detected: 142.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9280904277358625
+Box Area Precision: 0.9900807966431979
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 32
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.22092873240864314
+Pixels matched: 10172.0
+Pixels missed: 1177.0
+Pixels falsely detected: 153.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9204930869957866
+Box Area Precision: 0.988955852803288
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 33
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.21631352986037433
+Pixels matched: 8852.0
+Pixels missed: 2263.0
+Pixels falsely detected: 117.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8468260131063061
+Box Area Precision: 0.9916557178328074
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 34
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2127712939226866
+Pixels matched: 8192.0
+Pixels missed: 2689.0
+Pixels falsely detected: 240.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8179289842107933
+Box Area Precision: 0.9846305556058095
+Localized Object Area Recall: 0.5
+Localized Box Area Precision: 1.0
+
+
+For frame 35
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.1934282598986422
+Pixels matched: 8197.0
+Pixels missed: 2357.0
+Pixels falsely detected: 235.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8417425322540768
+Box Area Precision: 0.9852459502803376
+Localized Object Area Recall: 0.5
+Localized Box Area Precision: 1.0
+
+
+For frame 36
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.18332433918645807
+Pixels matched: 8140.0
+Pixels missed: 2178.0
+Pixels falsely detected: 238.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8536463532846637
+Box Area Precision: 0.9773215562930897
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 37
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.17015000044840856
+Pixels matched: 8140.0
+Pixels missed: 1824.0
+Pixels falsely detected: 351.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8774558770831002
+Box Area Precision: 0.9688469800021717
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 38
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.17393074891247354
+Pixels matched: 8140.0
+Pixels missed: 1706.0
+Pixels falsely detected: 577.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.8871284962571824
+Box Area Precision: 0.951897827420336
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 39
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.1736295173986021
+Pixels matched: 8140.0
+Pixels missed: 1352.0
+Pixels falsely detected: 916.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9105659962680963
+Box Area Precision: 0.9264740985475826
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 40
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.1735385538421285
+Pixels matched: 8140.0
+Pixels missed: 1116.0
+Pixels falsely detected: 1142.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9261909962753723
+Box Area Precision: 0.9095249459657468
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 41
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.1534525858720078
+Pixels matched: 8144.0
+Pixels missed: 768.0
+Pixels falsely detected: 1138.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9496284962862862
+Box Area Precision: 0.9097636665263045
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 42
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.15533209610978704
+Pixels matched: 8376.0
+Pixels missed: 536.0
+Pixels falsely detected: 1245.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9648595885210016
+Box Area Precision: 0.9083910237105521
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 43
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.179680138793625
+Pixels matched: 8602.0
+Pixels missed: 310.0
+Pixels falsely detected: 1697.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9796967734488178
+Box Area Precision: 0.8744927187797114
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 44
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.20134461040205534
+Pixels matched: 8876.0
+Pixels missed: 36.0
+Pixels falsely detected: 2190.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9976365545287899
+Box Area Precision: 0.8421457071519205
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 45
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2197342433360099
+Pixels matched: 8929.0
+Pixels missed: 102.0
+Pixels falsely detected: 2476.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9934007166854109
+Box Area Precision: 0.8235895458253052
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 46
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2353508532910379
+Pixels matched: 9030.0
+Pixels missed: 120.0
+Pixels falsely detected: 2744.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.992237174181378
+Box Area Precision: 0.8107555125890094
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 47
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.24955477868186066
+Pixels matched: 9453.0
+Pixels missed: 78.0
+Pixels falsely detected: 2803.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9949579830257957
+Box Area Precision: 0.8061916212580128
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 48
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2661695897188827
+Pixels matched: 9929.0
+Pixels missed: 175.0
+Pixels falsely detected: 2809.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9888995725144165
+Box Area Precision: 0.8088512238156289
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 49
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.27630627948153125
+Pixels matched: 10298.0
+Pixels missed: 190.0
+Pixels falsely detected: 2809.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9880021365769218
+Box Area Precision: 0.8097192795526792
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 50
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2866810327566606
+Pixels matched: 10780.0
+Pixels missed: 270.0
+Pixels falsely detected: 2696.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9832316529859004
+Box Area Precision: 0.8190352019476869
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 51
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.2990183708253402
+Pixels matched: 11203.0
+Pixels missed: 352.0
+Pixels falsely detected: 2612.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9784372234616602
+Box Area Precision: 0.8235537602210202
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 52
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3025936997973331
+Pixels matched: 11744.0
+Pixels missed: 376.0
+Pixels falsely detected: 2393.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9771619245769279
+Box Area Precision: 0.8412193971878008
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 53
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.30939647395135667
+Pixels matched: 12113.0
+Pixels missed: 393.0
+Pixels falsely detected: 2394.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9764684513101674
+Box Area Precision: 0.8418931119804705
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 54
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.31635307942812946
+Pixels matched: 12625.0
+Pixels missed: 476.0
+Pixels falsely detected: 2252.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9722531433088021
+Box Area Precision: 0.8498488906071748
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 55
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.32732360662302173
+Pixels matched: 13220.0
+Pixels missed: 544.0
+Pixels falsely detected: 2140.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9683630023935637
+Box Area Precision: 0.8588525887387117
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 56
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.340575851891458
+Pixels matched: 13589.0
+Pixels missed: 629.0
+Pixels falsely detected: 2254.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9640747995414188
+Box Area Precision: 0.8508920163618829
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 57
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3606141175192846
+Pixels matched: 13948.0
+Pixels missed: 781.0
+Pixels falsely detected: 2491.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9548711932519782
+Box Area Precision: 0.8336924260173424
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 58
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3654283037713861
+Pixels matched: 14215.0
+Pixels missed: 971.0
+Pixels falsely detected: 2337.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9447545672043947
+Box Area Precision: 0.8469639016999695
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 59
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.361869438719875
+Pixels matched: 14826.0
+Pixels missed: 993.0
+Pixels falsely detected: 1870.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9441409208551705
+Box Area Precision: 0.8788179223792711
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 60
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3593176156791475
+Pixels matched: 15257.0
+Pixels missed: 1022.0
+Pixels falsely detected: 1656.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9434237898995279
+Box Area Precision: 0.8957375983687759
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 61
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3607940481094616
+Pixels matched: 15843.0
+Pixels missed: 1151.0
+Pixels falsely detected: 1328.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9363543742505621
+Box Area Precision: 0.9208514873966815
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 62
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.3683395726225989
+Pixels matched: 16223.0
+Pixels missed: 1237.0
+Pixels falsely detected: 1319.0
+Fragmentation metric: 0.7686217868402407
+Object Area Recall: 0.9316592744699024
+Box Area Precision: 0.9199714699853079
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 63
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.369641290101987
+Pixels matched: 16725.0
+Pixels missed: 1374.0
+Pixels falsely detected: 962.0
+Fragmentation metric: 0.8843108934201204
+Object Area Recall: 0.9240318596940635
+Box Area Precision: 0.942902700483288
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 64
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.374355765466744
+Pixels matched: 16978.0
+Pixels missed: 1590.0
+Pixels falsely detected: 854.0
+Fragmentation metric: 0.8843108934201204
+Object Area Recall: 0.9126369873586283
+Box Area Precision: 0.9513318463933337
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 65
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.39137621416774404
+Pixels matched: 16846.0
+Pixels missed: 2118.0
+Pixels falsely detected: 986.0
+Fragmentation metric: 0.8843108934201204
+Object Area Recall: 0.8771396895764114
+Box Area Precision: 0.9436681363469307
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 66
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.39949081658827645
+Pixels matched: 17097.0
+Pixels missed: 2461.0
+Pixels falsely detected: 880.0
+Fragmentation metric: 0.8843108934201204
+Object Area Recall: 0.8584064463425458
+Box Area Precision: 0.9520140369199281
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 67
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.4015585162684129
+Pixels matched: 17383.0
+Pixels missed: 2694.0
+Pixels falsely detected: 739.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8513607626554374
+Box Area Precision: 0.95849592260015
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 68
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.407348871537181
+Pixels matched: 17460.0
+Pixels missed: 2916.0
+Pixels falsely detected: 887.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8424566822789874
+Box Area Precision: 0.952533640178169
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 69
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.4053270626605149
+Pixels matched: 17748.0
+Pixels missed: 2936.0
+Pixels falsely detected: 745.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8426065323141434
+Box Area Precision: 0.9588502307696501
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 70
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.40674495471489847
+Pixels matched: 17892.0
+Pixels missed: 3027.0
+Pixels falsely detected: 747.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8396995825877878
+Box Area Precision: 0.9589987252647982
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 71
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.4071666114764132
+Pixels matched: 17955.0
+Pixels missed: 3119.0
+Pixels falsely detected: 684.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8365830515216026
+Box Area Precision: 0.9616298647418757
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 72
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.40649379692342774
+Pixels matched: 18157.0
+Pixels missed: 3155.0
+Pixels falsely detected: 628.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8372564862190077
+Box Area Precision: 0.9661265984019853
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 73
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.40459561366801877
+Pixels matched: 18359.0
+Pixels missed: 3109.0
+Pixels falsely detected: 572.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8408492460571458
+Box Area Precision: 0.9706216191270489
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 74
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 0.4086888224858273
+Pixels matched: 18502.0
+Pixels missed: 3399.0
+Pixels falsely detected: 575.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8293222127618838
+Box Area Precision: 0.9706902082407336
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 1.0
+
+
+For frame 75
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.44140799441750844
+Pixels matched: 12155.0
+Pixels missed: 1347.0
+Pixels falsely detected: 7068.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9002370018978776
+Box Area Precision: 0.4840315387044249
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 76
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.43674926759523774
+Pixels matched: 12528.0
+Pixels missed: 1376.0
+Pixels falsely detected: 6928.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9010356729389335
+Box Area Precision: 0.48979591833883707
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 77
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.43222915525496736
+Pixels matched: 12760.0
+Pixels missed: 1302.0
+Pixels falsely detected: 6843.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.9074100409203256
+Box Area Precision: 0.49319727881494785
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 78
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.4408281255082669
+Pixels matched: 12672.0
+Pixels missed: 1638.0
+Pixels falsely detected: 6931.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8855345909882032
+Box Area Precision: 0.48979591833883707
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 79
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.4402096231655262
+Pixels matched: 12816.0
+Pixels missed: 1653.0
+Pixels falsely detected: 6934.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.885755753557084
+Box Area Precision: 0.48979591833883707
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 80
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.4412882126749594
+Pixels matched: 12960.0
+Pixels missed: 1760.0
+Pixels falsely detected: 6937.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8804347821885882
+Box Area Precision: 0.48979591833883707
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 81
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.4406945002765214
+Pixels matched: 13104.0
+Pixels missed: 1776.0
+Pixels falsely detected: 6940.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8806451609733725
+Box Area Precision: 0.48979591833883707
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 82
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.4417925725885632
+Pixels matched: 13248.0
+Pixels missed: 1886.0
+Pixels falsely detected: 6943.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8753799390398804
+Box Area Precision: 0.48979591833883707
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 83
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.44122230406286617
+Pixels matched: 13392.0
+Pixels missed: 1903.0
+Pixels falsely detected: 6946.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8755802548842413
+Box Area Precision: 0.48979591833883707
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 84
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.44291775119937227
+Pixels matched: 13630.0
+Pixels missed: 2084.0
+Pixels falsely detected: 6949.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8673794068709851
+Box Area Precision: 0.48986486484755987
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 85
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.44952115778944196
+Pixels matched: 13536.0
+Pixels missed: 2340.0
+Pixels falsely detected: 7043.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8526077092870175
+Box Area Precision: 0.48648648638580294
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 86
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.450587409913503
+Pixels matched: 13680.0
+Pixels missed: 2457.0
+Pixels falsely detected: 7047.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8477412154189037
+Box Area Precision: 0.48648648638580294
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 87
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.4500067600902822
+Pixels matched: 13824.0
+Pixels missed: 2476.0
+Pixels falsely detected: 7051.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8480981592312913
+Box Area Precision: 0.48648648638580294
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 88
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.45109047389174367
+Pixels matched: 13968.0
+Pixels missed: 2596.0
+Pixels falsely detected: 7055.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8432745709285487
+Box Area Precision: 0.48648648638580294
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 89
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.45053175190333206
+Pixels matched: 14112.0
+Pixels missed: 2616.0
+Pixels falsely detected: 7059.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8436154945956615
+Box Area Precision: 0.48648648638580294
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 90
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.4516316329990351
+Pixels matched: 14256.0
+Pixels missed: 2739.0
+Pixels falsely detected: 7063.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8388349510910152
+Box Area Precision: 0.48648648638580294
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 91
+Detection Accuracy: 0.6666666666666666
+Object Count Recall: 1
+Object Count Precision: 0.5
+Dice coefficient: 0.453117787117659
+Pixels matched: 14500.0
+Pixels missed: 2930.0
+Pixels falsely detected: 7067.0
+Fragmentation metric: 1.0
+Object Area Recall: 0.8318990244678682
+Box Area Precision: 0.4865771811392983
+Localized Object Area Recall: 1.0
+Localized Box Area Precision: 0.5
+
+
+For frame 92
+Detection Accuracy: 1.0
+Object Count Recall: 1
+Object Count Precision: 1
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 17430.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: 0.0
+Box Area Precision: 0.0
+Localized Object Area Recall: 0.0
+Localized Box Area Precision: 0.0
+
+
+For frame 93
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+For frame 94
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+For frame 95
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+For frame 96
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+For frame 97
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+For frame 98
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+For frame 99
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+For frame 100
+Detection Accuracy: 0.0
+Object Count Recall: undefined
+Object Count Precision: 0.0
+Dice coefficient: 1.0
+Pixels matched: 0.0
+Pixels missed: 0.0
+Pixels falsely detected: 6667.0
+Fragmentation metric: undefined
+Object Area Recall: undefined
+Box Area Precision: 0.0
+Localized Object Area Recall: undefined
+Localized Box Area Precision: 0.0
+
+
+Total for all frames
+Detection Accuracy: 0.9299719887955182
+Object Count Recall: 1
+Object Count Precision: 0.8691099476439791
+Dice coefficient: 0.3534482568126518
+Pixels matched: 1175299.0
+Pixels missed: 141904.0
+Pixels falsely detected: 257241.0
+Fragmentation metric: 0.8681845331089865
+Object Area Recall: 0.9138636110560912
+Box Area Precision: 0.8065145865829852
+Localized Object Area Recall: 0.9819277108433735
+Localized Box Area Precision: 0.8638743455497382
+
+
+*****************************************************
+*                      METRICS                      *
+*****************************************************
+
+OBJECT Person	[dice 1.0]
+	Location	 [dice 0.9]
+----------------------------------------------------
+
+OBJECT Person
+    Location : dice matchedpixels missedpixels falsepixels fragmentation arearecall areaprecision [arearecall 0.7] [areaprecision 0.7] 
+
+----------------------------------------------------
+
+OBJECT Person	[dice 1.0]
+	* Location	 dice matchedpixels arearecall missedpixels falsepixels fragmentation arearecall areaprecision [maxdev 0.5]
+*****************************************************
+*                 TRACKING RESULTS                  *
+*****************************************************
+
+	For file "file:/D:/Mreuss/viper-full-20060131/samples/media/LAMP-Moving.mpeg"
+
+For object 0
+Dice coefficient: 0.17189394724001655
+Pixels matched: 5854.6621621621625
+Object Area Recall: 0.7861992990219183
+Pixels missed: 1650.0945945945946
+Pixels falsely detected: 817.918918918919
+Fragmentation metric: 1.0
+Box Area Precision: 0.8773950320928239
+
+For object 1, no match was found
+
+
+Total for all Descriptors
+For all objects
+Dice coefficient: 0.08594697362000828
+Pixels matched: 2927.3310810810813
+Object Area Recall: 0.39309964951095916
+Pixels missed: 825.0472972972973
+Pixels falsely detected: 408.9594594594595
+Fragmentation metric: 0.5
+Box Area Precision: 0.43869751604641194
+

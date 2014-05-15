@@ -1,0 +1,7 @@
+#BEGIN_EQUIVALENCE
+
+Text : TextBlock
+LOCATION : Location TORSO BODY
+
+zwei : zweiter
+#END_EQUIVALENCE

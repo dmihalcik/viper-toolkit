@@ -1,0 +1,24 @@
+#INCLUDE "equiv.epf"
+
+#BEGIN_OBJECT_EVALUATION
+
+OBJECT Person [dice 1]
+   Location : [dice .9]
+
+#END_OBJECT_EVALUATION
+
+#BEGIN_FRAMEWISE_EVALUATION
+
+OBJECT Person
+   Location : dice matchedpixels missedpixels falsepixels fragmentation \
+arearecall areaprecision [arearecall 0.7] [areaprecision 0.7]
+
+#END_FRAMEWISE_EVALUATION
+
+#BEGIN_TRACKING_EVALUATION
+
+OBJECT Person [dice 1]
+   *Location : dice matchedpixels arearecall missedpixels falsepixels fragmentation arearecall areaprecision [dice .5] [maxdev -]
+
+   
+#END_TRACKING_EVALUATION
