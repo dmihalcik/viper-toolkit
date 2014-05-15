@@ -30,6 +30,8 @@ import edu.umd.cs.piccolo.nodes.*;
  */
 
 public class PolygonCreator extends CanvasCreator {
+	private static final int RADIUS = 5;
+
 	private static Logger logger = Logger.getLogger("edu.umd.cfar.lamp.viper.gui.canvas.datatypes");
 
 	PPath poly = new PPath() ;
@@ -38,15 +40,9 @@ public class PolygonCreator extends CanvasCreator {
 	Point2D selectPt = null ;
 	PPath rect ;
 	Point2D [] polyPnts = new Point2D[ 0 ] ;
-	private static int LEFT_MOUSE_MASK = InputEvent.BUTTON1_MASK ;
-	private static int MIDDLE_MOUSE_MASK = InputEvent.BUTTON2_MASK ;
 	
 	public PolygonCreator( CreatorAssistant a, Attribute attr ) {
 		super( a, attr );
-
-//		getAssistant().addShape( poly ) ;
-//		poly.addChild( moveLine ) ;
-//		displaySelected() ;
 	}
 
 	public void displaySelected()
@@ -86,7 +82,6 @@ public class PolygonCreator extends CanvasCreator {
 	
 	public void keyPressed( PInputEvent e )
 	{
-		super.keyPressed( e ) ;
 		if ( e.getKeyCode() == KeyEvent.VK_ENTER )
 		{
 			getAssistant().switchListener() ; // switch from creator to editor
@@ -98,16 +93,29 @@ public class PolygonCreator extends CanvasCreator {
 	}
 	
 	public void mousePressed(PInputEvent e) {
-		super.mousePressed(e);
-		// middle mouse button finishes the polygon and exits
+		if (!e.isLeftMouseButton()) {
+			return;
+		}
+		boolean shifty = 0 != (InputEvent.SHIFT_DOWN_MASK & e.getModifiersEx());
+
 		selectPt = e.getPosition(); 
-//		System.out.println( "Polygon creator: mouse pressed" ) ;
+		if (!shifty && 2 < polyPnts.length) {
+			double scale = e.getCamera().getViewScale();
+			double modRadius = RADIUS / scale;
+			double d = selectPt.distance(polyPnts[0]);
+			if (d < modRadius) {
+				Polygon poly = new Polygon( polyPnts ) ;
+				setAttrValueInMediator( poly ) ;
+				return;
+			}
+		}
 		addPoint( selectPt ) ;
-		updatePolygon();
 	}
 
 	public void mouseDragged(PInputEvent e) {
-		super.mouseDragged(e);
+		if (!e.isLeftMouseButton()) {
+			return;
+		}
 		selectPt = e.getPosition();
 		updatePoint( selectPt ) ;
 		updatePolygon();
@@ -116,7 +124,6 @@ public class PolygonCreator extends CanvasCreator {
 	Point2D [] local = new Point2D[ 2 ] ;
 	
 	public void mouseMoved(PInputEvent e) {
-		super.mouseDragged(e);
 		if ( selectPt != null )
 		{
 			Point2D dragPt = e.getPosition() ;
@@ -127,7 +134,9 @@ public class PolygonCreator extends CanvasCreator {
 	}
 	
 	public void mouseReleased(PInputEvent e) {
-		super.mouseReleased(e);
+		if (!e.isLeftMouseButton()) {
+			return;
+		}
 		selectPt = e.getPosition();
 		updatePoint( selectPt ) ;
 		updatePolygon();
