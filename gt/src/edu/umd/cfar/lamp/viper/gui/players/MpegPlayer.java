@@ -17,7 +17,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
-import org.apache.xerces.utils.*;
+import org.apache.xerces.utils.Base64;
 
 import viper.api.time.*;
 import viper.api.time.Frame;

@@ -50,26 +50,31 @@ public abstract class DataPlayer implements ListIterator {
 	public static final Logger logger = Logger
 			.getLogger("edu.umd.cfar.lamp.viper.gui.core.player");
 
-	private static Map DECODERS = new HashMap();
+	private static Map<String, Class<?>[]> DECODERS = new HashMap<>();
 
-	private static Class[] MPEG_LOAD = new Class[] { 
-		NativePlayer.class, MpegPlayer.class, QuicktimePlayer.class, JmfPlayer.class,
+	private static Class<?>[] MPEG_LOAD = new Class[] { 
+		NativePlayer.class, MpegPlayer.class, MatlabPlayer.class, QuicktimePlayer.class, JmfPlayer.class,
 			NotFoundPlayer.class };
 
-	private static Class[] INFO_LOAD = new Class[] { InfoPlayer.class,
+	private static Class<?>[] INFO_LOAD = new Class[] { InfoPlayer.class,
 			NotFoundPlayer.class };
 
-	private static Class[] AVI_LOAD = new Class[] { JmfPlayer.class,
+	private static Class<?>[] AVI_LOAD = new Class[] { MatlabPlayer.class, JmfPlayer.class,
 			QuicktimePlayer.class, NotFoundPlayer.class };
 
-	private static Class[] MOV_LOAD = new Class[] { QuicktimePlayer.class,
-			JmfPlayer.class, NotFoundPlayer.class };
+	private static Class<?>[] MOV_LOAD = new Class[] { QuicktimePlayer.class,
+			MatlabPlayer.class, JmfPlayer.class, NotFoundPlayer.class };
 	
-	private static Class[] ELSE_LOAD = new Class[] { StaticImagePlayer.class,
-			NativePlayer.class, MpegPlayer.class, QuicktimePlayer.class,
+	private static Class<?>[] ELSE_LOAD = new Class[] { StaticImagePlayer.class,
+			NativePlayer.class, MatlabPlayer.class, MpegPlayer.class, QuicktimePlayer.class,
 			JmfPlayer.class, NotFoundPlayer.class };
 	static {
-		loadDefaultDecoderOrderings(DECODERS);
+		DECODERS.put("mpeg", MPEG_LOAD);
+		DECODERS.put("mpg", MPEG_LOAD);
+		DECODERS.put("info", INFO_LOAD);
+		DECODERS.put("mov", MOV_LOAD);
+		DECODERS.put("dv", MOV_LOAD);
+		DECODERS.put("avi", AVI_LOAD);
 	}
 
 	private static final String[] MPEG_FILE_EXTS = new String[] {"mpeg,mpg,mpv"};
@@ -85,13 +90,7 @@ public abstract class DataPlayer implements ListIterator {
 	public static final ExtensionFilter INFO_FILE_FILTER = new ExtensionFilter(Arrays.asList(INFO_FILE_EXTS), "Image Collections (info)");
 	public static final ExtensionFilter STATIC_FILE_FILTER = new ExtensionFilter(Arrays.asList(STATIC_FILE_EXTS), "Static Images (jpeg;png;gif)");
 	
-	private static void loadDefaultDecoderOrderings(Map m) {
-		m.put("mpeg", MPEG_LOAD);
-		m.put("mpg", MPEG_LOAD);
-		m.put("info", INFO_LOAD);
-		m.put("mov", MOV_LOAD);
-		m.put("dv", MOV_LOAD);
-		m.put("avi", AVI_LOAD);
+	{
 	}
 
 	protected DataPlayer() {
@@ -128,7 +127,7 @@ public abstract class DataPlayer implements ListIterator {
 		return toReturn;
 	}
 
-	private static final DataPlayer tryToUsePlayer(Class type, File dataFile) {
+	private static final DataPlayer tryToUsePlayer(Class<?> type, File dataFile) {
 		try {
 			if (InfoPlayer.class.equals(type)) {
 				return new InfoPlayer(dataFile);
@@ -142,6 +141,8 @@ public abstract class DataPlayer implements ListIterator {
 				return new QuicktimePlayer(dataFile);
 			} else if (JmfPlayer.class.equals(type)) {
 				return new JmfPlayer(dataFile);
+			} else if (MatlabPlayer.class.equals(type)) {
+				return new MatlabPlayer(dataFile.getAbsolutePath());
 			} else { // if (NotFoundPlayer.class};
 				return new NotFoundPlayer();
 			}
@@ -157,7 +158,7 @@ public abstract class DataPlayer implements ListIterator {
 	private static final DataPlayer getPlayerByExtension(String extension,
 			File dataFile, PrefsManager prefs) {
 		DataPlayer dh = null;
-		Class[] order = ELSE_LOAD;
+		Class<?>[] order = ELSE_LOAD;
 		if (DECODERS.containsKey(extension)) {
 			order = (Class[]) DECODERS.get(extension);
 		}

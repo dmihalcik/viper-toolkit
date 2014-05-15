@@ -41,7 +41,6 @@
 	<classpathentry kind="lib" path="common/lib/jena.jar"/>
 	<classpathentry kind="lib" path="common/lib/sfutils-1.0.jar"/>
 	<classpathentry kind="lib" path="common/lib/groovy-all-1.0-beta-9.jar"/>
-	<classpathentry kind="lib" path="common/lib/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="common/lib/commons-collections-3.1.jar"/>
 	<classpathentry kind="lib" path="common/lib/piccolo.jar"/>
 	<classpathentry kind="lib" path="common/lib/piccolox.jar"/>
@@ -54,5 +53,10 @@
 	<classpathentry kind="lib" path="common/lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="common/lib/xml-writer.jar"/>
 	<classpathentry kind="lib" path="common/lib/xmlParserAPIs.jar"/>
+	<classpathentry kind="lib" path="common/lib/matlabcontrol/matlabcontrol-4.0.0.jar" sourcepath="common/lib/matlabcontrol/matlabcontrol-4.0.0_src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/viper-toolkit/common/lib/matlabcontrol/matlabcontrol-4.0.0_javadocs.zip!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
